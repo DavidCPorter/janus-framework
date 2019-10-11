@@ -25,14 +25,23 @@ def main( ):
     print(sys.argv[1:])
     main_args = parse_commandline(sys.argv[1:])
     if main_args.query == 'direct':
+        if int(main_args.clustersize) > 1:
+            main_args.port = 8983
+        elif (int(main_args.port) == 0 ):
+            main_args.port = 8983
+        else:
+            main_args.port = 9990
+
+
+    elif main_args.query == 'direct' and int(main_args.clustersize) > 1:
         main_args.port = 8983
 
     elif main_args.query == 'solrj':
         main_args.host = '127.0.0.1'
 
     else:
-        main_args.port = 8983
-        main_args.output_dir = './'
+        # for single server mode host and ports are good
+        pass
 
 # config for closed loop -> throughput
     if main_args.loop == 'closed':
@@ -125,7 +134,7 @@ def main( ):
     time.sleep(5)
 
     # Join on threads
-    main_thread = threading.currentThread()
+    main_thread = threading.current_thread()
     for next_thread in threading.enumerate():
         if next_thread is not main_thread:
             next_thread.join( )

@@ -1,4 +1,4 @@
-# playbook for cloudconfig
-- hosts: nodes,zookeeperNodes
+# playbook
+- hosts: zookeeperNodes, nodes
   roles:
     - solr

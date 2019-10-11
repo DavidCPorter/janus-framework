@@ -31,9 +31,10 @@ def get_urls(test_param, terms, shards, replicas, clustersize):
         r = random.randint(1,len(terms))
         for i in range( test_param.max_iters ):
             i+=r
-            term = terms[i%len(terms)].rstrip()
+            term1 = terms[i%len(terms)].rstrip()
+            term2 = terms[(i+r)%len(terms)].rstrip()
             field = indexed_fields[i%len(indexed_fields)]
-            q = '/solr/reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+str(clustersize)+'/select?q='+field+'%3A'+term+'&rows=10'
+            q = '/solr/reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+str(clustersize)+'/select?q='+field+'%3A'+term1+'%20'+term2+'&rows=10'
             urls.append("%s%s" % (prefix_url, q))
 
     else:
@@ -42,10 +43,11 @@ def get_urls(test_param, terms, shards, replicas, clustersize):
         r = random.randint(1,len(terms))
         for i in range( test_param.max_iters ):
             i+=r
-            term = terms[i%len(terms)].rstrip()
+            term1 = terms[i%len(terms)].rstrip()
+            term2 = terms[(i+r)%len(terms)].rstrip()
             field = indexed_fields[i%len(indexed_fields)]
             # q = 'solr/reviews_rf2q/select?q='+field+'%3A'+term+'&rows=10'
-            urls.append( "/%s/%s/%s" % (field, term, 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+str(clustersize)))
+            urls.append( "/%s/%s/%s/%s" % (field, term1, term2, 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+str(clustersize)))
 
     return urls
 

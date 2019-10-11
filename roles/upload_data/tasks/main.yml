@@ -68,7 +68,7 @@
 
 - name: copy word.txt to dataServer
   copy:
-    src: ../../tests_v1/words.txt
+    src: /Users/dporter/projects/solrcloud/tests_v1/words.txt
     dest: '{{data_upload_dir}}'
     when: data_download_path_status.stat.exists == False
   tags:

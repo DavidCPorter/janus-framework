@@ -3,6 +3,8 @@ import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
+import java.util.Arrays;
+
 /**
  *
  * @author dporter
@@ -12,17 +14,15 @@ public class MultiThreadedServer implements Runnable{
     private ServerSocket pyServer = null;
     private boolean      isStopped    = false;
     private Thread       runningThread= null;
-    private CloudSolrClient solrAPI;
+    private static String defaultCollection = "reviews";
 
-    public MultiThreadedServer(int port, CloudSolrClient solrAPI){
+    public MultiThreadedServer(int port){
         this.serverPort = port;
-        this.solrAPI = solrAPI;
     }
 
     public void run(){
         // creates pyServer socket
 
-        this.solrAPI.connect();
 
         openServerSocket();
 
@@ -33,10 +33,20 @@ public class MultiThreadedServer implements Runnable{
 
             Socket pySocket = new Socket();
 
+            CloudSolrClient instance;
             try {
                 System.out.println("listening for new connections");
                 pySocket = this.pyServer.accept();
                 System.out.println("accepted connection."+ String.valueOf(serverPort));
+                CloudSolrClient.Builder builder = new CloudSolrClient.Builder();
+                builder.withZkHost(Arrays.asList("10.10.1.1:2181","10.10.1.2:2181","10.10.1.3:2181"));
+                instance = builder.build();
+                final int zkClientTimeout = 9999;
+                final int zkConnectTimeout = 9999;
+                instance.setDefaultCollection(defaultCollection);
+                instance.setZkClientTimeout(zkClientTimeout);
+                instance.setZkConnectTimeout(zkConnectTimeout);
+                instance.connect();
             } catch (IOException e) {
                 if(isStopped()) {
                     System.out.println("Server Stopped.") ;
@@ -48,7 +58,7 @@ public class MultiThreadedServer implements Runnable{
             // passes socket object and a solrj connection to a new thread to handle request
             new Thread(
                     new WorkerRunnable(
-                            this.isStopped, pySocket, this.solrAPI, "Multithreaded Server")
+                            this.isStopped, pySocket, instance , "Multithreaded Server")
             ).start();
 
         }
