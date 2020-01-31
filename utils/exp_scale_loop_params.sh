@@ -1,20 +1,28 @@
 #########  EXP PARAMS
 
 # constraint -> shards are 1, 2, or 4
+SEARCHENGINES="elastic"
 DSTAT_SWITCH=off
 copy_python_scripts="no"
-SHARDS=( 1 2 )
-QUERYS=( "solrj" "direct" )
-RF_MULTIPLE=( 1 2 )
-LOAD=36
-load_start=2
-export MAX_LOAD=36
+SHARDS=( 1 )
+# client == solrj, or elastic client api
+QUERYS=( "client" )
+RF_MULTIPLE=( 1 )
+load_start=1
+LOAD=8
+export MAX_LOAD=8
 instances=0
 export SOLRJ_PORT_OVERRIDE=true
-load_server_incrementer=2
-EXTRA_ITERS=8
-
-
+load_server_incrementer=1
+EXTRA_ITERS=0
+CONTROLLOOP=( "closed" )
+JVM_MEM=( 1 )
+DOC_CACHE=( 1 )
+FILTER_CACHE=( 1 )
+mincon=1
+maxcon=100
+conincrementer=10
+WARM_CACHE=false
 
 
 #########  PARAMS END
@@ -22,7 +30,7 @@ EXTRA_ITERS=8
 setLoadArray (){
 	load_seq=($( seq 1 $MAX_LOAD ))
 	if [[ ! " ${load_seq[@]} " =~ " $1 " ]]; then
-			echo "NOT VALID LOAD PARAMETER"
+			echo "NOT VALID LOAD PARAMETER LOAD ARRAY"
 			return
 	else
 		case "$1" in
@@ -43,7 +51,7 @@ getLoadNum (){
 	load_seq=($( seq 1 $MAX_LOAD ))
 	if [[ ! " ${load_seq[@]} " =~ " $1 " ]]; then
 	    # whatever you want to do when arr contains value
-			echo "NOT VALID LOAD PARAMETER"
+			echo "NOT VALID LOAD PARAMETER LOAD NUM"
 			return
 	else
 		case "$1" in
@@ -55,5 +63,4 @@ getLoadNum (){
 	fi
 
 }
-
 export -f getLoadNum

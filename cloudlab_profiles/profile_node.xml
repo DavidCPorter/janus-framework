@@ -5,6 +5,7 @@
   </sliver_type>
   <services xmlns="http://www.geni.net/resources/rspec/3"/>
   <interface xmlns="http://www.geni.net/resources/rspec/3" client_id="interface-1"/>
+  <emulab:blockstore name="bs" mountpoint="/mydata" class="local" size="60GB" placement="any"/>
   <routable_control_ip xmlns="http://www.protogeni.net/resources/rspec/ext/emulab/1"/>
   <hardware_type xmlns="http://www.geni.net/resources/rspec/3" name="m510"/>
 </node>

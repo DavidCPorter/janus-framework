@@ -41,56 +41,28 @@ alias daparams="vim $PROJ_HOME/utils/exp_scale_loop_params.sh"
 
 export CORE_HOME=/users/dporte7/solr-8_3/solr/server/solr
 
-export node0='128.110.153.89'
-export node1='128.110.153.75'
-export node2='128.110.153.103'
-export node3='128.110.153.66'
-export node4='128.110.153.125'
-export node5='128.110.153.76'
-export node6='128.110.153.78'
-export node7='128.110.153.77'
-export node8='128.110.153.96'
-export node9='128.110.153.105'
-export node10='128.110.153.135'
-export node11='128.110.153.92'
-export node12='128.110.153.91'
-export node13='128.110.153.90'
-export node14='128.110.153.144'
-export node15='128.110.153.121'
-export node16='128.110.153.88'
-export node17='128.110.153.82'
-export node18='128.110.153.83'
-export node19='128.110.153.107'
-export node20='128.110.153.69'
-export node21='128.110.153.95'
-export node22='128.110.153.73'
-export node23='128.110.153.100'
-export node24='128.110.153.97'
-export node25='128.110.153.64'
-export node26='128.110.153.70'
-export node27='128.110.153.108'
-export node28='128.110.153.153'
-export node29='128.110.153.87'
-export node30='128.110.153.71'
-export node31='128.110.153.106'
-export node32='128.110.153.101'
-export node33='128.110.153.85'
-export node34='128.110.153.86'
-export node35='128.110.153.65'
-export node36='128.110.153.80'
-export node37='128.110.153.104'
-export node38='128.110.153.122'
-export node39='128.110.153.99'
-export node40='128.110.153.79'
-export node41='128.110.153.74'
-export node42='128.110.153.84'
-export node43='128.110.153.149'
+export node0='128.110.153.77'
+export node1='128.110.153.87'
+export node2='128.110.153.78'
+export node3='128.110.153.76'
+export node4='128.110.153.90'
+export node5='128.110.153.82'
+export node6='128.110.153.71'
+export node7='128.110.153.106'
+export node8='128.110.153.80'
+export node9='128.110.153.66'
+export node10='128.110.153.103'
+export node11='128.110.153.84'
+export node12='128.110.153.83'
+export node13='128.110.153.108'
+export node14='128.110.153.95'
+export node15='128.110.153.73'
 
 # cannot export ARRAYS in bash : ) so we do this instead
-export ALL_NODES=" $node0 $node1 $node2 $node3 $node4 $node5 $node6 $node7 $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 $node16 $node17 $node18 $node19 $node20 $node21 $node22 $node23 $node24 $node25 $node26 $node27 $node28 $node29 $node30 $node31 $node32 $node33 $node34 $node35 $node36 $node37 $node38 $node39 $node40 $node41 $node42 $node43 "
+export ALL_NODES=" $node0 $node1 $node2 $node3 $node4 $node5 $node6 $node7 $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 "
 
-export ALL_SOLR=" $node0 $node1 $node2 $node3 $node4 $node5 $node6 $node7 $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 "
-export ALL_LOAD=" $node16 $node17 $node18 $node19 $node20 $node21 $node22 $node23 $node24 $node25 $node26 $node27 $node28 $node29 $node30 $node31 $node32 $node33 $node34 $node35 $node36 $node37 $node38 $node39 $node40 $node41 $node42 $node43 $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 "
+export ALL_SOLR=" $node0 $node1 $node2 $node3 $node4 $node5 $node6 $node7 "
+export ALL_LOAD=" $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 "
 
 alias ssher="ssh -l $CL_USER"
 shopt -s expand_aliases
@@ -180,6 +152,13 @@ startSolr () {
   printf "\n\n"
   play solr_configure_$1.yml --tags solr_start
   sleep 3
+}
+
+startElastic () {
+  printf "\n\n"
+  echo "starting elastic "
+  printf "\n\n"
+  play elastic_configure_$1.yml --tags start
 }
 
 #to kill malware

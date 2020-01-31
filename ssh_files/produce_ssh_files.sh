@@ -15,7 +15,7 @@ for n in $ALL_LOAD;do
 done
 rm pssh_traffic_node_file
 touch pssh_traffic_node_file
-for i in "${ips[@]}";do
+for i in $ALL_LOAD;do
 	echo $i >> pssh_traffic_node_file
 done
 

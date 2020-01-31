@@ -5,7 +5,7 @@ import os
 class TestParam( object ):
     def __init__( self, host="", port=0, threads=1, http_pool=None, base_url="", ramp=1,
                   duration=1, conns=1, rand_req=False, max_rand_obj=1, req_dist="", poisson_lam=1.0,
-                  gauss_mean=1.0, gauss_std=1.0, max_iters=5000, loop='closed' ):
+                  gauss_mean=1.0, gauss_std=1.0, max_iters=5000, loop='closed', engine='' ):
         self.host         = host
         self.port         = port
         self.threads      = threads
@@ -22,6 +22,7 @@ class TestParam( object ):
         self.gauss_std    = gauss_std
         self.max_iters    = max_iters
         self.loop         = loop
+        self.engine       = engine
         return
 
 
@@ -66,14 +67,16 @@ def parse_commandline(cl_args):
     parser.add_argument( "--req-dist", dest="req_dist", choices=["gauss", "poisson"], default="gauss",
                          help="Client wait time distribution type." )
 
-    parser.add_argument( "--query", dest="query", choices=["direct", "solrj", "local"], default="solrj",
-                         help="queries made directly to solr http server OR solrJ" )
+    parser.add_argument( "--query", dest="query", choices=["client", "roundrobin"], default="client",
+                         help="queries made using client or roundrobin" )
     parser.add_argument( "--loop", dest="loop", choices=["open", "closed"], default="closed",
                          help="run open or closed loop experiment")
     parser.add_argument( "--solrnum", dest="clustersize", default="4",
                         help="number of nodes running solr")
     parser.add_argument( "--instances", dest="instances", default=None,
                         help="number of solr instances running in each node")
+    parser.add_argument( "--engine", dest="engine", default=None,
+                        help="solr or elastic",choices=["solr", "elastic"])
 
     #just hardcoded a random generating query
     # parser.add_argument( "--query", dest="query", default="summary",

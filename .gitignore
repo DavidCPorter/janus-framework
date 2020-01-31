@@ -1,4 +1,5 @@
 cloudlabDNS
+.idea/*
 hostsIps
 inventory
 inventory_gen.txt

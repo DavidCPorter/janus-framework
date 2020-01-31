@@ -64,6 +64,8 @@ accepted_nodes=( 2 4 8 16 24 )
 ####### validate arguments
 
 for SERVERNODE in "$@"; do
+  # shellcheck disable=SC2068
+  # shellcheck disable=SC2068
   containsElement $SERVERNODE ${accepted_nodes[@]}
   if [ $? -eq 1 ]; then
     echo "nodesizes must be 2,4,8,16, or 32"
@@ -95,7 +97,12 @@ echo "SCALE EXP will increase outstanding query requests (LOAD) from $(($load_se
 echo "chartname:"
 echo $CHARTNAME
 EXP_HOME=/Users/dporter/projects/solrcloud/chart/exp_records
+# mov prev record outside project perview (data size too large)
+echo "moving previous records to long term data store"
+mv $EXP_HOME/* ~/projects/saga_records/
+
 mkdir $EXP_HOME/$CHARTNAME
+
 # ARCHIVE PREVIOUS EXPs (this shouldnt archive anything if done correctly so first wipe dir)
 rm -rf $PROJ_HOME/tests_v1/profiling_data/exp_results/*
 rm -rf $PROJ_HOME/tests_v1/profiling_data/proc_results/*
@@ -111,7 +118,7 @@ fi
 ########## PRINT ENV TO ENV OUTPUT FILE ##########
 
 LOAD=$(getLoadNum $LOAD)
-
+printf "getting load machine info"
 echo "LOADNODES:::" > $ENV_OUTPUT_FILE
 pssh -h $PROJ_HOME/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
@@ -128,158 +135,163 @@ echo "RAM::: " >> $ENV_OUTPUT_FILE
 pssh -h $PROJ_HOME/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
+#
+LOADHOSTS="$PROJ_HOME/ssh_files/pssh_traffic_node_file"
 
-for QUERY in ${QUERYS[@]}; do
+printf "sttarting loop \n\n"
+for ENGINE in ${SEARCHENGINES[@]};do
 
-  for SERVERNODE in "$@"; do
-    # maybe restart zoo
+  for QUERY in ${QUERYS[@]}; do
 
+    for SERVERNODE in "$@"; do
 
+      for SHARD in ${SHARDS[@]}; do
 
-    LOADHOSTS="$PROJ_HOME/ssh_files/pssh_traffic_node_file"
+        for RF_MULT in ${RF_MULTIPLE[@]}; do
 
-    for SHARD in ${SHARDS[@]}; do
+          ######## EXP LOOP = r*s = 2(num of SERVERNODES) ##########
 
-      for RF_MULT in ${RF_MULTIPLE[@]}; do
+          RF=$(($RF_MULT*$SERVERNODE))
+          # RF=$RF_MULT
 
+        # change this to switch statement.
+          if [ $ENGINE == "solr" ];then
+            # zookeeper loses sight of previous collection node mapping for a single clustersize. chroot mitigates zookeeper failure when clustersize changes for an experiment. Basically, a single instance of Zookeeper can keep track of every config and cluster change for solr without failing if chroot exists to separate each clustersize collection mapping. i.e. we dont need to restart zookeeper ever.
+            startSolr $SERVERNODE
+          # begin_exp is going to either post to solr a new colleciton or pull down an existing one from aws
+            play post_data_$SERVERNODE.yml --tags begin_exp --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+          #  need to restart since pulling index from aws most likely happened and solr (not zookeeper) needs to restart after that hack
+            restartSolr $SERVERNODE
 
-        ######## EXP LOOP = r*s = 2(num of SERVERNODES) ##########
+            play post_data_$SERVERNODE.yml --tags update_collection_configs --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+            sleep 2
 
-        RF=$(($RF_MULT*$SERVERNODE))
-        # RF=$RF_MULT
-        # zookeeper is going to be confused when startSolr is run since the last exp moved indexes to cloud... but its fine
-        startSolr $SERVERNODE
+            if [ $QUERY == "client" ]; then
+              echo "waiting for solr..."
+              sleep 3
+              echo "restarting solrj.."
+              restartSolrJ $SERVERNODE
+              sleep 2
+            fi
+            # else it will be roundrobin
 
-        # begin_exp is going to either post to solr a new colleciton or pull down an existing one from aws
-        play post_data_$SERVERNODE.yml --tags begin_exp --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
-        #  need to restart since pulling index from aws most likely happened and solr (not zookeeper) needs to restart after that hack
-        restartSolr $SERVERNODE
-
-        play post_data_$SERVERNODE.yml --tags update_collection_configs --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
-        sleep 2
-
-        #  sfor solrj ... using chroot requires restart of solrj every time :/
-        if [ $QUERY == "solrj" ]; then
-          echo "waiting for solr..."
-          sleep 3
-          echo "restarting solrj.."
-
-          restartSolrJ $SERVERNODE
-          sleep 2
-        fi
-
-        PROCESSES=$SERVERNODE
-        SOLRNUM=$SERVERNODE
-          # scale each load up to servernode size then add a load node
-
-        if [ "$DSTAT_SWITCH" = on ];then
-          commence_dstat $QUERY $RF $SHARD $SOLRNUM
-        fi
-
-        # vars for loop for config experiment
-        box_cores=16
-        box_threads=1
-        app_threads=1
-        load_start=$load_start
-        load_server_incrementer=$load_server_incrementer
-        export procs=$(($box_cores*$box_threads))
-        export SOLRJ_PORT_OVERRIDE=$SOLRJ_PORT_OVERRIDE
-        export first_time=yes
-        export M_LOAD=$LOAD
-        export second_pass=0
-
-        # warm cache
-        cd ~/projects/solrcloud;pssh -l dporte7 -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
-        cd ~/projects/solrcloud/tests_v1/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $(($procs*$M_LOAD*$app_threads)) --solrnum $SOLRNUM --query $QUERY --loop open --load $M_LOAD
-
-        for ((l=$load_start; l<=$LOAD; l=$((l+$load_server_incrementer))));do
-          export first_time=no
-
-          # keep last log
-          printf "\n"
-          printf "\n"
-          printf "\n"
-
-          echo "********   STARTING EXP PRELIM STEPS   ************"
-          printf "\n"
-
-          echo "removing previous exp load script output ::: traffic_gen/traffic_gen.log"
-          cd ~/projects/solrcloud;pssh -l dporte7 -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
-          printf "\n\n\n\n"
-          echo " PARAMETERS TO runscript.sh:::: "
-          echo "\$ ./tests_v1/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $(($procs*$l*$app_threads)) --solrnum $SOLRNUM --query $QUERY --loop open --load $l"
-          printf "\n\n"
-
-          cd ~/projects/solrcloud/tests_v1/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $(($procs*$l*$app_threads)) --solrnum $SOLRNUM --query $QUERY --loop open --load $l
-          sleep 2
-
-        done
-
-
-        export load_server_incrementer=$load_server_incrementer
-        for ((l=$load_server_incrementer; l<=$(($EXTRA_ITERS)); l=$((l+$load_server_incrementer))));do
-          export first_time=no
-          export second_pass=$l
-          echo " SECOND PASS !!! $l"
-
-          if [ $EXTRA_ITERS -eq 0 ]; then
-            break
+          # start elastic search
+          else
+            printf "staring elastic \n"
+            startElastic $SERVERNODE
+            sleep 5
           fi
 
-          # keep last log
-          printf "\n"
-          printf "\n"
-          printf "\n"
 
-          tmp=$(($l*35))
-          pro=$(($procs*$LOAD*$app_threads))
-          parallel_requests=$(($tmp+$pro))
+          #  sfor solrj ... using chroot requires restart of solrj every time :/
 
-          echo "********   STARTING EXP PRELIM STEPS   ************"
-          printf "\n"
 
-          echo "removing previous exp load script output ::: traffic_gen/traffic_gen.log"
-          cd ~/projects/solrcloud;pssh -l dporte7 -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
-          printf "\n\n\n\n"
-          echo " PARAMETERS TO runscript.sh:::: "
-          echo "\$ ./tests_v1/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $(($procs*$LOAD*$app_threads)) --solrnum $SOLRNUM --query $QUERY --loop open --load $LOAD"
-          printf "\n\n"
+          PROCESSES=$SERVERNODE
+          SOLRNUM=$SERVERNODE
+            # scale each load up to servernode size then add a load node
 
-          cd ~/projects/solrcloud/tests_v1/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $parallel_requests --solrnum $SOLRNUM --query $QUERY --loop open --load $LOAD
-          sleep 2
+      # these state loops below do not require any index mods, so they are fast
+
+          for J_MEM in ${JVM_MEM[@]}; do
+            for doc_cache in ${DOC_CACHE[@]}; do
+              for filter_cache in ${FILTER_CACHE[@]}; do
+                for loop in ${CONTROLLOOP[@]}; do
+
+                  STATE_SPACE="
+                    \n\n
+                    \n ENGINE       = $ENGINE
+                    \n LB           = $QUERY
+                    \n SERVERNODE   = $SERVERNODE
+                    \n SHARD        = $SHARD
+                    \n RF_MULT      = $RF_MULT
+                    \n JVM_MEM      = $J_MEM
+                    \n doc_cache    = $doc_cache
+                    \n filter_cache = $filter_cache
+                    \n CONTROLLOOP  = $loop
+                    \n LOADSIZE     = $LOAD
+                    \n CONNSCALE    = $mincon -> $maxcon
+                    \n\n
+                  "
+                  printf "BEGINNING EXP LOOP FOR THIS STATE SPACE: $STATE_SPACE "
+
+                  if [ "$DSTAT_SWITCH" = on ];then
+                    commence_dstat "$QUERY" $RF "$SHARD" "$SOLRNUM"
+                  fi
+
+                  # vars for loop for config experiment
+                  box_cores=$load_cpu_cores
+                  load_start=$load_start
+                  load_server_incrementer=$load_server_incrementer
+                  export SOLRJ_PORT_OVERRIDE=$SOLRJ_PORT_OVERRIDE
+                  printf "\n\n********** WARMING CACHE... **************\n\n"
+
+                  if "$WARM_CACHE" == true;then
+                    cd ~/projects/solrcloud;pssh -l dporte7 -h $LOADHOSTS "echo ''>traffic_gen/traffic_gen.log"
+                    echo "bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $M_LOAD --engine $ENGINE"
+                    cd ~/projects/solrcloud/tests_v1/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
+                  fi
+
+                  printf "\n\n********** WARMING CACHE COMPLETE **************\n\n"
+
+                  # this loop scales the connections on traffic servers, thus increasing load to search engines
+                  for ((l=mincon; l<=maxcon; l=$((l+conincrementer))));do
+
+                    printf "\n\n********   STARTING EXP PRELIM STEPS   ************\n\n"
+                    printf "removing previous exp load script output ::: traffic_gen/traffic_gen.log \n\n"
+                    cd ~/projects/solrcloud;pssh -l dporte7 -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
+
+                    printf "\n\n PARAMETERS TO runscript.sh:::: \n"
+                    echo "\$ ./tests_v1/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $l --engine $ENGINE"
+
+                    printf "\n\n\n RUNNING runscript.sh .....  \n"
+                    # shellcheck disable=SC2086
+                    cd ~/projects/solrcloud/tests_v1/scriptsThatRunLoadServers || exit; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
+                    sleep 2
+
+                  done
+
+                  printf "\n\n\n ******* COMPLETED CONNECTION SCALE LOOP for $ ********** "
+
+                  # this is the secondary loop that scales the experiemnt beyond the optimal CPU parallism
+
+                  if [ "$DSTAT_SWITCH" = on ];then
+                    for n in $ALL_NODES;do
+                      ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
+                    done
+                    DSTAT_DIR="${PROJ_HOME}/rf_${RF}_s${SHARD}_solrnum${SOLRNUM}_query${QUERY}"
+                    mkdir $DSTAT_DIR
+                    for n in $ALL_NODES;do
+                      scp -r $USER@${n}:~/*dstat.csv $DSTAT_DIR
+                    done
+                    mv $DSTAT_DIR "/Users/dporter/projects/solrcloud/chart/exp_records/$CHARTNAME"
+                  fi
+
+                  # next controlloop
+                done
+                # next filter cache
+              done
+              # next doc cache
+            done
+            # next jvm
+          done
+
+          #need to call stopsolr it here since it needs to stop this exp explicitly before running a new one
+
+          stopElastic $SERVERNODE
+          stopSolr $SERVERNODE
+          play post_data_$SERVERNODE.yml --tags aws_exp_reset --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+          archivePrev $CHARTNAME $SERVERNODE $QUERY $RF $SHARD
+
+          # next RF
         done
-
-
-
-        if [ "$DSTAT_SWITCH" = on ];then
-          for n in $ALL_NODES;do
-            ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
-          done
-          DSTAT_DIR="${PROJ_HOME}/rf_${RF}_s${SHARD}_solrnum${SOLRNUM}_query${QUERY}"
-          mkdir $DSTAT_DIR
-          for n in $ALL_NODES;do
-            scp -r $USER@${n}:~/*dstat.csv $DSTAT_DIR
-          done
-          mv $DSTAT_DIR "/Users/dporter/projects/solrcloud/chart/exp_records/$CHARTNAME"
-        fi
-
-
-
-
-    # need to call stopsolr it here since it needs to stop this exp explicitly before running a new one
-        stopSolr $SERVERNODE
-        play post_data_$SERVERNODE.yml --tags aws_exp_reset --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
-
-        # next RF
-        archivePrev $CHARTNAME $SERVERNODE $QUERY $RF $SHARD
-
+        # next shard
       done
-      # next shard
+      # next servernode
     done
-    # next servernode
+    python3 /Users/dporter/projects/solrcloud/chart/chart_all_full.py $QUERY $CHARTNAME
+    python3 /Users/dporter/projects/solrcloud/chart/chartit_error_bars.py $QUERY $CHARTNAME
+    zip -r /Users/dporter/projects/solrcloud/chart/exp_html_out/_$CHARTNAME/exp_zip.zip /Users/dporter/projects/solrcloud/chart/exp_records/$CHARTNAME
+    # next query
   done
-  # next query
-  python3 /Users/dporter/projects/solrcloud/chart/chart_all_full.py $QUERY $CHARTNAME
-  python3 /Users/dporter/projects/solrcloud/chart/chartit_error_bars.py $QUERY $CHARTNAME
-  zip -r /Users/dporter/projects/solrcloud/chart/exp_html_out/_$CHARTNAME/exp_zip.zip /Users/dporter/projects/solrcloud/chart/exp_records/$CHARTNAME
+  # next searchengine
 done

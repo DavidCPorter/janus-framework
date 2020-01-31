@@ -1,0 +1,77 @@
+
+- name: benchmarking a few scenarios
+  bench:
+    application:
+      - solr
+      - elastic
+    clustersize:
+      - 2
+      - 4
+      - 8
+    loadsize:
+      - 2
+      - 8
+    load_cpu_cores:
+      - 16
+
+    loadscale:
+      mincon:
+        - 1
+      maxcon:
+        - 10
+      conincrementer:
+        - 1
+
+    shards:
+      - 1
+      - 2
+    replicas:
+      - 1x
+      - 2x
+    cache:
+      doc_cache:
+        - 99999
+        - 999
+      query_cache:
+        - 9999999
+        - 999
+      filter_cache:
+        - 999
+      field_cache:
+        - 999
+
+    loadbalancer:
+      - roundrobin
+      - client
+
+    logging:
+      - warn
+      - info
+
+    jvm_memory:
+      - 30G
+      - 10G
+
+    index_storage:
+      - ram
+      - disk
+
+    term_dictionary:
+      - "/Users/dporter/projects/solrcloud/tests_v1/words.txt"
+
+    documents:
+      - "/Users/dporter/projects/solrcloud/tests_v1/reviews_Electronics.json"
+
+    search_term_length:
+      - 1
+      - 2
+      - 3
+
+
+
+
+- name: visualization
+  visualizations:
+  - cdf
+  - p99_latency
+  - scaled_throughput

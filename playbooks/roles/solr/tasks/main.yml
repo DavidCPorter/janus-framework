@@ -84,22 +84,22 @@
   become: yes
   become_user: root
 
-- name: add slow query logging for queries > .5s to default solrconfig.xml
-  lineinfile:
-    path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
-    insertbefore: '</query>'
-    line: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
-  tags:
-    - slow_query
-    # - setup
-#  decided to completely disable logging for experiments.
-- name: add slow query logging for queries > .5s to default solrconfig.xml
-  lineinfile:
-    path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
-    state: absent
-    regex: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
-  tags:
-    - remove_slow_query
+# - name: add slow query logging for queries > .5s to default solrconfig.xml
+#   lineinfile:
+#     path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
+#     insertbefore: '</query>'
+#     line: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
+#   tags:
+#     - slow_query
+#     # - setup
+# #  decided to completely disable logging for experiments.
+# - name: rm slow query logging for queries > .5s to default solrconfig.xml
+#   lineinfile:
+#     path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
+#     state: absent
+#     regex: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
+#   tags:
+#     - remove_slow_query
     # - setup
 
 - name: replace solrconfig.xml with local default copy

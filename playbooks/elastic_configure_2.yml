@@ -1,5 +1,59 @@
 # playbook
-- hosts: twoNode
+# masternode are like zookeeper and need to be relaunced for every state change. Simply use the zookeeperNodes
+- hosts: masterNodes:!thirdMaster
   roles:
     - elastic
   vars:
+    cache_percentage_of_heap: "{{cache_percentage}}"
+    master_flag: true
+    data_flag: true
+    discovery_nodes:
+      - 10.10.1.1
+      - 10.10.1.2
+    cluster_name: twoNode
+  tags:
+    - main
+
+- hosts: singleGenerator
+  tasks:
+    - name: include tasks download_json
+      include_tasks:
+        file: roles/elastic/tasks/download_json.yml
+        apply:
+          vars:
+            data_upload_dir: /users/dporte7
+  tags:
+    - load_json
+    - never
+
+
+
+- hosts: singleGenerator
+  tasks:
+    - name: include tasks run indexing
+      include_tasks:
+        file: roles/elastic/tasks/do_index.yml
+        apply:
+          vars:
+            data_upload_dir: /users/dporte7
+            replicas: 2
+            shards: 1
+  tags:
+    - run_script
+    - never
+
+
+  # tags:
+    # - start_masternodes
+    # - never
+
+# - hosts: thirdMaster
+#   roles:
+#     - elastic
+#   vars:
+#     master_flag: true
+#     data_flag: false
+#     discovery_nodes:
+#       - "{{node0}}"
+#       - "{{node1}}"
+#     cluster_name: twoNode

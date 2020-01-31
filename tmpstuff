@@ -1,0 +1,31 @@
+if [ "$second_pass" -gt 0 ];then
+  update
+  # leave first foreground node alone
+  for ((i=1; i<=$load_server_incrementer; i++));do
+    # additional loops spread traffic over num of procs to round robin server
+    for ((l=1; l<=$procs; l++)); do
+      LUCKY_LOAD=${ALL_LOAD_NODES[$(($l%$M_LOAD))]}
+      node_subnet_suffix=$(($(($l % $SOLR_SIZE))+1))
+      # this port suffix thing is just for solrj requests since solrj has multiple ports to serve requests
+      port_num_suffix=$((($l % 4)+1))
+      if [ "$SOLRJ_PORT_OVERRIDE" = true ];then
+        port_num_suffix=4
+      fi
+
+      if [ "$INSTANCES_BOOL" = true ];then
+        PARAMS="$SINGLE_PAR  --host 10.10.1.$node_subnet_suffix --port ${single_instance_port_arr[$(($l % 4))]}"
+      else
+        PARAMS="$PAR --host 10.10.1.$node_subnet_suffix --port 9$port_num_suffix$port_num_suffix$port_num_suffix"
+      fi
+      if [ "$STANDALONE" = true ];then
+        PARAMS="$PAR  --host 10.10.1.5 --port 8983"
+      fi
+      echo "python3 traffic_gen.py $THREADS $PARAMS >/dev/null 2>&1 &" >> $RSCRIPTS/${LUCKY_LOAD}/remotescript.sh
+
+    done
+  done
+
+  for noder in "${ALL_LOAD_NODES[@]}";do
+    scp ${RSCRIPTS}/${noder}/remotescript.sh $USER@${noder}:/users/${USER}/traffic_gen/remotescript.sh &
+  done
+fi

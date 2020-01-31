@@ -2,11 +2,10 @@
 
 RSCRIPTS=$PROJECT_HOME/tests_v1/remotescripts
 
+source /Users/dporter/projects/solrcloud/utils/utils.sh
+source /Users/dporter/projects/solrcloud/utils/exp_helpers.sh
+source /Users/dporter/projects/solrcloud/utils/exp_scale_loop_params.sh
 
-
-# source /Users/dporter/projects/solrcloud/utils/utils.sh
-# source /Users/dporter/projects/solrcloud/utils/exp_helpers.sh
-# source /Users/dporter/projects/solrcloud/utils/exp_scale_loop_params.sh
 
 function start_experiment() {
 
@@ -27,19 +26,22 @@ function start_experiment() {
   SOLRNUM="${18} ${19}"
   LOAD=${21}
   INSTANCES="${22} ${23}"
+  ENGINE="${24} ${25}"
   SOLR_SIZE=${19}
   # loadsize = num of load servers
   LOADSIZE=$LOAD
   # proper array for this var
   LOAD_NODES=($(setLoadArray $LOADSIZE))
-  ALL_LOAD_NODES=($(setLoadArray $M_LOAD))
+  ALL_LOAD_NODES=($(setLoadArray $LOAD))
   # LOAD_NODES is the array of IPs for the specified loadsize
   echo "THESE ARE THE LOAD NODES FOR THIS ITERATION OF EXP::"
   for i in "${LOAD_NODES[@]}";do
     echo $i
   done
+
   INSTANCES_BOOL=false
   STANDALONE=false
+  echo "solrsize=$SOLR_SIZE"
 
   if [ $SOLR_SIZE -eq 1 ];then
     INSTANCES_BOOL=true
@@ -50,195 +52,54 @@ function start_experiment() {
     SOLR_SIZE=1
   fi
 
-  SINGLE_PAR=""
-  PAR=""
-  PARAMS=""
-  # each process in the python script will make #THREAD num of REPLICASnections to a SINGLE solr instance "--host" (for --query direct)
-  # parameters for py script running on nodes 32, 33, 34, 35
-  # hosts here will either be this local for solrj since solj is running on same node, or a subnet address
-  # different ports reflect the number of solrj processes on each node running solrj
-  #  otherwise ports will be changed to 8983 since solrcloud httpserver runs there on the network
 
-  # if wee have instances > 0 then we are in single node cluster mode
+  SINGLE_PAR=none
+  PAR=none
+  PARAMS=""
+
+  # if we have instances > 0 then we are in single node cluster mode
   if [ "$INSTANCES_BOOL" = true ];then
     # need to add port (instance) later
-    SINGLE_PAR="$DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $INSTANCES --connections 1 --output-dir ./"
+    SINGLE_PAR="$DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $ENGINE $INSTANCES --connections 1 --output-dir ./"
   else
-    PAR="$DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM --connections 1 --output-dir ./"
+    PAR="$DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $ENGINE --connections 1 --output-dir ./"
   fi
 
-
-
-  printf "\n\n\n"
-  echo "removing previous output from remote sources and local host copies"
+  printf "\n\n\n removing previous output from remote sources and local host copies \n\n\n"
   pssh -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file --user $USER "rm ~/traffic_gen/http_benchmark_*"
   rm $PROJECT_HOME/tests_v1/profiling_data/proc_results/*
 # THIS MIGHT HAVE BEEN THE PROBLEM
 
-########## EXPERIMENTS #################
-  # printf "\n"
-  # echo "making dirs for copying remote scripts"
-  # for i in "${LOAD_NODES[@]}";do
-  #   mkdir $RSCRIPTS/${i}
-  #   touch $RSCRIPTS/${i}/remotescript.sh
-  # done
+########## UPDATE LOAD SERVER SCRIPTS #################
 
-  if [ "$first_time" = yes ];then
+  update_rscripts $LOAD $RSCRIPTS $PROCESSES $SOLR_SIZE $SOLRJ_PORT_OVERRIDE "$SINGLE_PAR" "$PAR" $INSTANCES_BOOL $STANDALONE "$THREADS" $USER
 
-    for i in "${ALL_LOAD_NODES[@]}";do
-      echo "#!/bin/bash" > $RSCRIPTS/${i}/remotescript.sh
-    done
+  printf "\n\n\n ******** EXP PRELIM STEPS COMPLETE!! ************ \n\n\n"
+  printf "********* STARTING EXPERIMENT *********\n\n\n"
 
-
-    # the following is a loop
-    #  for each load server, for each core on the load server, run this python process to one of the round robin solr servers
-    #  this remains the same for both distributed cloud and singlenode except that single node passes instance param and does not RR through solr servers ~ just one 10.10.1.1.
-
-  # single_instance_port_arr =  so we can load balance accross local cores
-    single_instance_port_arr=( "8983" "9911" "9922" "9933" )
-
-  ####### THIS IS FOR FOREGROUND and BACKGROUND NODES
-
-    for ((l=0; l<$(($M_LOAD)); l++)); do
-      LUCKY_LOAD=${ALL_LOAD_NODES[$l]}
-      # always 2 threads now, not incrementing by one anymore
-      # if [ $l -gt 0 ];then
-      #   THREADS="--threads 2"
-      # fi
-  # 16 logical cores on each load server
-      # $procs+$SOLR_SIZE
-      for ((i=1; i<=$(($procs)); i++)); do
-        # if more than 1 node, then the nodes subsequent to the first always have the max three threads for optimal parallelism
-        node_subnet_suffix=$(($(($i % $SOLR_SIZE))+1))
-        # this port suffix thing is really just for solrj requests since solrj has multiple ports to serve requests
-        port_num_suffix=$((($i % 4)+1))
-        if [ "$SOLRJ_PORT_OVERRIDE" = true ];then
-          port_num_suffix=4
-        fi
-
-        if [ "$INSTANCES_BOOL" = true ];then
-          PARAMS="$SINGLE_PAR  --host 10.10.1.$node_subnet_suffix --port ${single_instance_port_arr[$(($i % 4))]}"
-        else
-          PARAMS="$PAR --host 10.10.1.$node_subnet_suffix --port 9$port_num_suffix$port_num_suffix$port_num_suffix"
-        fi
-        if [ "$STANDALONE" = true ];then
-          PARAMS="$PAR  --host 10.10.1.5 --port 8983"
-        fi
-        echo "python3 traffic_gen.py $THREADS $PARAMS >/dev/null 2>&1 &" >> $RSCRIPTS/${LUCKY_LOAD}/remotescript.sh
-
-      done
-      if [ $l -eq 0 ];then
-        echo "python3 traffic_gen.py $THREADS $PARAMS >/dev/null 2>&1" >> $RSCRIPTS/${LUCKY_LOAD}/remotescript.sh
-      fi
-
-    done
-  fi
-
-
-
-# copy to respective load nodes
-  if [ "$first_time" = yes ];then
-    for noder in "${ALL_LOAD_NODES[@]}";do
-      scp ${RSCRIPTS}/${noder}/remotescript.sh $USER@${noder}:/users/${USER}/traffic_gen/remotescript.sh &
-    done
-    sleep 3
-  fi
-
-
-# just appends an additional process to 16 different load nodes
-  if [ $second_pass -gt 0 ];then
-    # leave first foreground node alone
-    for ((i=1; i<=$load_server_incrementer; i++));do
-      for ((l=1; l<=35; l++)); do
-        LUCKY_LOAD=${ALL_LOAD_NODES[$l]}
-        # always 2 threads now, not incrementing by one anymore
-        # if [ $l -gt 0 ];then
-        #   THREADS="--threads 2"
-        # fi
-
-      # for ((i=1; i<=$(($second_pass)); i++)); do
-        # if more than 1 node, then the nodes subsequent to the first always have the max three threads for optimal parallelism
-        node_subnet_suffix=$(($(($l % $SOLR_SIZE))+1))
-        # this port suffix thing is really just for solrj requests since solrj has multiple ports to serve requests
-        port_num_suffix=$((($l % 4)+1))
-        if [ "$SOLRJ_PORT_OVERRIDE" = true ];then
-          port_num_suffix=4
-        fi
-
-        if [ "$INSTANCES_BOOL" = true ];then
-          PARAMS="$SINGLE_PAR  --host 10.10.1.$node_subnet_suffix --port ${single_instance_port_arr[$(($l % 4))]}"
-        else
-          PARAMS="$PAR --host 10.10.1.$node_subnet_suffix --port 9$port_num_suffix$port_num_suffix$port_num_suffix"
-        fi
-        if [ "$STANDALONE" = true ];then
-          PARAMS="$PAR  --host 10.10.1.5 --port 8983"
-        fi
-        echo "python3 traffic_gen.py $THREADS $PARAMS >/dev/null 2>&1 &" >> $RSCRIPTS/${LUCKY_LOAD}/remotescript.sh
-
-      done
-    done
-
-    for noder in "${ALL_LOAD_NODES[@]}";do
-      scp ${RSCRIPTS}/${noder}/remotescript.sh $USER@${noder}:/users/${USER}/traffic_gen/remotescript.sh &
-    done
-  fi
-
-
-
-  printf "\n"
-  echo "******** EXP PRELIM STEPS COMPLETE!! ************"
-  printf "\n"
-  printf "\n"
-  printf "\n"
-
-  echo "********* STARTING EXPERIMENT *********"
-  printf "\n"
-  printf "\n"
-  printf "\n"
-#### RUNNING EXPERIMENTS #####
   echo "RUNNING THESE SHELL SCRIPTS ON LOAD NODES"
-  easyreadcount=0
-  for i in "${LOAD_NODES[@]}";do
-    if [ "$easyreadcount" -eq 0 ];then
-      echo "${i}::"
-      cat $RSCRIPTS/${i}/remotescript.sh
-      printf "\n"
+  show_remote_scripts $LOAD $RSCRIPTS
 
-    else
-      echo "${i}::"
-      # head -n 5 $RSCRIPTS/${i}/remotescript.sh
-      cat $RSCRIPTS/${i}/remotescript.sh
-      echo "......"
-      printf "\n"
-    fi
-
-    ((easyreadcount+=1))
-
-  done
-  echo "nohup output to loadoutput.out"
-  printf "\n"
-  printf "\n"
+  printf "\n nohup output to loadoutput.out\n\n\n"
   # BACKGROUND LOAD GEN NODES
-#  nohup pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$(($LOADSIZE-1)) "cd $(basename $PY_SCRIPT); bash remotescript_net.sh"&
-  nohup pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$LOADSIZE "cd $(basename $PY_SCRIPT); bash remotescript.sh" > loadoutput.out
+  # ideally kafka would take care of output here. but for now we are just reading a single con output
+
+  # THIS RUNS THE EXPERIMENT
+  echo "pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$LOAD cd $(basename $PY_SCRIPT); bash remotescript.sh "
+  pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$LOAD -P "cd traffic_gen; bash remotescript.sh"
   wait $!
+
   echo "************* FINISHED EXP ****************"
 #### FINISHED #####
 
-  printf "\n"
-  printf "\n"
-  printf "\n"
-  printf "\n"
-  echo "************* STARTING POST EXP STEPS ****************"
-  printf "\n"
-  printf "\n"
+  printf "\n\n\n\n ************* STARTING POST EXP STEPS ****************\n\n\n"
   echo "copying exp results to profiling_data/proc_results/  ... "
 
   # wait for slow processes to complete
   sleep 5
   mycounter=1
 
-  for i in "${LOAD_NODES[@]}"; do
+  for i in "${ALL_LOAD_NODES[@]}"; do
     if [ $mycounter -eq $LOADSIZE ];then
       echo "$mycounter == $LOADSIZE"
       scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $PROJECT_HOME/tests_v1/profiling_data/proc_results
@@ -247,35 +108,28 @@ function start_experiment() {
       mycounter=$(($mycounter+1))
     fi
   done
+  wait $!
 
   # data transfer can take a few seconds
   sleep 2
 
 
-  printf "\n\n\n"
-  if [ "$first_time" = no ];then
-    echo "RUNNING READ RESULTS SCRIPT"
+  printf "\n\n\n RUNNING READ RESULTS SCRIPT"
+  printf "$PROJECT_HOME/tests_v1/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES"
 
-    echo "$PROJECT_HOME/tests_v1/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES"
-    python3 $PROJECT_HOME/tests_v1/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES
-    wait $!
-    DATE=$(date '+%Y-%m-%d_%H:%M:%S')
-    mkdir $PROJECT_HOME/tests_v1/${DATE}:::FCTS__query${15}_rf${11}_s${13}_clustersize${19}_threads${5}_proc${7}
-    cp -rf $PROJECT_HOME/tests_v1/profiling_data/proc_results $PROJECT_HOME/tests_v1/${DATE}:::FCTS__query${15}_rf${11}_s${13}_clustersize${19}_threads${5}_proc${7}
+  python3 $PROJECT_HOME/tests_v1/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES
+  wait $!
 
-  fi
+  #stores the comnnection output for each load server... this is a lot of data, prolly want to get rid of this.
+  DATE=$(date '+%Y-%m-%d_%H:%M:%S')
+  conn_result_store=$PROJECT_HOME/tests_v1/${DATE}:::FCTS__query${15}_rf${11}_s${13}_clustersize${19}_threads${5}_proc${7}
+
+  mkdir $conn_result_store
+  cp -rf $PROJECT_HOME/tests_v1/profiling_data/proc_results $conn_result_store
+
   touch $PROJECT_HOME/tests_v1/profiling_data/proc_results/javaServer.log
-  # for i in "${LOAD_NODES[@]}";do
-  #   echo "${i}::" >> $PROJECT_HOME/tests_v1/profiling_data/proc_results/javaServer.log
-  #   ssh dporte7@$i tail -n 10 /users/dporte7/solrclientserver/javaServer.log >> $PROJECT_HOME/tests_v1/profiling_data/proc_results/javaServer.log
-  # done
-  # pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$LOADSIZE "echo ''> /users/dporte7/solrclientserver/javaServer.log"
-  # for reference fcts
 
-  printf "\n\n\n "
-  echo "****** COMPLETED POST EXP STEPS *******"
-  printf "\n\n\n "
-
+  printf "\n\n\n****** COMPLETED POST EXP STEPS *******\n\n\n"
 
 }
 
@@ -292,7 +146,7 @@ TERMS="x"
 THREADS="x x"
 PROCESSES="x x"
 DURATION="x x"
-REPLICAS="x x" 
+REPLICAS="x x"
 SHARDS="x x"
 QUERY="x x"
 LOOP="x x"
@@ -300,7 +154,7 @@ SOLRNUM="x x"
 # this default remains when distributed solrcloud is run
 INSTANCES="--instances 0"
 LOAD="x x"
-
+ENGINE="x x"
 
 while (( "$#" )); do
   case "$1" in
@@ -355,6 +209,10 @@ while (( "$#" )); do
       INSTANCES="--instances $2"
       shift 2
       ;;
+    --engine)
+      ENGINE="--engine $2"
+      shift 2
+      ;;
 
     --) # end argument parsing
       shift
@@ -385,7 +243,8 @@ cd ~/projects/solrcloud/tests_v1;
 # start_experiment $USER $PY_SCRIPT
 export procs=$procs
 export SOLRJ_PORT_OVERRIDE=$SOLRJ_PORT_OVERRIDE
-start_experiment $USER $PY_SCRIPT $TERMS $THREADS $PROCESSES $DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $LOAD $INSTANCES
+export -f setLoadArray
+start_experiment $USER $PY_SCRIPT $TERMS $THREADS $PROCESSES $DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $LOAD $INSTANCES $ENGINE
 
 #start_experiment $USER $PY_SCRIPT "\"$PARAMETERS\""
 

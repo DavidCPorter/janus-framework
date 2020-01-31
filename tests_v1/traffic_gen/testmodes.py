@@ -14,18 +14,6 @@ def duration_based_test( test_param, thread_stats, conn, urls, start_flag, stop_
     """ Duration-based test to be carried out by each thread """
     sys.stdout.flush()
     j = int( name )
-    # np.random.seed( j )
-
-    # Pre-stage requests and wait times
-    # sleep_times = [test_param.gauss_mean]
-    # if test_param.req_dist == "gauss":
-    #     sleep_times = np.abs( np.random.normal(loc=test_param.gauss_mean,
-    #                                            scale=test_param.gauss_std, size=test_param.max_iters) )
-    # elif test_param.req_dist == "poisson":
-    #     sleep_times = np.random.poisson( lam=test_param.poisson_lam, size=test_param.max_iters )
-
-    # [(fct, timestamp), ...]
-    # fct_stamps = []
     lat = 0
     responses = 0
     requests = 0
@@ -37,15 +25,6 @@ def duration_based_test( test_param, thread_stats, conn, urls, start_flag, stop_
     logging.debug( "Event %s: Starting" , event_start )
     start = time.time()
 
-    # wait ramp time
-    # while (time.time() - start < test_param.ramp):
-    #     route = urls[random.randint(1,4990)]
-    #     print(route)
-    #     conn.request( "GET", route , headers = {'Connection':'keep-alive'})
-    #     resp = conn.getresponse()
-    #     r = resp.read()
-    #     continue
-    # i = 0
     while not stop_flag.is_set():
 
         route = urls[random.randint(1,4990)]
@@ -67,8 +46,11 @@ def duration_based_test( test_param, thread_stats, conn, urls, start_flag, stop_
 
             if responses == 1:
                 gut_check.append(r[:1000])
+                gut_check.append("route -> %s" % route)
             if responses%1000 == 0:
                 gut_check.append(r[:1000])
+                gut_check.append("route -> %s" % route)
+
             responses += 1
             j+=1
 

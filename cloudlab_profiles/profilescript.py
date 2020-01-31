@@ -27,6 +27,7 @@ property = '<property xmlns="http://www.geni.net/resources/rspec/3" source_id="i
 
 footer =  '<site xmlns="http://www.protogeni.net/resources/rspec/ext/jacks/1" id="undefined"/>\n</link>\n</rspec>'
 
+disk = '<emulab:blockstore name="bs%d" mountpoint="/mydata" class="local" size="50GB" placement="any"/>\n'
 
 # write Node definitions
 
@@ -40,6 +41,8 @@ for i in range(0,int(sys.argv[1])):
             output.write(node % node_num)
         elif line_num == 6:
             output.write(node_interface % node_num)
+        elif line_num == 7:
+            output.write(disk % node_num)
         else:
             output.write(j)
 

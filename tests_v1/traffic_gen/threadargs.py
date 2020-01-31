@@ -18,13 +18,17 @@ def add_pool(main_args):
     return http_pool
 
 def add_conn(main_args):
-    conn = http.client.HTTPConnection(main_args.host,main_args.port,timeout=20)
+    conn = http.client.HTTPConnection(main_args.host,main_args.port,timeout=10)
 
     return conn
 
-def get_urls(test_param, terms, shards, replicas, clustersize, instances, query):
+def get_urls(test_param, terms, shards, replicas, clustersize, instances, query, engine):
     indexed_fields = ["reviewText","summary"]
-    prefix_url = "%s" % (test_param.base_url)
+    # no prefix for elastic... not sure how solr handles prefix, ut it works
+    # prefix_url = "%s" % (test_param.base_url)
+
+    prefix_url = ""
+
     urls = []
     # port 8983 is a benchamrk using direct solr instance queries
 # single cluster
@@ -44,7 +48,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query)
             urls.append("%s%s" % (prefix_url, q))
 
 # solrj
-    else:
+    elif query == "solrj":
         col = 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize
         # port 9111 flow -> via solrJ
         # introduce randomness for each thread
@@ -55,7 +59,17 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query)
             field = indexed_fields[i%len(indexed_fields)]
             # q = 'solr/reviews_rf2q/select?q='+field+'%3A'+term+'&rows=10'
             urls.append( "/%s/%s/%s" % (field, term, col))
-
+    elif engine == "elastic":
+        index = 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize
+        r = random.randint(1,len(terms))
+        for i in range( test_param.max_iters ):
+            i+=r
+            term = terms[i%len(terms)].rstrip()
+            field = indexed_fields[i%len(indexed_fields)]
+            # q = '/solr/reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize+'/_search?q='+field+':'+term
+            # testing with index reviews right now
+            q='/reviewsrf2s2/_search?q='+field+':'+term
+            urls.append("%s" % q)
     return urls
 
 def get_terms():
@@ -84,14 +98,14 @@ def create_threadargs(main_args,start_flag, stop_flag, gauss_mean, gauss_std, po
         test_param = TestParam( host=main_args.host, port=main_args.port, threads=main_args.threads,
                                 base_url=base_url, conns=main_args.conns, rand_req=main_args.rand_req,
                                 max_rand_obj=main_args.max_rand_obj, req_dist=main_args.req_dist,
-                                gauss_mean=gauss_mean, gauss_std=gauss_std, poisson_lam=poisson_lam )
+                                gauss_mean=gauss_mean, gauss_std=gauss_std, poisson_lam=poisson_lam, engine=main_args.engine )
     else:
         target = duration_based_test
         test_param = TestParam( host=main_args.host, port=main_args.port, threads=main_args.threads,
                                 base_url=base_url, ramp=main_args.ramp, loop=main_args.loop,
                                 duration=main_args.duration, conns=main_args.conns, rand_req=main_args.rand_req,
                                 max_rand_obj=main_args.max_rand_obj, req_dist=main_args.req_dist,
-                                gauss_mean=gauss_mean, gauss_std=gauss_std, poisson_lam=poisson_lam )
+                                gauss_mean=gauss_mean, gauss_std=gauss_std, poisson_lam=poisson_lam, engine=main_args.engine )
 
     thread_args = [ test_param, thread_stats]
     return thread_args

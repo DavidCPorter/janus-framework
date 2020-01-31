@@ -1,0 +1,98 @@
+
+
+- name: append elastic configs to config
+  block:
+    - name: elasticsearch.yml
+      template:
+        src: elasticsearch.yml
+        dest: "{{es_root_dir}}/config"
+      vars:
+        cache_of_heap: "{{cache_percentage_of_heap}}"
+        clustername: "{{cluster_name}}"
+        nodename: "{{globalIP}}"
+        pathdata: "{{es_data_dir}}"
+        pathlogs: "{{es_log_dir}}"
+        masters:
+          - 10.10.1.1:9300
+          - 10.10.1.2:9300
+          # - "{{node2}}"
+        nethost: "{{ansible_subnet}}"
+        discoverynodes: "{{discovery_nodes}}"
+        masterflag: "{{master_flag}}"
+        dataflag: "{{data_flag}}"
+
+    - name: log4j2.properties
+      template:
+        src: log4j2.properties
+        dest: "{{es_root_dir}}/config"
+      vars:
+        root_log: warn
+
+    - name: jvm.options
+      template:
+        src: jvm.options
+        dest: "{{es_root_dir}}/config"
+      vars:
+        heapsize: 20
+
+  tags:
+    - start
+    - never
+
+- name: start elastic w/ a pointer to config path
+  shell: ./bin/elasticsearch >/dev/null 2>&1 &
+  async: 9999
+  poll: 0
+  register: es_start_result
+  # ignore_errors: yes
+
+  args:
+    chdir: '{{es_root_dir}}'
+  environment:
+    ES_PATH_CONF: "{{es_root_dir}}/config"
+  tags:
+    - start
+    - never
+
+# - name: fail ansible if elastic didn't launch
+#   fail:
+#     msg: "elastic search returned nonzero -- failed"
+#   when:
+#     - es_start_result.rc != 0
+#   tags:
+#     - start
+#     - never
+
+- name: restart elastic
+  shell: ./bin/elasticsearch >/dev/null 2>&1 &
+  register: es_restart_result
+  ignore_errors: yes
+
+  args:
+    chdir: '{{es_root_dir}}'
+
+  tags:
+    - restart
+    - never
+
+
+- name: fail ansible if elastic didn't launch
+  fail:
+    msg: "elastic search returned nonzero -- failed"
+  when:
+    - es_restart_result.rc != 0
+  tags:
+    - restart
+    - never
+
+
+- name: stop elastic (ignore error)
+  shell: ps aux | grep -i elastic | awk -F' ' '{print $2}' | xargs kill -9
+  register: es_stop_result
+  ignore_errors: yes
+
+  args:
+    chdir: '{{es_root_dir}}'
+  tags:
+    - stop
+    - never

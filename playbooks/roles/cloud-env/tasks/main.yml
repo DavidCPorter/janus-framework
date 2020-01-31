@@ -26,10 +26,10 @@
   blockinfile:
     path: '/etc/security/limits.conf'
     block: |
-      {{ansible_user}}       soft    nproc           65000
-      {{ansible_user}}       hard    nproc           65000
-      {{ansible_user}}       soft    nofile          65000
-      {{ansible_user}}       hard    nofile          65000
+      {{ansible_user}}       soft    nproc           65555
+      {{ansible_user}}       hard    nproc           65555
+      {{ansible_user}}       soft    nofile          65555
+      {{ansible_user}}       hard    nofile          65555
   become: yes
   become_user: root
   tags:
