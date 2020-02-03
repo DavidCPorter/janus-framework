@@ -1,0 +1,132 @@
+---
+# tasks file for cloud-env
+
+# - name: Ensure ramdisk directory exists
+#   file:
+#     dest: "{{ ramdisk_path }}"
+#     mode: '01777'
+#     state: directory
+#
+# - name: Ensure ramdisk is mounted
+#   mount:
+#     name: "{{ ramdisk_path }}"
+#     src: tmpfs
+#     fstype: tmpfs
+#     opts: "size={{ ramdisk_size }}"
+#     state: mounted
+
+- name: add aws credentials
+  copy:
+    src: "{{cred_dir}}"
+    dest: /users/dporte7/
+  tags:
+    - aws
+
+- name: raise file and proc limits on servers
+  blockinfile:
+    path: '/etc/security/limits.conf'
+    block: |
+      {{ansible_user}}       soft    nproc           65555
+      {{ansible_user}}       hard    nproc           65555
+      {{ansible_user}}       soft    nofile          65555
+      {{ansible_user}}       hard    nofile          65555
+  become: yes
+  become_user: root
+  tags:
+    - raise_limits
+
+- name: update packages
+  apt:
+    update_cache: yes
+  become: yes
+  become_user: root
+  tags:
+    - update_packages
+
+- name: ensure jdk8 is installed
+  apt:
+    name: openjdk-8-jdk
+  become: yes
+  become_user: root
+
+
+- name: sudo apt-get install packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update-cache: yes
+  become: yes
+  become_user: root
+  tags:
+    - install_packages
+
+    #- name: download ptp
+    #  git:
+    #    repo: git://git.code.sf.net/p/linuxptp/code
+    #    dest: ./linuxptp
+    #    force: yes
+    #  tags:
+    #    - ptp
+    #
+    #
+    #- name: install ptp
+    #  make:
+    #    chdir: '{{ptp_install_dir}}'
+    #    target: install
+    #  become: yes
+    #  become_user: root
+    #  tags:
+    #    - ptp
+    #
+    #
+    #- name: apt-get install iftop
+    #  apt:
+    #    name: iftop
+    #    state: present
+    #  become: yes
+    #  become_user: root
+    #  tags:
+    #    - install_packages
+    #    - iftop
+#
+# - name: uninstall sematext
+#   shell: sudo apt-get remove spm-client -y
+#   become_user: root
+#   tags:
+#     - rm_sematext
+#
+# - name: uninstall sematext
+#   shell: sudo rm -rf /opt/spm
+#   become_user: root
+#   tags:
+#     - rm_sematext_dir
+
+# - name: install sematext
+#   shell: echo "deb http://pub-repo.sematext.com/ubuntu sematext main" | sudo tee /etc/apt/sources.list.d/sematext.list > /dev/null
+#   become_user: root
+#   tags:
+#     - sematext
+#
+# - name: install sematext
+#   shell: wget -O - https://pub-repo.sematext.com/ubuntu/sematext.gpg.key | sudo apt-key add -
+#   become_user: root
+#   tags:
+#     - sematext
+#
+# - name: sudo apt-get update
+#   shell: sudo apt-get update
+#   become_user: root
+#   tags:
+#     - sematext
+#
+# - name: sudo apt-get install spm-client
+#   shell: sudo apt-get install spm-client -y
+#   become_user: root
+#   tags:
+#     - sematext
+#
+# - name: add monitoring configs to sematext
+#   shell: sudo bash /opt/spm/bin/setup-sematext --monitoring-token cfe92cf2-cf42-45b7-a965-b1bed5cea132 --app-type sapa --agent-type javaagent --infra-token 31738f36-ddb5-4d8e-b16d-4a9be47df4f4
+#   become_user: root
+#   tags:
+#     - sematext_mon

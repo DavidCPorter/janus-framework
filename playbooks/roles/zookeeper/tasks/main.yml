@@ -1,0 +1,105 @@
+---
+# tasks file for zookeeper
+
+- name: Download and unpack zookeeper
+  unarchive:
+    remote_src: yes
+    src: https://archive.apache.org/dist/zookeeper/zookeeper-3.5.5/apache-zookeeper-3.5.5.tar.gz
+    dest: '{{zoo_install_dir}}/'
+
+  tags:
+    - zookeeper_unpack
+
+- name: remove zoo_sample.cfg
+  file:
+    path: '{{zoo_conf_dir}}/zoo_sample.cfg'
+    state: absent
+  ignore_errors: yes
+  tags:
+    - zoo_conf
+
+- name: remove zoo.cfg
+  file:
+    path: '{{zoo_conf_dir}}/zoo.cfg'
+    state: absent
+  ignore_errors: yes
+  tags:
+    - zoo_conf
+
+- name: copy zoo.cfg file to hosts
+  copy:
+    src: ./roles/zookeeper/files/zoo.cfg
+    dest: '{{zoo_conf_dir}}/zoo.cfg'
+  tags:
+    - zoo_conf
+
+- name: copy zoo.sh file to conf dir
+  copy:
+    src: ./roles/zookeeper/files/zookeeper-env.sh
+    dest: '{{zoo_conf_dir}}/zookeeper-env.sh'
+  tags:
+    - zoo_conf
+
+- name: create zookeeper data dir
+  file:
+    path: "/var/lib/zookeeper"
+    state: directory
+    mode: "777"
+    recurse: yes
+  become: yes
+  become_user: root
+
+- name: add zoo_id to "/var/lib/zookeeper"
+  copy:
+    content: "{{zoo_id}}"
+    dest: /var/lib/zookeeper/myid
+    mode: "777"
+  become: yes
+  become_user: root
+
+- name: add zookeeper_server.pid  to "/var/lib/zookeeper"
+  file:
+    path: /var/lib/zookeeper/zookeeper_server.pid
+    state: touch
+    mode: "777"
+  become: yes
+  become_user: root
+  tags:
+    - zoo_3-5_weirdness
+
+- name: compile zookeeper
+  shell: ant compile
+  args:
+    chdir: '{{zoo_root_dir}}'
+  tags:
+    - compile
+
+# systemd option not worth it right now
+- name: stop zookeeper
+  shell: "{{zoo_bin_dir}}/zkServer.sh stop"
+  tags:
+    - zoo_stop
+    - burn_zoo
+
+- name: start ZooKeeper
+  shell: "{{zoo_bin_dir}}/zkServer.sh start"
+  tags:
+    - zoo_start
+
+- name: delete zookeeper data
+  file:
+    path: /var/lib/zookeeper
+    state: absent
+  become: yes
+  become_user: root
+  tags:
+    - never
+    - burn_zoo
+
+- name: delete zookeeper dir
+  file:
+    path: "{{zoo_root_dir}}"
+    state: absent
+  tags:
+    - never
+    - burn_zoo

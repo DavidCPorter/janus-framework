@@ -1,6 +1,0 @@
----
-# defaults file for upload_data
-data_upload_dir: /users/dporte7
-# collection name is passed in now
-collection_name: reviews_rf"{{replicas}}"_s"{{shards}}"_clustersize"{{clustersize}}"
-solr_install_dir: /users/dporte7/solr-8_0

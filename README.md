@@ -1,4 +1,4 @@
-## This project builds and deploys a distributed SolrCloud Development Environment w/ solr source version control
+## SAPA: a tool for Search Agnostic Performance Analysis
 
 To deploy you need to set up a local and remote env:
 
@@ -12,10 +12,18 @@ install packages:
 
 REMOTE:  
 1. to set up your remote env, put the four Cloudlab domains in a file ./cloudlabDNS e.g
-`domain1`
-`domain2`
-`domain3`
-`domain4`
+```
+ms1312.utah.cloudlab.us
+ms1019.utah.cloudlab.us
+ms1311.utah.cloudlab.us
+ms1341.utah.cloudlab.us
+ms0819.utah.cloudlab.us
+...
+```
+
+*before running this script, make sure your id_rsa public key is on cloudlab and your id_rsa private key starts with -----BEGIN RSA PRIVATE KEY----- since this paramiko version requires this.*
+**also make sure all whitespace is removed from this file otherwise paramiko may throw a curious error**
+**be sure the list of dns names are in order of the cloudlab listview**
 
 2. run $python3 getips.py <cloudlab username> <cloudlabDNS filename> <path_to_private_rsa_key>
 this will generate >> `inventory_gen.txt` file. swap this file with `./inventory`
@@ -25,24 +33,43 @@ this will generate >> `inventory_gen.txt` file. swap this file with `./inventory
 - fork the lucene-solr repo https://github.com/DavidCPorter/lucene-solr.git
 - add ssh keys from solr nodes to github account (temp solution so ansible can easily update repos remotely)
 - locally clone repo
-- checkout branch_8_0
+- checkout branch_8_3 (or whatever solr version you want)
 - create new branch <name> e.g. `git checkout -b <name>`
 - push <name> branch to origin
-- replace `dporter` with <branch name> in roles/solr/defaults/main.yml.
+- replace git_branch_name=dporter_8_3 in inventory to git_branch_name=<name>
 - replace `dporte7` in ansible role "vars" and "defaults" files with your username in cloudlab
+
+##### LOAD env helpers utils.sh and be sure to replace PROJ_HOME and CL_USER var with your path for this app.
+
+#### set up shell envs
+1. update all files in utils folder with your current cluster and user-specific info **especially the node strings with the IPS**
+2. then, run `ssh_files/produce_ssh_files.sh` to create files for pssh tasks dependencies in runtest.sh
 
 #### run ansible scripts
 3. to install the cloud env, run:  
-`ansible-playbook -i inventory cloud_configure.yml`
+`play cloud_configure.yml --tags never`
 4. to install and run zookeeper, run:  
-`ansible-playbook -i inventory zoo_configure.yml`
+`play zoo_configure.yml`
 5. to install and run solrcloud, run:  
-`ansible-playbook -i inventory solr_configure.yml`
-6. to post amazon review data to solr, run:  
-`ansible-playbook -i inventory post_data.yml`
-7. to open solr admin page for node0 and jconsole for remote monitoring of solr nodes, run:  
-`ansible-playbook -i inventory solr_bench.yml`
+`play solr_configure_all.yml --tags setup --extra-vars "solr_bin_exec=/users/dporte7/solr-8_3/solr/bin/solr"`
+6. to install solrj-enabled client application (cloudaware solr client). There is a tag you can use to enable remote monitoring via jmx if you would like to see that. Also requires REMOTE_JMX setting mod (see below)
+`play solr_bench.yml --tags solrj`
 
+
+
+
+#### run experiment
+*before you run any experiment you want to make sure solr is not running `checksolr` and that there is no indicies on the cores `listcores`*
+*make sure the utils are updated  loaded first*
+*make sure to edit params file*
+fulltest < list of solr clusters >
+e.g. if i wanted to run scaling experiment on 2 4 8 and 16 clusters and compare the performance, I would run this:
+`fulltest 2 4 8 16`
+
+**IF YOU EVER EXIT an experiment or it fails... make sure to remember run `stopSolr <clustersize>` and `wipecores` and `killallbyname dstat` `callingnodes rm *.csv` before you continue**
+*FURTHERMORE, if the exp posted_data (indexed) for the first time, you might want to consider deleting that collection via solr admin and redoing the experiemnt becuase the final step in the exp is to save to aws and that would not have happened in a failed exp... you can either run the ansible script to post to aws, or just redo it after deleting*
+
+**It's important to remember that the disk space on the cluster is small ~10GB so any more that 4 replicas will prolly fail due to disk size failure. This is why there is the posting the index to aws (if prev nott there ) and removing it after each exp so you dont hit the limit.**
 
 
 ### NOTES
@@ -57,7 +84,7 @@ to
 
 
 #### Notes on Ansible Roles:
-There are three roles in this repo `cloudenv, solr, zookeeper` located in the ./roles dir. You can take a look at the procedures for setting up the envs in ./roles/<role_name>/tasks/main.yml
+There are five roles in this repo `cloudenv, solr, zookeeper, upload_data, benchmark` located in the /playbooks/roles dir. You can take a look at the procedures for setting up the envs in ./roles/<role_name>/tasks/main.yml
 
 #### Notes on Ansible Variables
 when you run ansible playbooks, the process will generate sys variables, and to view these you can run `ansible -i inventory -m setup`
@@ -71,4 +98,51 @@ If multiple variables of the same name are defined in different places, they win
 - then comes facts discovered about a system
 - then "role defaults", which are the most "defaulty" and lose in priority to everything.
 
-`alias test="cd ~/solrclientserver;java -cp target/solrclientserver-1.0-SNAPSHOT.jar com.dporte7.solrclientserver.DistributedWebServer"`
+
+
+### upgrading solr:
+http://lucene.apache.org/solr/guide/8_3/solr-upgrade-notes.html#solr-upgrade-notes
+
+**feature changes 8->8.1**
+*Collections API*
+- The CREATE command will now return the appropriate status code (4xx, 5xx, etc.) when the command has failed. Previously, it always returned 0, even in failure.
+
+
+*Logging*
+- (we turn logging off... but goood to know) The default Log4j2 logging mode has been changed from synchronous to asynchronous. This will improve logging throughput and reduce system contention at the cost of a slight chance that some logging messages may be missed in the event of abnormal Solr termination.
+
+**feature changes 8.1->8.2**
+*Zookeeper*
+- ZooKeeper 3.5.5
+- This ZooKeeper release includes many new security features. In order for Solr’s Admin UI to work with 3.5.5, the zoo.cfg file must allow access to ZooKeeper’s "four-letter commands". At a minimum, ruok, conf, and mntr must be enabled, but other commands can optionally be enabled if you choose. See the section Configuration for a ZooKeeper Ensemble for details.
+- add this to zoo.cfg::: 4lw.commands.whitelist=mntr,conf,ruok
+
+*Distributed Tracing Support*
+- woo! This release adds support for tracing requests in Solr. Please review the section Distributed Solr Tracing for details on how to configure this feature.
+
+*Caches*
+
+- Solr has a new cache implementation, CaffeineCache, which is now recommended over other caches. This cache is expected to generally provide most users lower memory footprint, higher hit ratio, and better multi-threaded performance.Since caching has a direct impact on the performance of your Solr implementation, before switching to any new cache implementation in production, take care to test for your environment and traffic patterns so you fully understand the ramifications of the change.
+- A new parameter, maxIdleTime, allows automatic eviction of cache items that have not been used in the defined amount of time. This allows the cache to release some memory and should aid those who want or need to fine-tune their caches.
+
+
+
+**UPGRADING SOLR STEPS**
+- run play zoo_configure.yml --tags burn_zoo
+- stop solr
+- change solr install dir
+- change solr git branch name in inventory
+- change aws bucket name to new dir for this verison
+- delete solr dir and data dirs with `play solr_configure_all.yml --tags burn_solr`
+- run `play solr_configure_all.yml --tags setup --extra-vars "solr_bin_exec=/users/dporte7/solr-8_3/solr/bin/solr"`
+- change defaults in zoo role for new version download link
+- add this to zoo.cfg: 4lw.commands.whitelist=mntr,conf,ruok
+- run `play zoo_configure.yml`
+
+i.e. these commands should work in sequence as long as the directory names are changed
+```
+play zoo_configure.yml --tags burn_zoo
+play solr_configure_all.yml --tags burn_solr
+play zoo_configure.yml
+play solr_configure_all.yml --tags setup --extra-vars "solr_bin_exec=/users/dporte7/solr-8_3/solr/bin/solr"
+```

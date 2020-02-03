@@ -1,0 +1,10 @@
+
+
+# aws s3 rm s3://mybucket --recursive
+- name: include the vars
+  include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
+
+- name: delete AWS index "{{collection_name}}"
+  shell: aws s3 rm "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}" --recursive
+  ignore_errors: yes
+  no_log: True

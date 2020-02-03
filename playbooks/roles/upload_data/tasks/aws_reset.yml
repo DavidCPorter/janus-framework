@@ -1,0 +1,24 @@
+---
+# tasks file for upload_data
+- name: include the vars
+  include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
+
+- name: check if aws has the index
+# aws s3 ls s3://solr-8-dporter/10.10.1.12/reviews_rf32_s1_clustersize12
+  shell: aws s3 ls "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}"
+  register: index_result
+  ignore_errors: yes
+
+- name: post dir to AWS
+  shell: aws s3 sync . "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}"
+  ignore_errors: yes
+  no_log: True
+  args:
+    chdir: '{{solr_home}}'
+  when: "'PRE' not in index_result.stdout"
+
+
+- name: rm cores from nodes
+  shell: rm -rf reviews*
+  args:
+    chdir: '{{solr_home}}'

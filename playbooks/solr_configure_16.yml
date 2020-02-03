@@ -1,0 +1,6 @@
+# playbook
+- hosts: sixteenNode
+  roles:
+    - solr
+  vars:
+    chroot: sixteenNode

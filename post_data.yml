@@ -1,4 +1,0 @@
-# playbook for cloudconfig
-- hosts: singleNode
-  roles:
-    - upload_data

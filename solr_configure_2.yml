@@ -1,4 +1,0 @@
-# playbook
-- hosts: twoNode
-  roles:
-    - solr

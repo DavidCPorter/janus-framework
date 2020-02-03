@@ -1,0 +1,28 @@
+# playbook for cloudconfig
+- hosts: allNodes
+  roles:
+    - cloud-env
+  tags:
+    - never
+    - general
+
+- hosts: generatorNode
+  tasks:
+  - name: pip install numpy
+    pip:
+      name: numpy
+      executable: /usr/bin/pip3
+  tags:
+    - never
+    - numpy
+
+# - hosts: generatorNodeEight:nodes
+#   tasks:
+#   - name: iftop install
+#     include_role:
+#       name: cloud-env
+#       apply:
+#         tags:
+#           - iftop
+#   tags:
+#     - iftop

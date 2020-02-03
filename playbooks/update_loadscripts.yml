@@ -1,0 +1,11 @@
+- hosts: generatorNode
+  tasks:
+  - name: copy traffic_gen to loads
+    copy:
+      src: "{{scripts_path}}"
+      dest: /users/dporte7/
+  - name: copy terms to loads
+    copy:
+      src: "{{terms_path}}"
+      dest: /users/dporte7/
+      mode: '0777'

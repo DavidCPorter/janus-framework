@@ -1,0 +1,6 @@
+# playbook
+- hosts: fourNode
+  roles:
+    - solr
+  vars:
+    chroot: fourNode

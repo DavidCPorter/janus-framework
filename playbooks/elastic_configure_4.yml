@@ -1,0 +1,28 @@
+# playbook
+# masternode are like zookeeper and need to be relaunced for every state change. Simply use the zookeeperNodes
+- hosts: masterNodes
+  roles:
+    - elastic
+  vars:
+    discoverynodes:
+      - "{{node0}}"
+      - "{{node1}}"
+      - "{{node2}}"
+      - "{{node3}}"
+    clustername: fourNode
+  # tags:
+    # - start_masternodes
+    # - never
+
+- hosts: fourNode:!masterNodes
+  roles:
+    - elastic
+  vars:
+    masterflag: false
+    dataflag: true
+    discoverynodes:
+      - "{{node0}}"
+      - "{{node1}}"
+      - "{{node2}}"
+      - "{{node3}}"
+    clustername: fourNode

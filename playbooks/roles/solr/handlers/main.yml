@@ -1,0 +1,48 @@
+---
+# handlers file for solr
+  - name: stop solr
+    shell: ./solr/bin/solr stop -c -all
+    register: solr_stop_result
+    ignore_errors: yes
+    args:
+      chdir: '{{solr_install_dir}}'
+    environment:
+      SOLR_HOST: "{{ansible_subnet}}"
+      GLOBALIP: "{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+
+    listen:
+      - "stop solr services"
+
+  - name: fail the play if the previous command did not succeed
+    fail:
+      msg: "the command failed"
+    when:
+      - solr_stop_result.rc != 0
+      - '"No process found" not in solr_stop_result.stdout'
+    listen:
+      - "stop solr services"
+
+#
+# q has been added to issue WARN log level only -> didnt seem to make a big difference
+  - name: start solr
+    shell: ./solr/bin/solr start -q -c -z "10.10.1.1:2181,10.10.1.2:2181,10.10.1.3:2181/{{chroot}}"
+    register: solr_start_result
+    ignore_errors: yes
+
+    args:
+      chdir: '{{solr_install_dir}}'
+    environment:
+      SOLR_HOST: "{{ansible_subnet}}"
+      GLOBALIP: "{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+    listen:
+      - "start solr services"
+
+  - name: fail the start solr if conditions not met
+    fail:
+      msg: "the command failed"
+    when:
+      - solr_start_result.rc != 0
+      - "'Port 8983 is already being used by another process' not in solr_start_result.stdout"
+
+    listen:
+      - "start solr services"

@@ -1,0 +1,6 @@
+# playbook
+- hosts: singleNode
+  roles:
+    - solr
+  vars:
+    solr_init_file: ./roles/solr/files/solr_lone.in.sh

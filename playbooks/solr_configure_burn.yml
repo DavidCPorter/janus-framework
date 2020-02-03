@@ -1,0 +1,14 @@
+
+- hosts: twentyfourNode
+  tasks:
+    - name: delete solr data
+      file:
+        path: /var/solr
+        state: absent
+      become: yes
+      become_user: root
+
+    - name: delete solr home dir
+      file:
+        path: "{{prev_solr_install_dir}}"
+        state: absent

@@ -7,35 +7,35 @@ import gzip
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 
 def main(query,clustersize,codename):
-    proj_home = "~/projects/solrcloud"
+    proj_home = "~/projects/sapa"
     print('RUNNING chart results')
     QPS = []
     median_lat = []
     tail_lat = []
-    dirs = os.popen('ls '+proj_home+'/tests_v1/profiling_data/exp_results | grep clustersize'+clustersize).read()
+    dirs = os.popen('ls '+proj_home+'/benchmark_scripts/tmp/tmp | grep clustersize'+clustersize).read()
     dirs = dirs.split('\n')
     dirs.pop()
-    
+
     try:
-        os.makedirs('/Users/dporter/projects/solrcloud/chart/totals')
+        os.makedirs('//chart/totals')
     except FileExistsError:
         print("file exists\n\n\n")
      # directory already exists
         pass
 
 # this is for total file
-    fm = open('/Users/dporter/projects/solrcloud/chart/totals/total_'+clustersize+query+'_'+codename+'.csv', "w+")
+    fm = open('/Users/dporter/projects/sapa/chart/totals/total_'+clustersize+query+'_'+codename+'.csv', "w+")
     fm.write('parallel_requests,QPS,median_lat,tail_lat,clustersize,query,rfshards\n')
 
     for d in dirs:
         print(d)
-        files = os.popen('ls '+proj_home+'/tests_v1/profiling_data/exp_results/'+d+' | grep '+query+ '| grep clustersize'+clustersize ).read()
+        files = os.popen('ls '+proj_home+'/benchmark_scripts/tmp/tmp/'+d+' | grep '+query+ '| grep clustersize'+clustersize ).read()
         print(files)
         files = files.split('\n')
         files.pop()
         print(files)
         try:
-            os.makedirs('/Users/dporter/projects/solrcloud/chart/'+d+'/query'+query)
+            os.makedirs('/Users/dporter/projects/sapa/chart/'+d+'/query'+query)
         except FileExistsError:
             print("file exists\n\n\n")
             # directory already exists
@@ -43,22 +43,25 @@ def main(query,clustersize,codename):
 
 
         # add table headers
-        fp = open('/Users/dporter/projects/solrcloud/chart/'+d+'/query'+query+'/'+d+'query'+query+'_chartdata_'+codename+'.csv', "a+")
+        fp = open('/Users/dporter/projects/sapa/chart/'+d+'/query'+query+'/'+d+'query'+query+'_chartdata_'+codename+'.csv', "a+")
         fp.write('parallel_requests,QPS,median_lat,tail_lat,clustersize,query,rfshards\n')
         fp.close()
 
 
+        fm = open('/Users/dporter/projects/sapa/chart/totals/total_'+clustersize+query+'_'+codename+'.csv', "a+")
 
+        
         for exp_output in files:
-            f = open("/Users/dporter/projects/solrcloud/tests_v1/profiling_data/exp_results/"+d+'/'+exp_output, 'r')
+            f = open("/Users/dporter/projects/sapa/benchmark_scripts/tmp/tmp/"+d+'/'+exp_output, 'r')
             data = f.readline()
             f.close()
-            fp = open('/Users/dporter/projects/solrcloud/chart/'+d+'/query'+query+'/'+d+'query'+query+'_chartdata_'+codename+'.csv', "a+")
-            fp.write(data+','+clustersize+','+query+','+d[:8]+'\n')
-            fp.close()
-            fm = open('/Users/dporter/projects/solrcloud/chart/totals/total_'+clustersize+query+'_'+codename+'.csv', "a+")
+            # dont need to write this file anymore
+            # fp = open('/Users/dporter/projects/sapa/chart/'+d+'/query'+query+'/'+d+'query'+query+'_chartdata_'+codename+'.csv', "a+")
+            # fp.write(data+','+clustersize+','+query+','+d[:8]+'\n')
+            # fp.close()
             fm.write(data+','+clustersize+','+query+','+d[:8]+'\n')
-            fm.close()
+
+        fm.close()
 
 
 
