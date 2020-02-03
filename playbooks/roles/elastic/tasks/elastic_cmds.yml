@@ -13,13 +13,14 @@
         pathdata: "{{es_data_dir}}"
         pathlogs: "{{es_log_dir}}"
         masters:
-          - 10.10.1.1:9300
-          - 10.10.1.2:9300
-          # - "{{node2}}"
+          - "{{item}}:9300"
+          - "{{item}}:9300"
+          - "{{item}}:9300"
         nethost: "{{ansible_subnet}}"
         discoverynodes: "{{discovery_nodes}}"
         masterflag: "{{master_flag}}"
         dataflag: "{{data_flag}}"
+      with_items: "{{play_hosts}}"
 
     - name: log4j2.properties
       template:

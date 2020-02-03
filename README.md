@@ -1,4 +1,4 @@
-## This project builds and deploys a distributed SolrCloud Development Environment w/ solr source version control
+## SAPA: a tool for Search Agnostic Performance Analysis
 
 To deploy you need to set up a local and remote env:
 

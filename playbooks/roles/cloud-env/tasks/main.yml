@@ -126,7 +126,7 @@
 #     - sematext
 #
 # - name: add monitoring configs to sematext
-#   shell: sudo bash /opt/spm/bin/setup-sematext --monitoring-token cfe92cf2-cf42-45b7-a965-b1bed5cea132 --app-type solrcloud --agent-type javaagent --infra-token 31738f36-ddb5-4d8e-b16d-4a9be47df4f4
+#   shell: sudo bash /opt/spm/bin/setup-sematext --monitoring-token cfe92cf2-cf42-45b7-a965-b1bed5cea132 --app-type sapa --agent-type javaagent --infra-token 31738f36-ddb5-4d8e-b16d-4a9be47df4f4
 #   become_user: root
 #   tags:
 #     - sematext_mon

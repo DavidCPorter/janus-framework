@@ -10,7 +10,7 @@
 
 - name: copy solrj source to load nodes
   copy:
-    src: /Users/dporter/projects/solrcloud/solrclientserver
+    src: /Users/dporter/projects/sapa/solrclientserver
     dest: "/users/{{ansible_user}}/"
     owner: '{{ansible_user}}'
   tags:

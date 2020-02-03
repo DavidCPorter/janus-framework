@@ -87,11 +87,11 @@
     - setup
     - never
 
-- name: post data
+- name: run post script
   include_tasks:
-    file: upload_data.yml
+    file: do_index.yml
   tags:
-    - upload
+    - do_index
     - never
 
 

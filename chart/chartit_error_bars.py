@@ -268,7 +268,7 @@ def Py_max_throughput(query, codename, py, axis_x):
     lat_fig_title=""
     lat_fig_title="SolrCloud Tail Latency (Round Robin)" if query == "direct" else "SolrCloud Tail Latency (SolrJ)"
     p_col_name=getPy(py)
-    total_scale_file = '/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
+    total_scale_file = '/Users/dporter/projects/sapa/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
     df = pd.read_csv(total_scale_file)
     df = df.sort_values("clustersize")
     # <class 'numpy.ndarray'>
@@ -283,12 +283,12 @@ def Py_max_throughput(query, codename, py, axis_x):
     if py == "QPS":
         fillClustersizeLineQPS(latLineList, df, p_col_name)
         # name dirs
-        static_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/figs/'+codename+"/figs/"+"y-QPS_x-load/"
-        html_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/'+codename+"/figs/"+"y-QPS_x-load/"
+        static_dir='/Users/dporter/projects/sapa/chart/exp_html_out/figs/'+codename+"/figs/"+"y-QPS_x-load/"
+        html_dir='/Users/dporter/projects/sapa/chart/exp_html_out/'+codename+"/figs/"+"y-QPS_x-load/"
     else:
         fillClustersizeLine(latLineList, df, p_col_name,axis_x)
-        static_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/figs/'+codename+"/figs/"+"y-percentileTails_x-throughput/"
-        html_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/'+codename+"/figs/"+"y-percentileTails_x-throughput/"
+        static_dir='/Users/dporter/projects/sapa/chart/exp_html_out/figs/'+codename+"/figs/"+"y-percentileTails_x-throughput/"
+        html_dir='/Users/dporter/projects/sapa/chart/exp_html_out/'+codename+"/figs/"+"y-percentileTails_x-throughput/"
 
     y_title=getPtitle(p_col_name)
     x_title=getXtitle(axis_x)
@@ -349,11 +349,11 @@ def display_chart_scaling_errorbar(query, codename):
     lat_fig_title=""
     lat_fig_title="SolrCloud Tail Latency (Round Robin)" if query == "direct" else "SolrCloud Tail Latency (SolrJ)"
 
-    total_scale_file = '/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
+    total_scale_file = '/Users/dporter/projects/sapa/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
 
-    ideal_path='/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs/ideal_line_direct.csv'
+    ideal_path= '//chart/scaling_exp_csvs/ideal_line_direct.csv'
     if query == "solrj":
-        ideal_path='/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs/ideal_line.csv'
+        ideal_path= '//chart/scaling_exp_csvs/ideal_line.csv'
 
     df = pd.read_csv(total_scale_file)
     ideal_df=pd.read_csv(ideal_path)
@@ -444,8 +444,8 @@ def display_chart_scaling_errorbar(query, codename):
 
     # fig_qps.show()
     # fig_lat.show()
-    static_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/figs/'+codename+"/figs/scaling/"
-    html_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/'+codename+"/figs/scaling/"
+    static_dir='/Users/dporter/projects/sapa/chart/exp_html_out/figs/'+codename+"/figs/scaling/"
+    html_dir='/Users/dporter/projects/sapa/chart/exp_html_out/'+codename+"/figs/scaling/"
 
     try:
         os.makedirs(static_dir)
@@ -464,7 +464,7 @@ def display_chart_scaling_errorbar(query, codename):
 def cdf_TAIL(query, codename):
     cdf_fig_title=""
 
-    total_scale_file = '/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
+    total_scale_file = '/Users/dporter/projects/sapa/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
     df = pd.read_csv(total_scale_file)
     df = df.sort_values("parallel_requests")
     pr_unique = df.parallel_requests.unique()
@@ -526,8 +526,8 @@ def cdf_TAIL(query, codename):
             )
         )
 
-        static_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/figs/'+codename+"/figs/cdfs/"
-        html_dir='/Users/dporter/projects/solrcloud/chart/exp_html_out/'+codename+"/figs/cdfs/"
+        static_dir='/Users/dporter/projects/sapa/chart/exp_html_out/figs/'+codename+"/figs/cdfs/"
+        html_dir='/Users/dporter/projects/sapa/chart/exp_html_out/'+codename+"/figs/cdfs/"
         try:
             os.makedirs(static_dir)
         except FileExistsError:

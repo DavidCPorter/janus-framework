@@ -1,5 +1,0 @@
-- name: post json
-  shell: curl -XPOST 'http://127.0.0.1:9200/test/_doc/1' -d @reviews_Electronics_5.json
-  async:
-  tags:
-    - upload

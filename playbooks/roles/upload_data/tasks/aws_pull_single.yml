@@ -1,7 +1,7 @@
 ---
 # tasks file for upload_data
 - name: include the vars
-  include_vars: /Users/dporter/projects/solrcloud/playbooks/roles/upload_data/defaults/main.yml
+  include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
 
 - name: pull AWS 8983 index
   shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}/default" .

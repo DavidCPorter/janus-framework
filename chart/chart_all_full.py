@@ -7,8 +7,8 @@ import gzip
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 
 def main(query,codename):
-    proj_home = "~/projects/solrcloud"
-    exp_home = "/Users/dporter/projects/solrcloud/chart/exp_records/"+codename
+    proj_home = "~/projects/sapa"
+    exp_home = "/Users/dporter/projects/sapa/chart/exp_records/"+codename
     print('******** FINISHED FULL SCALING EXPERIEMENT **********')
     print("\n\nRUNNING chart_all_full.py ")
     QPS = []
@@ -18,21 +18,21 @@ def main(query,codename):
     dirs = dirs.split('\n')
     dirs.pop()
     try:
-        os.makedirs('/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs')
+        os.makedirs('//chart/scaling_exp_csvs')
     except FileExistsError:
         print("file exists\n\n\n")
      # directory already exists
         pass
 
 # this is for total file
-    total_scale_file = '/Users/dporter/projects/solrcloud/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
+    total_scale_file = '/Users/dporter/projects/sapa/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
     fm = open(total_scale_file, "w+")
     fm.write('parallel_requests,QPS,P50_latency(ms),P90_latency(ms),P95_latency(ms),P99_latency(ms),clustersize,query,rfshards,GROUP,fcts\n')
 
     for d in dirs:
         print(d)
         bench_files = os.popen('ls '+exp_home+'/'+d+' | grep '+query).read()
-        print("these are the output files for "+d+" solrcloud experiment")
+        print("these are the output files for "+d+" sapa experiment")
         print(bench_files)
         bench_files = bench_files.split('\n')
         bench_files.pop()

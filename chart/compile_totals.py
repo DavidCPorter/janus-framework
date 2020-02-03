@@ -7,7 +7,7 @@ import gzip
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 
 def main(query, codename):
-    proj_home = "~/projects/solrcloud"
+    proj_home = "~/projects/sapa"
     print('RUNNING compile totals')
     QPS = []
     median_lat = []
@@ -16,7 +16,7 @@ def main(query, codename):
     print(dirs)
     dirs = dirs.split('\n')
     dirs.pop()
-    final_resting_place='/Users/dporter/projects/solrcloud/chart/totals/cluster_totals'
+    final_resting_place='/Users/dporter/projects/sapa/chart/totals/cluster_totals'
     try:
         os.makedirs(final_resting_place)
     except FileExistsError:
@@ -30,7 +30,7 @@ def main(query, codename):
 
     for d in dirs:
         print(d)
-        with open('/Users/dporter/projects/solrcloud/chart/totals/'+d, "r") as f_in:
+        with open('/Users/dporter/projects/sapa/chart/totals/'+d, "r") as f_in:
             # flush first line
             f_in.readline()
             for line in f_in:
