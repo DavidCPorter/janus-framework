@@ -14,11 +14,14 @@
 #     fstype: tmpfs
 #     opts: "size={{ ramdisk_size }}"
 #     state: mounted
-
+- name: include the stock vars
+  include_vars: "{{root_path}}/playbooks/sapa_vars.yml"
+- debug:
+    msg: '{{cred_dir}}'
 - name: add aws credentials
   copy:
     src: "{{cred_dir}}"
-    dest: /users/dporte7/
+    dest: "{{home}}"
   tags:
     - aws
 

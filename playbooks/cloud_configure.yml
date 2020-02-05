@@ -16,13 +16,3 @@
     - never
     - numpy
 
-# - hosts: generatorNodeEight:nodes
-#   tasks:
-#   - name: iftop install
-#     include_role:
-#       name: cloud-env
-#       apply:
-#         tags:
-#           - iftop
-#   tags:
-#     - iftop

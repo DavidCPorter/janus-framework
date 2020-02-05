@@ -1,0 +1,45 @@
+version: '2.4'
+services:
+  sapaserver1:
+    container_name: sapaUbuntu1
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2999:22"
+    tty: true
+    cpus: 2
+    mem_limit: 3000M
+
+  sapaserver2:
+    container_name: sapaUbuntu2
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2888:22"
+    tty: true
+    cpus: 2
+    mem_limit: 3000M
+
+  sapaserver3:
+    container_name: sapaUbuntu3
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2777:22"
+    tty: true
+    cpus: 2
+    mem_limit: 3000M
+
+  sapaserver4:
+    container_name: sapaWorkhorse
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2666:22"
+    tty: true
+    cpus: 2
+    mem_limit: 500M

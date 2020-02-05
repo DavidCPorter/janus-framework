@@ -17,6 +17,7 @@ alias wipetraffic="cd $PROJ_HOME;pssh -l $CL_USER -h ssh_files/pssh_traffic_node
 alias viewtraffic="cd $PROJ_HOME;pssh -l $CL_USER -h ssh_files/pssh_traffic_node_file -P 'tail -n 2000 traffic_gen/traffic_gen.log'"
 alias viewsolrj="cd $PROJ_HOME;pssh -l $CL_USER -h ssh_files/pssh_traffic_node_file -P 'tail -n 2000 solrclientserver/solrjoutput.txt'"
 alias play="cd $PROJ_HOME/playbooks; ansible-playbook -i ../inventory"
+alias play_solo="cd $PROJ_HOME/playbooks; ansible-playbook -i ../inventory_local"
 alias killsolrj='cd $PROJ_HOME;pssh -i -h ssh_files/pssh_traffic_node_file -l $CL_USER $KILLARGS'
 alias clearout="cd $PROJ_HOME/tests_v1; echo ''> nohup.out"
 alias viewout="cd $PROJ_HOME/tests_v1; tail -n 1000 nohup.out"

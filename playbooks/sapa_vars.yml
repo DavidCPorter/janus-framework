@@ -1,0 +1,59 @@
+---
+# defaults file for benchmark
+pyscript: traffic_gen.py
+pom_path: "{{home}}/solrclientserver"
+
+# defaults file for solr
+
+# VARIABLE PRECEDENCE
+# If multiple variables of the same name are defined in different places, they win in a certain order, which is:
+# extra vars (-e in the command line) always win
+# then comes connection variables defined in inventory (ansible_ssh_user, etc)
+# then comes "most everything else" (command line switches, vars in play, included vars, role vars, etc)
+# then comes the rest of the variables defined in inventory
+# then comes facts discovered about a system
+# then "role defaults", which are the most "defaulty" and lose in priority to everything.
+
+# Files & Paths
+solr_install_dir: "{{home}}/solr-8_3"
+solr_log_dir: /var/solr/logs
+git_branch_name: "{{git_banch_name}}"
+solr_home: "{{home}}/solr-8_3/solr/server/solr"
+solr_init_file: ./roles/solr/files/solr.in.sh
+
+# defaults file for elastic
+user_root_dir: "{{home}}"
+es_root_dir: "{{home}}/elasticsearch-7.5.1"
+kibana_root_dir: "{{home}}/kibana"
+es_data_dir: /var/elasticsearch/data
+es_log_dir: /var/elasticsearch/log
+cache_percentage: "50%"
+metric_root_dir: "{{home}}/metricbeat"
+
+# defaults file for upload_data
+data_upload_dir: "{{home}}"
+# collection name is passed in now
+#collection_name: "reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
+collection_name: default
+#aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
+aws_dir_name: default
+solr_install_dir: "{{home}}/solr-8_3"
+upload_data_file_path: /Users/dporter/projects/sapa/playbooks/roles/upload_data/files
+nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
+solr_home: "{{home}}/solr-8_3/solr/server/solr"
+tasks_dir: /Users/dporter/projects/sapa/playbooks/roles/upload_data/tasks
+
+# defaults file for zookeeper
+
+zoo_install_dir: "{{home}}/"
+zoo_conf_dir: "{{home}}/apache-zookeeper-3.5.5/conf"
+zoo_root_dir: "{{home}}/apache-zookeeper-3.5.5"
+zoo_bin_dir: "{{home}}/apache-zookeeper-3.5.5/bin"
+zoo3-5_link: https://archive.apache.org/dist/zookeeper/zookeeper-3.5.5/apache-zookeeper-3.5.5.tar.gz
+zoo3-4_link: https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz
+
+# defaults file for cloud-env
+
+ramdisk_path: /dev/shm
+ptp_install_dir: '/users/{{ansible_user}}/linuxptp'
+cred_dir: /Users/dporter/projects/sapa/playbooks/roles/cloud-env/files/.aws
