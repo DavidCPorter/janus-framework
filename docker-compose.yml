@@ -1,4 +1,4 @@
-version: '2.4'
+version: '3'
 services:
   sapaserver1:
     container_name: sapaUbuntu1
@@ -8,8 +8,18 @@ services:
     ports:
       - "2999:22"
     tty: true
-    cpus: 2
-    mem_limit: 3000M
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2000M
+        reservations:
+          cpus: '1'
+          memory: 2000M
+
+    networks:
+      sapa_net:
+        ipv4_address: 172.21.0.2
 
   sapaserver2:
     container_name: sapaUbuntu2
@@ -19,8 +29,17 @@ services:
     ports:
       - "2888:22"
     tty: true
-    cpus: 2
-    mem_limit: 3000M
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2000M
+        reservations:
+          cpus: '1'
+          memory: 2000M
+    networks:
+      sapa_net:
+        ipv4_address: 172.21.0.3
 
   sapaserver3:
     container_name: sapaUbuntu3
@@ -30,8 +49,17 @@ services:
     ports:
       - "2777:22"
     tty: true
-    cpus: 2
-    mem_limit: 3000M
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2000M
+        reservations:
+          cpus: '1'
+          memory: 2000M
+    networks:
+      sapa_net:
+        ipv4_address: 172.21.0.4
 
   sapaserver4:
     container_name: sapaWorkhorse
@@ -41,5 +69,22 @@ services:
     ports:
       - "2666:22"
     tty: true
-    cpus: 2
-    mem_limit: 500M
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 500M
+        reservations:
+          cpus: '1'
+          memory: 300M
+    networks:
+      sapa_net:
+        ipv4_address: 172.21.0.5
+
+
+networks:
+  sapa_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/24

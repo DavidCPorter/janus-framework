@@ -5,8 +5,8 @@ export USER="dporte7"
 export PROJ_HOME=$PROJ_HOME
 
 # load sugar
-source /Users/dporter/projects/sapa/utils/utils.sh
-source /Users/dporter/projects/sapa/utils/exp_helpers.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_helpers.sh
 source /Users/dporter/projects/sapa/utils/exp_scale_loop_params.sh
 
 commence_dstat () {

@@ -22,6 +22,7 @@ RUN bash -c ' \
                        ethtool \
                        git \
                        golang \
+                       htop \
                        lsof \
                        make \
                        maven \

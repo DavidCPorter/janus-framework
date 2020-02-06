@@ -15,13 +15,14 @@ def gendata(iname):
                 "_type": "_doc",
                 "_source": line
             }
+            return
 
-def delete_index():
-    es=Elasticsearch([{'host':"10.10.1.1",'port':9200}])
+def delete_index(hostname):
+    es=Elasticsearch([{'host':hostname,'port':9200}])
     response=es.indices.delete(index='reviews', ignore=400)
     print(response[:100])
 
-def main(shards,replicas,iname):
+def main(shards,replicas,iname, hostname):
 
     mapping = {
         "settings": {
@@ -53,7 +54,7 @@ def main(shards,replicas,iname):
     }
 
 
-    es=Elasticsearch([{'host':"10.10.1.1",'port':9200}])
+    es=Elasticsearch([{'host':hostname,'port':9200}])
     response=es.indices.create(
     index=iname,
     body=mapping,
@@ -78,12 +79,13 @@ def main(shards,replicas,iname):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 4:
-        print("3 args required <shards> <replicas> <index_name>")
+    if len(sys.argv) != 5:
+        print("4 args required <shards> <replicas> <index_name> <elastichost>")
         sys.exit()
     shards=sys.argv[1]
     replicas=sys.argv[2]
     iname=sys.argv[3]
+    ehost=sys.argv[4]
     #delete_index()
-    main(shards,replicas,iname)
+    main(shards,replicas,iname,ehost)
     sys.exit()

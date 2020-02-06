@@ -3,9 +3,9 @@
   - name: copy traffic_gen to loads
     copy:
       src: "{{scripts_path}}"
-      dest: /users/dporte7/
+      dest: "{{home}}"
   - name: copy terms to loads
     copy:
       src: "{{terms_path}}"
-      dest: /users/dporte7/
+      dest: "{{home}}"
       mode: '0777'

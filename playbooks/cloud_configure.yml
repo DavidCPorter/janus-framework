@@ -14,5 +14,14 @@
       executable: /usr/bin/pip3
   tags:
     - never
-    - numpy
+    - pip_installs
 
+- hosts: generatorNode
+  tasks:
+    - name: pip install elasticsearch
+      pip:
+        name: elasticsearch
+        executable: /usr/bin/pip3
+  tags:
+    - never
+    - pip_installs

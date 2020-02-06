@@ -16,7 +16,9 @@
 #
 cluster.name: {{clustername}}
 node.master: {% if 'masterNodes' in group_names %} true {% else %} false {% endif %}
-node.data: {% if 'masterNodes' not in group_names %} true {% else %} false {% endif %}
+
+
+node.data: {% if 'dataNodes' in group_names %} true {% else %} false {% endif %}
 #
 # ------------------------------------ Node ------------------------------------
 #
@@ -80,14 +82,14 @@ discovery.seed_hosts:
 # Bootstrap the cluster using an initial set of master-eligible nodes:
 #
 cluster.initial_master_nodes:
-  {% if 'masterNodes' in group_names %}
-    {% for noder in masters %}
-      - {{noder}}
-    {% if not loop.last %}{% endif %}{% endfor %}
-  {% endif %}
+{% if 'masterNodes' in group_names %}
+{% for noder in masters %}
+  - {{noder}}
+{% if not loop.last %}{% endif %}{% endfor %}
+{% endif %}
 
 
-discovery.zen.minimum_master_nodes: 2
+discovery.zen.minimum_master_nodes: 1
 #
 # For more information, consult the discovery and cluster formation module documentation.
 #

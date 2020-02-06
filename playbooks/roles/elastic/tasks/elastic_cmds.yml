@@ -12,15 +12,11 @@
         nodename: "{{globalIP}}"
         pathdata: "{{es_data_dir}}"
         pathlogs: "{{es_log_dir}}"
-        masters:
-          - "{{item}}:9300"
-          - "{{item}}:9300"
-          - "{{item}}:9300"
+        masters: "{{masters_override}}"
         nethost: "{{ansible_subnet}}"
         discoverynodes: "{{discovery_nodes}}"
         masterflag: "{{master_flag}}"
         dataflag: "{{data_flag}}"
-      with_items: "{{play_hosts}}"
 
     - name: log4j2.properties
       template:
@@ -33,8 +29,6 @@
       template:
         src: jvm.options
         dest: "{{es_root_dir}}/config"
-      vars:
-        heapsize: 20
 
   tags:
     - start

@@ -9,6 +9,18 @@ Create a python3 virtual env:
 install packages:  
 `pip install ansible paramiko Jinja2 numpy`
 
+add 127.0.0.1 as hostname for config file in ~/.ssh/config for all servers used in ansible inventory_local 
+make sure docker desktop configuration allocates enough CPU cores and RAM 
+
+ play_solo cloud_configure.yml --tags general,pip_installs --extra-vars "@sapa_vars.yml"
+
+ play_solo elastic_configure_2.yml --tags setup --extra-vars @sapa_vars.yml
+ 
+play_solo elastic_configure_2.yml --tags start --extra-vars @sapa_vars.yml 
+play_solo elastic_configure_2.yml --tags load_json --extra-vars @sapa_vars.yml
+play_solo elastic_configure_2.yml --tags run_script --extra-vars @sapa_vars.yml
+ 
+
 
 REMOTE:  
 1. to set up your remote env, put the four Cloudlab domains in a file ./cloudlabDNS e.g
