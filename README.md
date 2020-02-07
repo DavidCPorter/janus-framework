@@ -12,14 +12,12 @@ install packages:
 add 127.0.0.1 as hostname for config file in ~/.ssh/config for all servers used in ansible inventory_local 
 make sure docker desktop configuration allocates enough CPU cores and RAM 
 
- play_solo cloud_configure.yml --tags general,pip_installs --extra-vars "@sapa_vars.yml"
+put rsa keys in the local machines .ssh/authorized_keys file
 
- play_solo elastic_configure_2.yml --tags setup --extra-vars @sapa_vars.yml
- 
-play_solo elastic_configure_2.yml --tags start --extra-vars @sapa_vars.yml 
-play_solo elastic_configure_2.yml --tags load_json --extra-vars @sapa_vars.yml
-play_solo elastic_configure_2.yml --tags run_script --extra-vars @sapa_vars.yml
- 
+this example case runs a docker cloud locally, then performms a performance analysis of elastic search with a cloud of 2 elastic servers and a single workoad server.
+ new users still need to make some changes to the ssh files /sapa/utils/ssh_files. You can run the ssh script to generate. 
+
+also users need to make sure  they add hostnames to their .ssh/configs file and put their id_rsa.pub file in the docker servers. 
 
 
 REMOTE:  
@@ -32,6 +30,7 @@ ms1341.utah.cloudlab.us
 ms0819.utah.cloudlab.us
 ...
 ```
+
 
 *before running this script, make sure your id_rsa public key is on cloudlab and your id_rsa private key starts with -----BEGIN RSA PRIVATE KEY----- since this paramiko version requires this.*
 **also make sure all whitespace is removed from this file otherwise paramiko may throw a curious error**

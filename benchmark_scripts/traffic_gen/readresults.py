@@ -4,11 +4,12 @@ from datetime import datetime
 import time
 import gzip
 
+print(os.environ["PROJ_HOME"])
+proj_home="/Users/dporter/projects/sapa"
 
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 
 def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
-    proj_home = "~/projects/sapa"
     print('\n\nRUNNING readresults.py ::: ARGS == proc=%s threads=%s duration=%s' % (p, t, d))
     QPS = []
     median_lat = []
@@ -23,7 +24,7 @@ def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
     str(processes * int(t)), p))
     files.pop()
     for file in files:
-        f = open("/Users/dporter/projects/sapa/benchmark_scripts/tmp/proc_results/" + file, 'r')
+        f = open(proj_home+"/benchmark_scripts/tmp/proc_results/" + file, 'r')
         #
         result_page = f.readlines()
         # read first line which is the request total
@@ -91,14 +92,14 @@ def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
 
     try:
         os.makedirs(
-            '/Users/dporter/projects/sapa/benchmark_scripts/tmp/tmp/rf' + rf + '_s' + shards + '__clustersize' + solrnum)
+            '/Users/dporter/projects/sapa/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum)
     except FileExistsError:
         print("file exists\n\n\n")
         # directory already exists
         pass
 
     fp = open(
-        '/Users/dporter/projects/sapa/benchmark_scripts/tmp/tmp/rf' + rf + '_s' + shards + '__clustersize' + solrnum + '/rf' + rf + '_s' + shards + '__clustersize' + solrnum + "::query=" + q + "::proc=" + p + "::threads=" + t + "::dur=" + d + ":::TIME->" + datetime.today().strftime(
+        proj_home+'/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum + '/rf' + rf + '_s' + shards + '__clustersize' + solrnum + "::query=" + q + "::proc=" + p + "::threads=" + t + "::dur=" + d + ":::TIME->" + datetime.today().strftime(
             '%Y-%m-%d-%H:%M:%S'), 'w+')
     # for charting
     #  writes -> total outstanding requests, QPS, median LAT, Tail LAT

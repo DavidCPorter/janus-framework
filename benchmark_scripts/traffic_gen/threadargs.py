@@ -68,7 +68,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
             field = indexed_fields[i%len(indexed_fields)]
             # q = '/solr/reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize+'/_search?q='+field+':'+term
             # testing with index reviews right now
-            q='/reviewsrf2s2/_search?q='+field+':'+term
+            q='/reviews21/_search?q='+field+':'+term
             urls.append("%s" % q)
     return urls
 

@@ -2,12 +2,13 @@
 
 RSCRIPTS=$PROJECT_HOME/benchmark_scripts/remotescripts
 
-source /Users/dporter/projects/sapa/utils/utils.sh
-source /Users/dporter/projects/sapa/utils/exp_helpers.sh
-source /Users/dporter/projects/sapa/utils/exp_scale_loop_params.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_helpers.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_scale_loop_params.sh
 
 
 function start_experiment() {
+  export DOCKER=$DOCKER
 
   if [ "$#" -lt 3 ]; then
       echo "Usage: start_experiment <username> <python scripts dir> <term list textfile>"
@@ -66,12 +67,12 @@ function start_experiment() {
   fi
 
   printf "\n\n\n removing previous output from remote sources and local host copies \n\n\n"
-  pssh -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file --user $USER "rm ~/traffic_gen/http_benchmark_*"
+  pssh -h $PROJECT_HOME/utils/ssh_files/pssh_traffic_node_file --user $USER "rm ~/traffic_gen/http_benchmark_*"
   rm $PROJECT_HOME/benchmark_scripts/tmp/proc_results/*
 # THIS MIGHT HAVE BEEN THE PROBLEM
 
 ########## UPDATE LOAD SERVER SCRIPTS #################
-
+#DOCKER exported for this
   update_rscripts $LOAD $RSCRIPTS $PROCESSES $SOLR_SIZE $SOLRJ_PORT_OVERRIDE "$SINGLE_PAR" "$PAR" $INSTANCES_BOOL $STANDALONE "$THREADS" $USER
 
   printf "\n\n\n ******** EXP PRELIM STEPS COMPLETE!! ************ \n\n\n"
@@ -85,15 +86,15 @@ function start_experiment() {
   # ideally kafka would take care of output here. but for now we are just reading a single con output
 
   # THIS RUNS THE EXPERIMENT
-  echo "pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$LOAD cd $(basename $PY_SCRIPT); bash remotescript.sh "
-  pssh -l $USER -h $PROJECT_HOME/ssh_files/pssh_traffic_node_file_$LOAD -P "cd traffic_gen; bash remotescript.sh"
+  echo "pssh -l $USER -h $PROJECT_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD cd $(basename $PY_SCRIPT); bash remotescript.sh "
+  pssh -l $USER -h $PROJECT_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "cd traffic_gen; bash remotescript.sh"
   wait $!
 
   echo "************* FINISHED EXP ****************"
 #### FINISHED #####
 
   printf "\n\n\n\n ************* STARTING POST EXP STEPS ****************\n\n\n"
-  echo "copying exp results to profiling_data/proc_results/  ... "
+  echo "copying exp results to proc_results/  ... "
 
   # wait for slow processes to complete
   sleep 5
@@ -104,7 +105,7 @@ function start_experiment() {
       echo "$mycounter == $LOADSIZE"
       scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $PROJECT_HOME/benchmark_scripts/tmp/proc_results
     else
-      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $PROJECT_HOME/benchmark_scripts/tmp/proc_results &
+      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $PROJECT_HOME/benhmark_scripts/tmp/proc_results &
       mycounter=$(($mycounter+1))
     fi
   done
@@ -115,7 +116,7 @@ function start_experiment() {
 
 
   printf "\n\n\n RUNNING READ RESULTS SCRIPT"
-  printf "$PROJECT_HOME/tests_v1/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES"
+  printf "$PROJECT_HOME/benchmark_scripts/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES"
 
   python3 $PROJECT_HOME/benchmark_scripts/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES
   wait $!
@@ -243,6 +244,7 @@ cd ~/projects/sapa/benchmark_scripts;
 # start_experiment $USER $PY_SCRIPT
 export procs=$procs
 export SOLRJ_PORT_OVERRIDE=$SOLRJ_PORT_OVERRIDE
+export DOCKER=$DOCKER
 export -f setLoadArray
 start_experiment $USER $PY_SCRIPT $TERMS $THREADS $PROCESSES $DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $LOAD $INSTANCES $ENGINE
 

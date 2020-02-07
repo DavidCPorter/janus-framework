@@ -1,42 +1,42 @@
 [allNodes]
+sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
+
+[zookeeperNodes]
 sapa0:2999   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
 sapa1:2888   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
 sapa2:2777   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
-sapa3:2666   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
-
-[zookeeperNodes]
-sapa0:2999   globalIP=172.21.0.3   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1:2888   globalIP=172.21.0.2   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2:2777   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 [masterNodes]
-sapa0:2999   globalIP=172.21.0.3   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1:2888   globalIP=172.21.0.2   ansible_subnet=172.21.0.3  zoo_id=2
+sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
 
 [thirdMaster]
-sapa2:2777   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 
 [twoNode]
-sapa0:2999   globalIP=172.21.0.3   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1:2888   globalIP=172.21.0.2   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2:2777   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 [dataNodes]
-sapa0:2999   globalIP=172.21.0.3   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1:2888   globalIP=172.21.0.2   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2:2777   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 
 
 [singleNode]
-sapa0:2999   globalIP=172.21.0.3   ansible_subnet=172.21.0.2  zoo_id=1
+sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
 
 [singleGenerator]
-sapa3:2666   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
+sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 
 [generatorNode]
-sapa3:2666   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
+sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 
 
 [all:vars]

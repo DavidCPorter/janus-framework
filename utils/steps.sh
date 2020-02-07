@@ -1,5 +1,5 @@
 #!/bin/bash
-source /Users/dporter/projects/sapa/utils/utils.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
 # play cloud_configure.yml --tags never
 # play zoo_configure.yml
 # play solr_configure_all.yml --tags setup

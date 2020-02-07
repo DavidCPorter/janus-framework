@@ -8,14 +8,14 @@ from elasticsearch import helpers
 
 
 def gendata(iname):
-    with open("reviews_Electronics_5.json", "r") as f:
+    with open("reviews.json", "r") as f:
         for line in f.readlines():
             yield {
                 "_index": iname,
                 "_type": "_doc",
                 "_source": line
             }
-            return
+
 
 def delete_index(hostname):
     es=Elasticsearch([{'host':hostname,'port':9200}])

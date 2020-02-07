@@ -21,6 +21,14 @@
     - load_json
     - never
 
+- hosts: singleGenerator
+  tasks:
+    - name: truncate the json
+      shell: head -n 100000 reviews_Electronics_5.json > reviews.json
+  tags:
+    - docker
+    - never
+
 
 
 - hosts: singleGenerator

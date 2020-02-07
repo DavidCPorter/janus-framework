@@ -1,10 +1,11 @@
 #!/bin/bash
-source /Users/dporter/projects/sapa/utils/utils.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
 
-cd $PROJ_HOME/ssh_files
+cd $PROJ_HOME/utils/ssh_files
 count=0
 ips=()
 for n in $ALL_LOAD;do
+  echo $n
 	count=$(($count+1))
 	ips+=("$n")
 	rm pssh_traffic_node_file_$count

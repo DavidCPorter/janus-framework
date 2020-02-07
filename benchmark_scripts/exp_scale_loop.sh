@@ -7,7 +7,7 @@ export PROJ_HOME=$PROJ_HOME
 # load sugar
 source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
 source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_helpers.sh
-source /Users/dporter/projects/sapa/utils/exp_scale_loop_params.sh
+source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_scale_loop_params.sh
 
 commence_dstat () {
   # remove previous dstatout
@@ -16,11 +16,11 @@ commence_dstat () {
   SHARD=$3
   SOLRNUM=$4
   echo "dstat should not be running but killing just in case"
-  pssh -h $PROJ_HOME/ssh_files/pssh_all --user $USER "pkill -f dstat"
+  pssh -h $PROJ_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
 
 
   echo "removing prev dstat files"
-  pssh -h $PROJ_HOME/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
+  pssh -h $PROJ_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
   # dstat on each node
   # nodecounter just makes it easier to know which node dstat file was
   node_counter=0
@@ -41,8 +41,8 @@ commence_dstat () {
   printf "\n"
 }
 
-LOAD_SCRIPTS="$PROJ_HOME/tests_v1/traffic_gen"
-TERMS="$PROJ_HOME/tests_v1/words.txt"
+LOAD_SCRIPTS="$PROJ_HOME/benchmark_scripts/traffic_gen"
+TERMS="$PROJ_HOME/benchmark_scripts/words.txt"
 ENV_OUTPUT_FILE="$PROJ_HOME/env_output_file.txt"
 touch $ENV_OUTPUT_FILE
 
@@ -120,23 +120,23 @@ fi
 LOAD=$(getLoadNum $LOAD)
 printf "getting load machine info"
 echo "LOADNODES:::" > $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+pssh -h $PROJ_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "SOLR NODES:::" >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+pssh -h $PROJ_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "NETWORK BANDWIDTH::: " >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
+pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "RAM::: " >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
+pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 #
-LOADHOSTS="$PROJ_HOME/ssh_files/pssh_traffic_node_file"
+LOADHOSTS="$PROJ_HOME/utils/ssh_files/pssh_traffic_node_file"
 
 printf "starting loop \n\n"
 for ENGINE in ${SEARCHENGINES[@]};do
@@ -241,7 +241,7 @@ for ENGINE in ${SEARCHENGINES[@]};do
                     cd ~/projects/sapa;pssh -l dporte7 -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
 
                     printf "\n\n PARAMETERS TO runscript.sh:::: \n"
-                    echo "\$ ./tests_v1/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $l --engine $ENGINE"
+                    echo "\$ ./benchmark_scripts/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $l --engine $ENGINE"
 
                     printf "\n\n\n RUNNING runscript.sh .....  \n"
                     # shellcheck disable=SC2086
