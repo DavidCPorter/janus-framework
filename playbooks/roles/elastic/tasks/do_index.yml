@@ -1,3 +1,8 @@
+
+- name: truncate json when shorter_data flag is true
+  shell: head -n 100000 reviews_Electronics_5.json > shorter_reviews.json
+  when: "shorter_data == true"
+
 - name: copy es_scripts.py
   copy:
     src: roles/elastic/files/es_scripts.py
@@ -10,7 +15,7 @@
 
 
 - name: run indexing script
-  shell: python3 es_scripts.py "{{replicas}}" "{{shards}}" "reviews{{replicas}}{{shards}}" "{{hostname}}" > outputfile.txt
+  shell: python3 es_scripts.py "{{replicas}}" "{{shards}}" "reviews{{replicas}}{{shards}}" "{{hostname}}" "{{shorter_data}}" > outputfile.txt
   async: 999
   poll: 5
   tags:

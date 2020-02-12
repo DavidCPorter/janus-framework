@@ -62,17 +62,11 @@ def getXtitle(input):
 
 class LineData():
     color_matrix = {
-        0: {11: plotly.colors.sequential.Blues[6], 12: plotly.colors.sequential.Blues[6],
-            21: plotly.colors.sequential.Blues[6], 22: plotly.colors.sequential.Blues[6],
-            "1x": plotly.colors.sequential.Reds[6], "2x": plotly.colors.sequential.Reds[6]},
-        2: {11: plotly.colors.sequential.Blues[8], 12: plotly.colors.sequential.Blues[7],
-            21: plotly.colors.sequential.Blues[6], 22: plotly.colors.sequential.Blues[5]},
-        4: {11: plotly.colors.sequential.Reds[8], 12: plotly.colors.sequential.Reds[7],
-            21: plotly.colors.sequential.Reds[6], 22: plotly.colors.sequential.Reds[5]},
-        8: {11: plotly.colors.sequential.Greens[8], 12: plotly.colors.sequential.Greens[7],
-            21: plotly.colors.sequential.Greens[6], 22: plotly.colors.sequential.Greens[5]}
+        "solr": plotly.colors.sequential.Reds[6],
+        "elastic": plotly.colors.sequential.Greens[6]
     }
     symbol_matrix = {
+
         0: {11: "circle", 12: "circle-open", 21: "square", 22: "square-open", "2x": "asterisk", "1x": "asterisk"},
         2: {11: "circle", 12: "circle-open", 21: "square", 22: "square-open"},
         4: {11: "circle", 12: "circle-open", 21: "square", 22: "square-open"},
@@ -88,7 +82,7 @@ class LineData():
     #  north error == the max QPS for theat cluster for given GROUP
     #  south_error == the min QPS for that GROUP and Cluster
 
-    def __init__(self, gn, csize=0, load=0):
+    def __init__(self, gn, csize=0, load=0, engine=0):
 
         self.csize = csize
         self.input_x = []
@@ -98,6 +92,7 @@ class LineData():
         self.south_error = []
         self.load = load
         self.name = ''
+        self.engine = engine
 
     def getGn(self):
         return self.GROUPNAME
@@ -115,14 +110,14 @@ class LineData():
     def setInputSe(self, se):
         self.south_error.append(se)
 
-    def setName(self, gn):
+    def setName(self, gn, engine=''):
         the_load = ''
         the_clustersize = ''
         if self.load > 0:
             the_load = "load=" + str(self.load) + "::"
         if self.csize > 0:
             the_clustersize = 'clustersize=' + str(self.csize) + "::"
-        self.name = the_load + the_clustersize + '\n Shards=' + str(gn)[0] + ",\n Replicas=" + str(gn)[1]
+        self.name = the_load + str(self.engine) + the_clustersize + '\n Shards=' + str(gn)[0] + ",\n Replicas=" + str(gn)[1]
 
     def setLine(self):
         print(self)
@@ -134,7 +129,7 @@ class LineData():
         #     line_color=dict(color=plotly.colors.sequential.Purples[8])
         #     marker_symbol=dict(symbol=0)
         # else:
-        line_color = dict(color=LineData.color_matrix[self.csize][self.GROUPNAME])
+        line_color = dict(color=LineData.color_matrix[self.engine])
         marker_symbol = dict(symbol=LineData.symbol_matrix[self.csize][self.GROUPNAME], size=11)
 
         data = go.Scatter(
@@ -151,7 +146,7 @@ class LineData():
         # clustersize = df.filter(like)
         south = [i - j for i, j in zip(self.input_y, self.south_error)]
         north = [i - j for i, j in zip(self.north_error, self.input_y)]
-        line_color = dict(color=LineData.color_matrix[self.csize][self.GROUPNAME])
+        line_color = dict(color=LineData.color_matrix[self.engine])
         marker_symbol = dict(symbol=LineData.symbol_matrix[self.csize][self.GROUPNAME], size=11)
         data = go.Scatter(
             x=self.input_x,
@@ -171,7 +166,7 @@ class LineData():
         # YlGn
         # Reds
         # Blues
-        line_color = dict(color=LineData.color_matrix[self.csize][self.GROUPNAME])
+        line_color = dict(color=LineData.color_matrix[self.engine])
         marker_symbol = dict(symbol=LineData.symbol_matrix[self.csize][self.GROUPNAME], size=11)
         data = go.Scatter(
             x=self.input_x,
@@ -196,10 +191,13 @@ def fillClustersizeLine(lineList, df, col, axis_x):
     df.rename(columns={col: p_trunk}, inplace=True)
     print(df)
     for ld in lineList:
+        print("ld")
+        print(ld)
         gn = ld.getGn()
         ld.setName(gn)
-        gn_line_df = df.loc[df['GROUP'] == gn]
-        gn_csize_df = gn_line_df.loc[df["clustersize"] == ld.csize]
+        df_engine = df.loc[df['engine'] == ld.engine]
+        gn_line_df = df_engine.loc[df_engine['GROUP'] == gn]
+        gn_csize_df = gn_line_df.loc[gn_line_df["clustersize"] == ld.csize]
         # gn_csize_df is a df for a single line... just need to populte ld now by iterating over the
         # parallel_requests (x) and setting latency as y
         if axis_x == "QPS":
@@ -220,10 +218,11 @@ def fillClustersizeLineQPS(lineList, df, col):
         ld.setName(gn)
         gn_line_df = df.loc[df['GROUP'] == gn]
         gn_csize_df = gn_line_df.loc[df["clustersize"] == ld.csize]
+        _df = gn_csize_df.loc[df["engine"] == ld.engine]
 
         # gn_csize_df is a df for a single line... just need to populte ld now by iterating over the
         # parallel_requests (x_set) and setting latency as y
-        x_set = gn_csize_df.parallel_requests.unique()
+        x_set = _df.parallel_requests.unique()
         x_set.sort()
         for i in x_set:
             ld.setInputX(i)
@@ -233,27 +232,32 @@ def fillClustersizeLineQPS(lineList, df, col):
 
 def fillLineList(lineList, df, c):
     # this loop fills the data structure the plotting library needs to project the results
+    count=0
     for ld in lineList:
+        print("thisdf")
         gn = ld.getGn()
-        ld.setName(gn)
-        gn_line_df = df.loc[df['GROUP'] == gn]
-        gn_line_df.sort_values("clustersize")
+        df.sort_values("clustersize")
         # for each point on the line's x axis
-        for i in gn_line_df.clustersize.unique():
-            cluster_spec_data_for_gn = gn_line_df.loc[gn_line_df['clustersize'] == i]
 
-            ld.setInputX(i)
+        print(df.clustersize.unique())
+        for x_point in df.clustersize.unique():
+            gn_line_df = df.loc[df['GROUP'] == gn]
+            _df = gn_line_df.loc[gn_line_df['engine'] == ld.engine]
+            cluster_spec_data_for_gn = _df.loc[_df['clustersize'] == ld.csize]
+
+            ld.setName(gn, engine=ld.engine)
+            ld.setInputX(x_point)
 
             # these two lines remove the warm cache line
-
             cluster_spec_data_for_gn.sort_values("QPS", inplace=True)
+            print(cluster_spec_data_for_gn)
             # cluster_spec_data_for_gn = cluster_spec_data_for_gn.drop(cluster_spec_data_for_gn.index[0])
             # these set the value for a single error bar on the line
 
             ld.setInputY(cluster_spec_data_for_gn[c].mean())
             ld.setInputNe(cluster_spec_data_for_gn[c].max())
             ld.setInputSe(cluster_spec_data_for_gn[c].min())
-            # print(str(ld))
+                # print(str(ld))
 
 
 def cdfFillLineList(lineList, df):
@@ -263,9 +267,11 @@ def cdfFillLineList(lineList, df):
     for ld in lineList:
         gn = ld.getGn()
         ld.setName(gn)
-        gn_line_df = df.loc[df['GROUP'] == gn]
+        _df = df.loc[df['engine'] == ld.engine]
+        gn_line_df = _df.loc[_df['GROUP'] == gn]
         l_row = gn_line_df.loc[gn_line_df['clustersize'] == ld.csize]
         line_row = l_row.loc[l_row['parallel_requests'] == ld.load]
+        print(line_row)
         fct_values = line_row.iloc[0]["fcts"].split("--")
         # print(fct_values)
         percentile_count = 0
@@ -282,17 +288,19 @@ def Py_max_throughput(query, codename, py, axis_x):
     lat_fig_title = ""
     lat_fig_title = "SolrCloud Tail Latency (Round Robin)" if query == "direct" else "SolrCloud Tail Latency (SolrJ)"
     p_col_name = get_py(py)
-    total_scale_file = SAPA_HOME + '/chart/scaling_exp_csvs/total_' + query + '_' + codename + '.csv'
+    total_scale_file = SAPA_HOME + '/chart/scaling_exp_csvs/total_' + codename + '.csv'
     df = pd.read_csv(total_scale_file)
     df = df.sort_values("clustersize")
     # <class 'numpy.ndarray'>
+    engineList = df.engine.unique()
     clustersizeList = df.clustersize.unique()
     group_array = df.GROUP.unique()
     #  this creates a list of line objects for each groupname/clusersize combo
     latLineList = []
-    for csize in clustersizeList:
-        for gn in group_array:
-            latLineList.append(LineData(gn, csize))
+    for e in engineList:
+        for csize in clustersizeList:
+            for gn in group_array:
+                latLineList.append(LineData(gn, csize, engine=e))
 
     if py == "QPS":
         fillClustersizeLineQPS(latLineList, df, p_col_name)
@@ -362,7 +370,7 @@ def display_chart_scaling_errorbar(query, codename):
     lat_fig_title = ""
     lat_fig_title = "SolrCloud Tail Latency (Round Robin)" if query == "roundrobin" else "SolrCloud Tail Latency (SolrJ)"
 
-    total_scale_file = SAPA_HOME + '/chart/scaling_exp_csvs/total_' + query + '_' + codename + '.csv'
+    total_scale_file = SAPA_HOME + '/chart/scaling_exp_csvs/total_' + codename + '.csv'
 
     ideal_path = SAPA_HOME + '/chart/scaling_exp_csvs/ideal_line_direct.csv'
     if query == "client":
@@ -374,9 +382,13 @@ def display_chart_scaling_errorbar(query, codename):
     df_QPS = df_QPS.sort_values("clustersize")
     df = df.sort_values("clustersize")
     group_array_QPS = df_QPS.GROUP.unique()
+    engineList = df.engine.unique()
     # group_array_TAIL= df.GROUP.unique()
     #  there will be a line for each config aka Group contined in the lineList
-    qpsLineList = [LineData(x) for x in group_array_QPS]
+    qpsLineList = []
+    for e in engineList:
+        for gn in group_array_QPS:
+            qpsLineList.append(LineData(gn, engine=e))
     # latLineList = [LineData(x) for x in group_array_TAIL]
 
     fillLineList(qpsLineList, df_QPS, "QPS")
@@ -445,7 +457,7 @@ def display_chart_scaling_errorbar(query, codename):
 def cdf_TAIL(query, codename):
     cdf_fig_title = ""
 
-    total_scale_file = SAPA_HOME + '/chart/scaling_exp_csvs/total_' + query + '_' + codename + '.csv'
+    total_scale_file = SAPA_HOME + '/chart/scaling_exp_csvs/total_' + codename + '.csv'
     df = pd.read_csv(total_scale_file)
     df = df.sort_values("parallel_requests")
     pr_unique = df.parallel_requests.unique()
@@ -461,7 +473,8 @@ def cdf_TAIL(query, codename):
             gn = row["GROUP"]
             load = row["parallel_requests"]
             csize = row["clustersize"]
-            cdfLineList.append(LineData(gn, csize, load))
+            engine = row["engine"]
+            cdfLineList.append(LineData(gn, csize, load, engine))
 
         cdfFillLineList(cdfLineList, df_pr)
 
@@ -483,7 +496,7 @@ def cdf_TAIL(query, codename):
             plot_bgcolor='rgba(255,255,255,255)',
             # title=lat_fig_title,
             xaxis_title=xaxis_title,
-            showlegend=False,
+            showlegend=True,
             xaxis=dict(
                 showgrid=True,
                 gridcolor="LightGrey",
@@ -523,21 +536,23 @@ def cdf_TAIL(query, codename):
 
 if __name__ == "__main__":
     print(" ***** FINAL STEP: PLOTTING CHART IN BROWSER ******")
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 2:
+        _query = "roundrobin"
+        _chartname = sys.argv[1]
         # creates the two figures with x axis as clustersize
-        display_chart_scaling_errorbar(sys.argv[1], sys.argv[2])
+        # display_chart_scaling_errorbar(_query, _chartname)
         # creates xaxis outstanding requests and y P95 tail
         # Py is meant to signify PercentileX on the Y axis -
-        Py_max_throughput(sys.argv[1], sys.argv[2], 50, "QPS")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 90, "QPS")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 95, "QPS")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 99, "QPS")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 50, "parallel_requests")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 90, "parallel_requests")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 95, "parallel_requests")
-        Py_max_throughput(sys.argv[1], sys.argv[2], 99, "parallel_requests")
-        Py_max_throughput(sys.argv[1], sys.argv[2], "QPS", "parallel_requests")
-        cdf_TAIL(sys.argv[1], sys.argv[2])
+        Py_max_throughput(_query, _chartname, 50, "QPS")
+        Py_max_throughput(_query, _chartname, 90, "QPS")
+        Py_max_throughput(_query, _chartname, 95, "QPS")
+        Py_max_throughput(_query, _chartname, 99, "QPS")
+        Py_max_throughput(_query, _chartname, 50, "parallel_requests")
+        Py_max_throughput(_query, _chartname, 90, "parallel_requests")
+        Py_max_throughput(_query, _chartname, 95, "parallel_requests")
+        Py_max_throughput(_query, _chartname, 99, "parallel_requests")
+        Py_max_throughput(_query, _chartname, "QPS", "parallel_requests")
+        cdf_TAIL(_query, _chartname)
 
     else:
         print("arg length incorrect")

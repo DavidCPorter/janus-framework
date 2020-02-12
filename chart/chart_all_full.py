@@ -6,14 +6,14 @@ import gzip
 
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 SAPA_HOME="/Users/dporter/projects/sapa"
-def main(query,codename):
+def main(codename):
     exp_home = SAPA_HOME+"/benchmark_scripts/tmp/exp_results/"
     print('******** FINISHED FULL SCALING EXPERIEMENT **********')
     print("\n\nRUNNING chart_all_full.py ")
     QPS = []
     median_lat = []
     tail_lat = []
-    dirs = os.popen('ls '+exp_home+' | grep __clustersize').read()
+    dirs = os.popen('ls '+exp_home).read()
     dirs = dirs.split('\n')
     dirs.pop()
     try:
@@ -24,20 +24,23 @@ def main(query,codename):
         pass
 
 # this is for total file
-    total_scale_file = SAPA_HOME+'/chart/scaling_exp_csvs/total_'+query+'_'+codename+'.csv'
-    fm = open(total_scale_file, "w+")
-    fm.write('parallel_requests,QPS,P50_latency(ms),P90_latency(ms),P95_latency(ms),P99_latency(ms),clustersize,query,rfshards,GROUP,fcts\n')
+    total_scale_file = SAPA_HOME+'/chart/scaling_exp_csvs/total_'+codename+'.csv'
+    fm = open(total_scale_file, "a+")
+    fm.write('engine,parallel_requests,QPS,P50_latency(ms),P90_latency(ms),P95_latency(ms),P99_latency(ms),clustersize,query,rfshards,GROUP,fcts,\n')
 
     for d in dirs:
         print(d)
-        bench_files = os.popen('ls '+exp_home+'/'+d+' | grep '+query).read()
+        bench_files = os.popen('ls '+exp_home+'/'+d ).read()
         print("these are the output files for "+d+" sapa experiment")
         print(bench_files)
         bench_files = bench_files.split('\n')
         bench_files.pop()
-
+        engine = d.split('_')[0]
+        # since i added engine prefix need to remove it
+        _d=d
+        d=d[len(engine)+1:]
         for exp_output in bench_files:
-            f = open(exp_home+'/'+d+'/'+exp_output, 'r')
+            f = open(exp_home+'/'+_d+'/'+exp_output, 'r')
             data = f.readline()
             data=data.replace("\n","")
             fcts= f.readline()
@@ -50,6 +53,8 @@ def main(query,codename):
             # fct_data should be comma separated string of fcts
             f.close()
             # fp = open(complete_out_file, "a+")
+            print(d)
+            print(_d)
             csize=d[-4:]
             csize = csize.strip(' size')
             if csize == "0":
@@ -64,7 +69,9 @@ def main(query,codename):
             # fp.write(data+','+csize+','+query+','+d[:8]+','+group+'\n')
             # fp.close()
             fm = open(total_scale_file, "a+")
-            fm.write(data+','+csize+','+query+','+d[:8]+','+group+','+fct_string+'\n')
+            # temp solution
+            query = "lb"
+            fm.write(engine+','+data+','+csize+','+query+','+d[:8]+','+group+','+fct_string+'\n')
             fm.close()
 
     print("\n COMPLETED chart_all_full.py \n\n\n")
@@ -85,5 +92,5 @@ if __name__ == "__main__":
     # shards = sys.argv[13]
     # solrnum = sys.argv[15]
     sys.exit(
-    main(sys.argv[1],sys.argv[2])
+    main(sys.argv[1])
     )

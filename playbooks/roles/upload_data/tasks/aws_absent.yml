@@ -35,8 +35,8 @@
   # when:
   when: "'PRE' not in index_result.stdout"
 
-- name: create collection "{{collection_name}}"
-  shell: ./bin/solr create_collection -c "{{collection_name}}" -s "{{shards}}" -rf "{{replicas}}" -d _default -force
+- name: create collection {{collection_name}}
+  shell: ./bin/solr create_collection -c {{collection_name}} -s {{shards}} -rf {{replicas}} -d _default -force
   register: col_result
   args:
     chdir: '{{solr_install_dir}}/solr'
@@ -55,7 +55,7 @@
   when: "shorter_data == true"
 
 - name: post data
-  shell: ./bin/post -c "{{collection_name}}" "{{data_upload_dir}}/shorter_reviews.json"
+  shell: ./bin/post -c {{collection_name}} {{data_upload_dir}}/shorter_reviews.json
   args:
     chdir: '{{solr_install_dir}}/solr'
   when:

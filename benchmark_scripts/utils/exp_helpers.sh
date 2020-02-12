@@ -224,6 +224,7 @@ archivePrev (){
   mkdir $EXP_HOME/$chartname
   cd $SAPA_HOME/benchmark_scripts
   cp -rf tmp/exp_result/* $EXP_HOME/$chartname
+  rm -rf tmp/exp_result/*
   mkdir -p $EXP_HOME/$chartname/FCTS/$servernode/$query/r$reps:s$shards
   cp -rf 2020* $EXP_HOME/$chartname/FCTS/$servernode/$query/r$reps:s$shards
   rm -rf 2020*
@@ -295,6 +296,14 @@ startElastic () {
   fi
 
 }
+
+stopElastic (){
+  if [ $DOCKER = yes ];then
+    solo_party elastic_configure_$1.yml --tags stop --extra-vars "@sapa_vars.yml"
+  else
+    play elastic_configure_$1.yml --tags stop
+  fi
+}
 getHostResourceInfo (){
 
   echo $LOAD
@@ -317,5 +326,37 @@ getHostResourceInfo (){
   pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
   echo "********" >> $ENV_OUTPUT_FILE
 
+}
+
+commence_dstat () {
+  # remove previous dstatout
+  QUERY=$1
+  RF=$2
+  SHARD=$3
+  SOLRNUM=$4
+  echo "dstat should not be running but killing just in case"
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
+
+
+  echo "removing prev dstat files"
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
+  # dstat on each node
+  # nodecounter just makes it easier to know which node dstat file was
+  node_counter=0
+
+
+  echo "COMMENCE DSTAT ON ALL MACHINES..."
+  printf "\n"
+
+
+  ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
+
+  for n in $ALL_NODES;do
+    nohup ssh $USER@$n "dstat -t --cpu --mem --disk --io --net --int --sys --swap --tcp --output node${node_counter}_${n}_${QUERY}::rf${RF}_s${SHARD}_cluster${SOLRNUM}_dstat.csv &" >/dev/null 2>&1 &
+    node_counter=$(($node_counter+1))
+  done
+  printf "\n"
+  echo "DSTAT LIVE"
+  printf "\n"
 }
 

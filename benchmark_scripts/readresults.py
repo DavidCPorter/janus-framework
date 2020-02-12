@@ -9,7 +9,7 @@ SAPA_HOME="/Users/dporter/projects/sapa"
 
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 
-def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
+def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None, engine=''):
     print('\n\nRUNNING readresults.py ::: ARGS == proc=%s threads=%s duration=%s' % (p, t, d))
     QPS = []
     median_lat = []
@@ -90,17 +90,20 @@ def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
         print("SINGLE NODE READRESULTS ")
         solrnum = '9' + str(solrnum)
 
+
+    iter_result_path = SAPA_HOME+'/benchmark_scripts/tmp/exp_results/'+engine+'_rf' + rf + '_s' + shards + '__clustersize' + solrnum
+
     try:
-        os.makedirs(
-            SAPA_HOME+'/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum)
+        os.makedirs(iter_result_path)
     except FileExistsError:
         print("file exists\n\n\n")
         # directory already exists
         pass
 
     fp = open(
-        SAPA_HOME+'/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum + '/rf' + rf + '_s' + shards + '__clustersize' + solrnum + "::query=" + q + "::proc=" + p + "::threads=" + t + "::dur=" + d + ":::TIME->" + datetime.today().strftime(
-            '%Y-%m-%d-%H:%M:%S'), 'w+')
+            iter_result_path + '/rf' + rf + '_s' + shards + '__clustersize' + solrnum + "::query=" + q + "::proc=" + p + "::threads=" + t + "::dur=" + d + ":::TIME->" + datetime.today().strftime(
+            '%Y-%m-%d-%H:%M:%S'), 'w+'
+    )
     # for charting
     #  writes -> total outstanding requests, QPS, median LAT, Tail LAT
     # 2*2 is simply compensating for the fact that I don't want to change the driver code to generate the correct number here - so i'm just hardcoding the outstanding requests position with p*2*2 b/c thats the right number.
@@ -130,7 +133,8 @@ if __name__ == "__main__":
     solrnum = sys.argv[15]
     loadnodes = sys.argv[16]
     instances = sys.argv[18]
+    _engine = sys.argv[20]
 
     sys.exit(
-        main(processes, threads, duration, replicas, query, loop, shards, solrnum, loadnodes, instances)
+        main(processes, threads, duration, replicas, query, loop, shards, solrnum, loadnodes, instances, engine=_engine)
     )

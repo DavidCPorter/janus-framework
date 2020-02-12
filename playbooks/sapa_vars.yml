@@ -1,10 +1,4 @@
 ---
-# defaults file for benchmark
-pyscript: traffic_gen.py
-pom_path: "{{home}}/solrclientserver"
-
-
-# defaults file for solr
 
 # VARIABLE PRECEDENCE
 # If multiple variables of the same name are defined in different places, they win in a certain order, which is:
@@ -15,13 +9,21 @@ pom_path: "{{home}}/solrclientserver"
 # then comes facts discovered about a system
 # then "role defaults", which are the most "defaulty" and lose in priority to everything.
 
-# Files & Paths
+
+# defaults file for benchmark
+pyscript: traffic_gen.py
+pom_path: "{{home}}/solrclientserver"
+
+
+# defaults file for solr
+
 solr_install_dir: "{{home}}/solr-8_3"
 solr_log_dir: "/var/solr/logs"
 git_branch_name: dporter_8_3
 solr_home: "{{home}}/solr-8_3/solr/server/solr"
 solr_init_file: ./roles/solr/templates/solr.in.sh
 solr_log4j_props: "{{home}}/solr-8_3/solr/server/resources/log4j2.xml"
+solr_heap: 1 #GB
 
 # defaults file for elastic
 SAPA_HOME: /Users/dporter/projects/sapa
@@ -32,11 +34,16 @@ es_data_dir: /var/elasticsearch/data
 es_log_dir: /var/elasticsearch/log
 cache_percentage: "50%"
 metric_root_dir: "{{home}}/metricbeat"
+discovery_nodes_override:
+  - "{{node0}}"
+  - "{{node1}}"
+masters_override:
+  - "{{node0}}"
+  - "{{node1}}"
+
 
 # defaults file for upload_data
 data_upload_dir: "{{home}}"
-# collection name is passed in now
-#collection_name: "reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 collection_name: "reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 #aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 aws_dir_name: default
@@ -45,7 +52,6 @@ nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
 tasks_dir: "{{SAPA_HOME}}/playbooks/roles/upload_data/tasks"
 
 # defaults file for zookeeper
-
 zoo_install_dir: "{{home}}/"
 zoo_conf_dir: "{{home}}/apache-zookeeper-3.5.5/conf"
 zoo_root_dir: "{{home}}/apache-zookeeper-3.5.5"
@@ -54,24 +60,11 @@ zoo3-5_link: https://archive.apache.org/dist/zookeeper/zookeeper-3.5.5/apache-zo
 zoo3-4_link: https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz
 
 # defaults file for cloud-env
-
 ramdisk_path: /dev/shm
 ptp_install_dir: '/users/{{ansible_user}}/linuxptp'
 cred_dir: "{{SAPA_HOME}}/playbooks/roles/cloud-env/files/.aws"
 
-discovery_nodes_override:
-  - "{{node0}}"
-  - "{{node1}}"
-
-
-masters_override:
-  - "{{node0}}"
-  - "{{node1}}"
-
+# other
 heapsize: 1
-
-
-# in GB
-solr_heap: 1
-
 shorter_data: true
+id_rsa_pub_path: /Users/dporter/.ssh/id_rsa.pub

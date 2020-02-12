@@ -9,7 +9,7 @@ source ${SAPA_HOME}/benchmark_scripts/utils/exp_helpers.sh
 #set -e
 #if [ $DOCKER = yes ];then
 #fi
-set -x
+#set -x
 export DOCKER=$DOCKER
 
 if [ $DOCKER = yes ];then
@@ -18,37 +18,7 @@ if [ $DOCKER = yes ];then
 fi
 
 
-commence_dstat () {
-  # remove previous dstatout
-  QUERY=$1
-  RF=$2
-  SHARD=$3
-  SOLRNUM=$4
-  echo "dstat should not be running but killing just in case"
-  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
 
-
-  echo "removing prev dstat files"
-  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
-  # dstat on each node
-  # nodecounter just makes it easier to know which node dstat file was
-  node_counter=0
-
-
-  echo "COMMENCE DSTAT ON ALL MACHINES..."
-  printf "\n"
-
-
-  ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
-
-  for n in $ALL_NODES;do
-    nohup ssh $USER@$n "dstat -t --cpu --mem --disk --io --net --int --sys --swap --tcp --output node${node_counter}_${n}_${QUERY}::rf${RF}_s${SHARD}_cluster${SOLRNUM}_dstat.csv &" >/dev/null 2>&1 &
-    node_counter=$(($node_counter+1))
-  done
-  printf "\n"
-  echo "DSTAT LIVE"
-  printf "\n"
-}
 
 LOAD_SCRIPTS="$SAPA_HOME/benchmark_scripts/traffic_gen"
 TERMS="$SAPA_HOME/benchmark_scripts/words.txt"
@@ -109,17 +79,15 @@ EXP_HOME=${SAPA_HOME}/chart/exp_records
 # mov prev record outside project perview (data size too large)
 echo "moving previous records to long term data store"
 mv $EXP_HOME/* ~/projects/saga_records/
-
 mkdir $EXP_HOME/$CHARTNAME
 
 # ARCHIVE PREVIOUS EXPs (this shouldnt archive anything if done correctly so first wipe dir)
 
 mkdir -p $SAPA_HOME/benchmark_scripts/tmp/proc_results
 rm -rf $SAPA_HOME/benchmark_scripts/tmp/proc_results/*
+rm -rf $SAPA_HOME/benchmark_scripts/tmp/exp_results/*
 
-alias play=solo_party
-# echo "$LOAD_NODES"
-# echo "LOAD_NODES = ${LOAD_NODES[1]}"
+
 if [ $copy_python_scripts == "yes" ]; then
   echo 'Copying python scripts and search terms to load machines'
   play update_loadscripts.yml --extra-vars "scripts_path=$LOAD_SCRIPTS terms_path=$TERMS"
@@ -148,7 +116,7 @@ for ENGINE in ${SEARCHENGINES[@]};do
             # zookeeper loses sight of previous collection node mapping for a single clustersize. chroot mitigates zookeeper failure when clustersize changes for an experiment. Basically, a single instance of Zookeeper can keep track of every config and cluster change for solr without failing if chroot exists to separate each clustersize collection mapping. i.e. we dont need to restart zookeeper ever.
             startSolr $SERVERNODE
           # begin_exp is going to either post to solr a new colleciton or pull down an existing one from aws
-            if [ -z $keep_solr_state ]
+            if [ $keep_solr_state = false ]
               then
                 play post_data_$SERVERNODE.yml --tags begin_exp --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
           #  need to restart since pulling index from aws most likely happened and solr (not zookeeper) needs to restart after that hack
@@ -158,28 +126,22 @@ for ENGINE in ${SEARCHENGINES[@]};do
             play post_data_$SERVERNODE.yml --tags update_collection_configs --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
             sleep 2
 
+          #  for solrj ... using chroot requires restart of solrj every time :/
 #            if [ $QUERY == "client" ]; then
 #              sleep 3
 #              restartSolrJ $SERVERNODE
 #              sleep 2
 #            fi
             # else it will be roundrobin
-
-          # start elastic search
           else
             startElastic $SERVERNODE
             sleep 5
           fi
 
 
-          #  sfor solrj ... using chroot requires restart of solrj every time :/
-
 
           PROCESSES=$SERVERNODE
           SOLRNUM=$SERVERNODE
-            # scale each load up to servernode size then add a load node
-
-      # these state loops below do not require any index mods, so they are fast
 
           for J_MEM in ${JVM_MEM[@]}; do
             for doc_cache in ${DOC_CACHE[@]}; do
@@ -188,17 +150,17 @@ for ENGINE in ${SEARCHENGINES[@]};do
 
                   STATE_SPACE="
                     \n\n
-                    \n ENGINE       = $ENGINE
-                    \n LB           = $QUERY
-                    \n SERVERNODE   = $SERVERNODE
-                    \n SHARD        = $SHARD
-                    \n RF_MULT      = $RF_MULT
-                    \n JVM_MEM      = $J_MEM
-                    \n doc_cache    = $doc_cache
-                    \n filter_cache = $filter_cache
-                    \n CONTROLLOOP  = $loop
-                    \n LOADSIZE     = $LOAD
-                    \n CONNSCALE    = $mincon -> $maxcon
+                     ENGINE       = $ENGINE
+                     LB           = $QUERY
+                     SERVERNODE   = $SERVERNODE
+                     SHARD        = $SHARD
+                     RF_MULT      = $RF_MULT
+                     JVM_MEM      = $J_MEM
+                     doc_cache    = $doc_cache
+                     filter_cache = $filter_cache
+                     CONTROLLOOP  = $loop
+                     LOADSIZE     = $LOAD
+                     CONNSCALE    = $mincon -> $maxcon
                     \n\n
                   "
                   printf "BEGINNING EXP LOOP FOR THIS STATE SPACE: $STATE_SPACE "
@@ -264,10 +226,13 @@ for ENGINE in ${SEARCHENGINES[@]};do
             # next jvm
           done
 
-          #need to call stopsolr it here since it needs to stop this exp explicitly before running a new one
+          if [ $ENGINE = "solr" ]
+          then
+            stopSolr $SERVERNODE
+          else
+            stopElastic $SERVERNODE
+          fi
 
-          stopElastic $SERVERNODE
-#          stopSolr $SERVERNODE
 #          play post_data_$SERVERNODE.yml --tags aws_exp_reset --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
           archivePrev $CHARTNAME $SERVERNODE $QUERY $RF $SHARD
 
@@ -277,11 +242,12 @@ for ENGINE in ${SEARCHENGINES[@]};do
       done
       # next servernode
     done
-    export SAPA_HOME=$SAPA_HOME
-    python3 ${SAPA_HOME}/chart/chart_all_full.py $QUERY $CHARTNAME
-    python3 ${SAPA_HOME}/chart/chartit_error_bars.py $QUERY $CHARTNAME
-    zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME
+
     # next query
   done
   # next searchengine
 done
+export SAPA_HOME=$SAPA_HOME
+python3 ${SAPA_HOME}/chart/chart_all_full.py $CHARTNAME
+python3 ${SAPA_HOME}/chart/chartit_error_bars.py $CHARTNAME
+zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME

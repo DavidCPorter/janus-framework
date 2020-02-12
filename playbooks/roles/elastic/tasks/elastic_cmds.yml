@@ -82,7 +82,7 @@
 
 
 - name: stop elastic (ignore error)
-  shell: ps aux | grep -i elastic | awk -F' ' '{print $2}' | xargs kill -9
+  shell: jps | awk '/Elastic/{printf($1)}' | xargs kill
   register: es_stop_result
   ignore_errors: yes
 

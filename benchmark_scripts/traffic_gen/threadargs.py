@@ -37,7 +37,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
     if instances != None:
         csize = '9'+csize
 
-    if query == "roundrobin":
+    if query == "roundrobin" and engine == "solr":
         r = random.randint(1,len(terms))
 
         for i in range( test_param.max_iters ):

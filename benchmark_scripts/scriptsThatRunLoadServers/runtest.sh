@@ -105,22 +105,22 @@ function start_experiment() {
   for i in "${ALL_LOAD_NODES[@]}"; do
     if [ $mycounter -eq $LOADSIZE ];then
       echo "$mycounter == $LOADSIZE"
-      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $PROJECT_HOME/benchmark_scripts/tmp/proc_results
+      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $SAPA_HOME/benchmark_scripts/tmp/proc_results
     else
-      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $PROJECT_HOME/benhmark_scripts/tmp/proc_results &
+      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $SAPA_HOME/benhmark_scripts/tmp/proc_results &
       mycounter=$(($mycounter+1))
     fi
   done
   wait $!
-  sleep 7
+  sleep 3
 
   # data transfer can take a few seconds
 
 
   printf "\n\n\n RUNNING READ RESULTS SCRIPT"
-  printf "$PROJECT_HOME/benchmark_scripts/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES"
+  printf "$PROJECT_HOME/benchmark_scripts/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES $ENGINE"
 
-  python3 $PROJECT_HOME/benchmark_scripts/traffic_gen/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES
+  python3 $PROJECT_HOME/benchmark_scripts/readresults.py $PROCESSES $THREADS $DURATION $REPLICAS $QUERY $LOOP $SHARDS $SOLRNUM $LOADSIZE $INSTANCES $ENGINE
   wait $!
 
   #stores the comnnection output for each load server... this is a lot of data, prolly want to get rid of this.
@@ -247,7 +247,7 @@ cd ~/projects/sapa/benchmark_scripts;
 export procs=$procs
 export SOLRJ_PORT_OVERRIDE=$SOLRJ_PORT_OVERRIDE
 export DOCKER=$DOCKER
-export SAPA_HOME=$SAPA_HOMEs
+export SAPA_HOME=$SAPA_HOME
 export -f setLoadArray
 start_experiment $USER $PY_SCRIPT $TERMS $THREADS $PROCESSES $DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $LOAD $INSTANCES $ENGINE
 

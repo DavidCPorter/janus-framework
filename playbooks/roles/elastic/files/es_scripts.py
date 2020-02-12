@@ -7,8 +7,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 
 
-def gendata(iname):
-    with open("reviews.json", "r") as f:
+def gendata(iname, data_file):
+    with open(data_file, "r") as f:
         for line in f.readlines():
             yield {
                 "_index": iname,
@@ -18,12 +18,12 @@ def gendata(iname):
 
 
 def delete_index(hostname):
-    es=Elasticsearch([{'host':hostname,'port':9200}])
-    response=es.indices.delete(index='reviews', ignore=400)
+    es = Elasticsearch([{'host': hostname, 'port': 9200}])
+    response = es.indices.delete(index='reviews', ignore=400)
     print(response[:100])
 
-def main(shards,replicas,iname, hostname):
 
+def main(shards, replicas, iname, hostname, shorter_data):
     mapping = {
         "settings": {
             "number_of_shards": shards,
@@ -32,7 +32,7 @@ def main(shards,replicas,iname, hostname):
         "mappings": {
             "properties": {
                 "reviewerID": {
-                    "type": "text" # formerly "string"
+                    "type": "text"  # formerly "string"
                 },
                 "asin": {
                     "type": "text"
@@ -53,28 +53,27 @@ def main(shards,replicas,iname, hostname):
         }
     }
 
-
-    es=Elasticsearch([{'host':hostname,'port':9200}])
-    response=es.indices.create(
-    index=iname,
-    body=mapping,
-    ignore=400
+    es = Elasticsearch([{'host': hostname, 'port': 9200}])
+    response = es.indices.create(
+        index=iname,
+        body=mapping,
+        ignore=400
     )
 
     if 'acknowledged' in response:
         if response['acknowledged'] == True:
-            print ("INDEX MAPPING SUCCESS FOR INDEX:", response['index'])
+            print("INDEX MAPPING SUCCESS FOR INDEX:", response['index'])
 
     # catch API error response
     elif 'error' in response:
-        print ("ERROR:", response['error']['root_cause'])
-        print ("TYPE:", response['error']['type'])
+        print("ERROR:", response['error']['root_cause'])
+        print("TYPE:", response['error']['type'])
 
+    data_file = "shorter_reviews.json"
+    if shorter_data == "false":
+        data_file = "reviews_Electronics_5.json"
 
-    helpers.bulk(es, gendata(iname))
-
-
-
+    helpers.bulk(es, gendata(iname, data_file))
 
 
 if __name__ == "__main__":
@@ -82,10 +81,11 @@ if __name__ == "__main__":
     if len(sys.argv) != 5:
         print("4 args required <shards> <replicas> <index_name> <elastichost>")
         sys.exit()
-    shards=sys.argv[1]
-    replicas=sys.argv[2]
-    iname=sys.argv[3]
-    ehost=sys.argv[4]
-    #delete_index()
-    main(shards,replicas,iname,ehost)
+    shards = sys.argv[1]
+    replicas = sys.argv[2]
+    iname = sys.argv[3]
+    ehost = sys.argv[4]
+    shorter_data = sys.argv[5]
+    # delete_index()
+    main(shards, replicas, iname, ehost, shorter_data)
     sys.exit()

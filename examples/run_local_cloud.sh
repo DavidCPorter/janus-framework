@@ -4,7 +4,7 @@
 # new users still need to make some changes to the ssh files /sapa/utils/ssh_files. You can run the ssh scrupt to generate. will elaborate later
 
 #also users need to make sure  they add hostnames to their .ssh/configs file and put their id_rsa.pub file in the docker servers.
-
+cd
 docker-compose --compatibility build
 docker-compose --compatibility up -d
 
