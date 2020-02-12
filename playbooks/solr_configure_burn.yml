@@ -1,5 +1,5 @@
 
-- hosts: twentyfourNode
+- hosts: twoNode
   tasks:
     - name: delete solr data
       file:
@@ -10,5 +10,5 @@
 
     - name: delete solr home dir
       file:
-        path: "{{prev_solr_install_dir}}"
+        path: "{{solr_install_dir}}"
         state: absent

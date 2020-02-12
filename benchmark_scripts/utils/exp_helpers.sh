@@ -1,7 +1,15 @@
 #!/bin/bash
 
+
 CLOUDHOME="/users/dporte7"
 export USER=$USER
+DOCKER=yes
+
+
+if [ "$DOCKER" = yes ];then
+  echo "wooooo"
+  alias play=solo_party
+fi
 
 
 function show_remote_scripts() {
@@ -119,7 +127,7 @@ restartSolr () {
   printf "\n\n"
   # zoo needs to be restarted in case clutersize changed
   echo "restarting solr and zookeeper "
-  play solr_configure_$1.yml --tags solr_restart
+  play solr_configure_$1.yml --tags solr_restart --extra-vars "@sapa_vars.yml"
 
 }
 
@@ -189,7 +197,7 @@ containsElement () {
 }
 
 wipecores () {
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_solr_node_file -l $CL_USER rm -rf $CORE_HOME/reviews*
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_solr_node_file -l $CL_USER rm -rf $CORE_HOME/reviews*
 }
 
 wipecores_backup () {
@@ -198,12 +206,12 @@ wipecores_backup () {
   done
 }
 
-EXP_HOME=$PROJ_HOME/chart/exp_records
+EXP_HOME=$SAPA_HOME/chart/exp_records
 # just deal with it... find and replace snafu. they are the same
-export PROJECT_HOME=/Users/dporter/projects/sapa
+export PROJECT_HOME=${SAPA_HOME}
 
 runsolrj (){
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_traffic_node_file -l $CL_USER "cd solrclientserver;java -cp target/solrclientserver-1.0-SNAPSHOT.jar com.dporte7.solrclientserver.DistributedWebServer $1  > javaServer.log 2>&1 &"&
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_traffic_node_file -l $CL_USER "cd solrclientserver;java -cp target/solrclientserver-1.0-SNAPSHOT.jar com.dporte7.solrclientserver.DistributedWebServer $1  > javaServer.log 2>&1 &"&
 }
 
 archivePrev (){
@@ -214,7 +222,7 @@ archivePrev (){
   reps=$4
   shards=$5
   mkdir $EXP_HOME/$chartname
-  cd $PROJ_HOME/benchmark_scripts
+  cd $SAPA_HOME/benchmark_scripts
   cp -rf tmp/exp_result/* $EXP_HOME/$chartname
   mkdir -p $EXP_HOME/$chartname/FCTS/$servernode/$query/r$reps:s$shards
   cp -rf 2020* $EXP_HOME/$chartname/FCTS/$servernode/$query/r$reps:s$shards
@@ -225,7 +233,7 @@ stopsingle (){
   for i in `seq 3`;do
     printf "\n STOPPING SOLR INSTANCES:"
     echo "node__$i/solr -p 99$i$i"
-    pssh -h $PROJ_HOME/utils/ssh_files/solr_single_node -l $CL_USER -P "bash ~/solr-8_3/solr/bin/solr stop -cloud -q -s ~/node__$i/solr -p 99$i$i -Dhost=10.10.1.1"
+    pssh -h $SAPA_HOME/utils/ssh_files/solr_single_node -l $CL_USER -P "bash ~/solr-8_3/solr/bin/solr stop -cloud -q -s ~/node__$i/solr -p 99$i$i -Dhost=10.10.1.1"
   done
 }
 
@@ -236,7 +244,7 @@ wipeInstances (){
 
   sleep 8
   echo "removing old node_ dirs on server1"
-  pssh -h $PROJ_HOME/utils/ssh_files/solr_single_node -l $CL_USER -P "rm -rf ~/node_*"
+  pssh -h $SAPA_HOME/utils/ssh_files/solr_single_node -l $CL_USER -P "rm -rf ~/node_*"
   sleep 2
 }
 
@@ -246,7 +254,7 @@ stopSolr () {
   echo "stopping solr "
   printf "\n\n"
 
-  play solr_configure_$1.yml --tags solr_stop
+  play solr_configure_$1.yml --tags solr_stop --extra-vars "@sapa_vars.yml"
   # sleep 5
   if [ $1 -eq 1 ];then
 	stopsingle
@@ -257,18 +265,25 @@ stopSolr () {
 resetState () {
   stopSolr $1
   wipecores
-  play zoo_configure.yml --tags zoo_stop
-  play zoo_configure.yml --tags zoo_start
+  play zoo_configure.yml --tags zoo_stop --extra-vars "@sapa_vars.yml"
+  play zoo_configure.yml --tags zoo_start --extra-vars "@sapa_vars.yml"
 }
 
 startSolr () {
   printf "\n\n"
   echo "starting solr "
   printf "\n\n"
-  play solr_configure_$1.yml --tags solr_start
+  play solr_configure_$1.yml --tags solr_start --extra-vars "@sapa_vars.yml"
   sleep 3
 }
 
+stopZookeeper (){
+  play zoo_configure.yml --tags zoo_stop --extra-vars "@sapa_vars.yml"
+}
+
+startZookeeper (){
+  play zoo_configure.yml --tags zoo_start --extra-vars "@sapa_vars.yml"
+}
 startElastic () {
   printf "\n\n"
   echo "starting elastic "
@@ -287,19 +302,19 @@ getHostResourceInfo (){
   echo $LOAD
   printf "getting load machine info"
   echo "LOADNODES:::" > $ENV_OUTPUT_FILE
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
   echo "********" >> $ENV_OUTPUT_FILE
 
   echo "SOLR NODES:::" >> $ENV_OUTPUT_FILE
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
   echo "********" >> $ENV_OUTPUT_FILE
 
   echo "NETWORK BANDWIDTH::: " >> $ENV_OUTPUT_FILE
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
   echo "********" >> $ENV_OUTPUT_FILE
 
   echo "RAM::: " >> $ENV_OUTPUT_FILE
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
   echo "********" >> $ENV_OUTPUT_FILE
 
 }

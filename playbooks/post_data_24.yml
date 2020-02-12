@@ -21,8 +21,8 @@
   tasks:
     - name: update solr.xml
       copy:
-        src: /Users/dporter/projects/sapa/playbooks/roles/upload_data/files/solr.xml
-        dest: /users/dporte7/solr-8_3/solr/server/solr/
+        src: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/solr.xml"
+        dest: "{{user_root_dir}}/solr-8_3/solr/server/solr/"
         force: yes
   tags:
     - begin_exp

@@ -4,8 +4,8 @@ from datetime import datetime
 import time
 import gzip
 
-print(os.environ["PROJ_HOME"])
-proj_home="/Users/dporter/projects/sapa"
+tmp=os.environ["SAPA_HOME"]
+SAPA_HOME="/Users/dporter/projects/sapa"
 
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
 
@@ -17,14 +17,14 @@ def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
     ninenine = []
     ninezero = []
     fct_total_string = ''
-    files = os.popen('ls ' + proj_home + '/benchmark_scripts/tmp/proc_results | grep ' + q).read()
+    files = os.popen('ls ' + SAPA_HOME + '/benchmark_scripts/tmp/proc_results | grep ' + q).read()
     files = files.split('\n')
     processes = float(len(files))
     print("num output files copied from remote == %s | should == %s (num procs passsed in to this script)" % (
     str(processes * int(t)), p))
     files.pop()
     for file in files:
-        f = open(proj_home+"/benchmark_scripts/tmp/proc_results/" + file, 'r')
+        f = open(SAPA_HOME+"/benchmark_scripts/tmp/proc_results/" + file, 'r')
         #
         result_page = f.readlines()
         # read first line which is the request total
@@ -92,14 +92,14 @@ def main(p, t, d, rf, q, l, shards, solrnum, loadnodes, instances=None):
 
     try:
         os.makedirs(
-            '/Users/dporter/projects/sapa/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum)
+            SAPA_HOME+'/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum)
     except FileExistsError:
         print("file exists\n\n\n")
         # directory already exists
         pass
 
     fp = open(
-        proj_home+'/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum + '/rf' + rf + '_s' + shards + '__clustersize' + solrnum + "::query=" + q + "::proc=" + p + "::threads=" + t + "::dur=" + d + ":::TIME->" + datetime.today().strftime(
+        SAPA_HOME+'/benchmark_scripts/tmp/exp_results/rf' + rf + '_s' + shards + '__clustersize' + solrnum + '/rf' + rf + '_s' + shards + '__clustersize' + solrnum + "::query=" + q + "::proc=" + p + "::threads=" + t + "::dur=" + d + ":::TIME->" + datetime.today().strftime(
             '%Y-%m-%d-%H:%M:%S'), 'w+')
     # for charting
     #  writes -> total outstanding requests, QPS, median LAT, Tail LAT

@@ -3,19 +3,19 @@
 
 - name: Check if Solr has been installed already.
   stat:
-    path: "{{ solr_install_dir }}"
+    path: "{{solr_install_dir}}/solr/server/start.jar"
   register: solr_install_path_status
   tags:
     - setup
   # tags:
     # - solr_update
 
-- name: 'Download Solr to -> "{{solr_install_dir}}"'
+- name: Download Solr to -> solr_install_di
   git:
-      repo: https://github.com/DavidCPorter/lucene-solr.git
-      dest: "{{solr_install_dir}}"
-      version: "{{git_branch_name}}"
-      force: yes
+    repo: https://github.com/DavidCPorter/lucene-solr.git
+    dest: "{{solr_install_dir}}"
+    version: "{{git_branch_name}}"
+    force: yes
   register: solr_git_status
   when: solr_install_path_status.stat.exists == False
   tags:
@@ -23,9 +23,9 @@
     - setup
 
 
-- name: delete /users/dporte7/solr-8_3/solr/server/solr/configsets/sample_techproducts_configs
+- name: delete
   file:
-    path: /users/dporte7/solr-8_3/solr/server/solr/configsets/sample_techproducts_configs
+    path: "{{solr_install_dir}}/solr/server/solr/configsets/sample_techproducts_configs"
     state: absent
   tags:
     - rm_sample
@@ -58,15 +58,9 @@
     - setup
 
 
-- name: remove old solr.in.sh
-  shell: rm -f '{{solr_install_dir}}/solr/bin/solr.in.sh'
-  tags:
-    - solrinsh
-    - setup
-    - solr_start
-# not the best convention here...
+
 - name: copy solr init file to hosts
-  copy:
+  template:
     src: "{{solr_init_file}}"
     dest: '{{solr_install_dir}}/solr/bin/solr.in.sh'
   tags:
@@ -83,6 +77,10 @@
     recurse: yes
   become: yes
   become_user: root
+
+  tags:
+    - setup
+    - logs
 
 # - name: add slow query logging for queries > .5s to default solrconfig.xml
 #   lineinfile:
@@ -107,14 +105,14 @@
     src: ./roles/solr/files/solrconfig_default.xml
     dest: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
   tags:
-    - solrconfig
+    - config
 
 - name: replace solr.xml with local copy
   copy:
     src: ./roles/solr/files/solr_default.xml
     dest: '{{solr_install_dir}}/solr/server/solr/solr.xml'
   tags:
-    - solrxml
+    - config
 
 - name: modify solr executable ~/solr-8_3/solr/bin/solr
   lineinfile:
@@ -135,12 +133,9 @@
 
 
 - name: restart solr
-  shell: ./solr/bin/solr restart -c -q -z "10.10.1.1:2181,10.10.1.2:2181,10.10.1.3:2181/{{chroot}}"
+  shell: ./solr/bin/solr restart -c -q -z "{{node0}}:2181,{{node1}}:2181,{{node2}}:2181/{{chroot}}"
   args:
     chdir: '{{solr_install_dir}}'
-  environment:
-    SOLR_HOST: "{{ansible_subnet}}"
-    GLOBALIP: "{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
 
   tags:
     - never

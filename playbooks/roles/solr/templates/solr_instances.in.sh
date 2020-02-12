@@ -184,17 +184,19 @@
 # host checking can be disabled by using the system property "solr.disable.shardsWhitelist"
 #SOLR_OPTS="$SOLR_OPTS -Dsolr.shardsWhitelist=http://localhost:8983,http://localhost:8984"
 #  ZK_HOST is required for znode creation
-ZK_HOST="10.10.1.1:2181,10.10.1.2:2181,10.10.1.3:2181/singleNode"
+
+
+ZK_HOST="{{node0}}:2181,{{node1}}:2181,{{node2}}:2181"
 ZK_CLIENT_TIMEOUT=30000
-SOLR_HOST=$SOLR_HOST
-SOLR_PID_DIR="/var/solr"
-SOLR_HOME="/users/dporte7/solr-8_3/solr/server/solr"
-LOG4J_PROPS="/users/dporte7/solr-8_3/solr/server/resources/log4j2.xml"
-SOLR_LOGS_DIR="/var/solr/logs"
+SOLR_HOST={{ansible_subnet}}
+SOLR_PID_DIR={{solr_log_dir}}
+SOLR_HOME={{solr_home}}
+LOG4J_PROPS={{solr_log4j_props}}
+SOLR_LOGS_DIR={{solr_log_dir}}
 SOLR_PORT=8983
 # heapsize 20g
 # ENABLE_REMOTE_JMX_OPTS=true
 # RMI_PORT=18983
 # heapsize 20g
-SOLR_JAVA_MEM="-Xms10g -Xmx10g"
+SOLR_JAVA_MEM="-Xms{{solr_heap}}g -Xmx{{solr_heap}}g"
 # SOLR_OPTS="$SOLR_OPTS -Dcom.sun.management.jmxremote -javaagent:/opt/spm/spm-monitor/lib/spm-monitor-generic.jar=cfe92cf2-cf42-45b7-a965-b1bed5cea132::default"

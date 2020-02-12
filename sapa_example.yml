@@ -57,10 +57,10 @@
       - disk
 
     term_dictionary:
-      - "/Users/dporter/projects/sapa/benchmark_scripts/words.txt"
+      - "${SAPA_HOME}/benchmark_scripts/words.txt"
 
     documents:
-      - "/Users/dporter/projects/sapa/benchmark_scripts/reviews_Electronics.json"
+      - "${SAPA_HOME}/benchmark_scripts/reviews_Electronics.json"
 
     search_term_length:
       - 1

@@ -1,7 +1,11 @@
 # 32 shards and 3 copies
 
-- name: include the vars
-  include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
+- name: importing vars since --extra-vars cannot handle importing varfile with other params
+  include_vars: "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
+
+
+- debug:
+    msg: "{{SAPA_HOME}}"
 
 - name: check if aws has the index
   shell: aws s3 ls "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}"
@@ -10,14 +14,14 @@
 
 
 - name: include reviews download task
-  include_tasks: /Users/dporter/projects/sapa/playbooks/roles/upload_data/tasks/download_reviews.yml
+  include_tasks: "{{SAPA_HOME}}/playbooks/roles/upload_data/tasks/download_reviews.yml"
   when: "'PRE' not in index_result.stdout"
 
 
 # solrconfig.xml is index-specific so it should be part of upload_data role rather than solr role.
 - name: copy solrconfig to nodes
   copy:
-    src: /Users/dporter/projects/sapa/playbooks/roles/upload_data/files/solr8-3config.xml
+    src: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/solr8-3config.xml"
     dest: solr-8_3/solr/server/solr/configsets/_default/conf/solrconfig.xml
   when: "'PRE' not in index_result.stdout"
   tags:
@@ -43,12 +47,25 @@
 
 
 - name: create schema
-  script: /Users/dporter/projects/sapa/playbooks/roles/upload_data/files/schema_create.sh "{{ansible_subnet}}" "{{collection_name}}"
+  script: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/schema_create.sh {{ansible_subnet}} {{collection_name}}"
   when: "'PRE' not in index_result.stdout"
 
+- name: truncate json when shorter_data flag is true
+  shell: head -n 100000 reviews_Electronics_5.json > shorter_reviews.json
+  when: "shorter_data == true"
+
+- name: post data
+  shell: ./bin/post -c "{{collection_name}}" "{{data_upload_dir}}/shorter_reviews.json"
+  args:
+    chdir: '{{solr_install_dir}}/solr'
+  when:
+  - "'PRE' not in index_result.stdout"
+  - "shorter_data == true"
 
 - name: post data
   shell: ./bin/post -c "{{collection_name}}" "{{data_upload_dir}}/reviews_Electronics_5.json"
   args:
     chdir: '{{solr_install_dir}}/solr'
-  when: "'PRE' not in index_result.stdout"
+  when:
+  - "'PRE' not in index_result.stdout"
+  - "shorter_data != true"

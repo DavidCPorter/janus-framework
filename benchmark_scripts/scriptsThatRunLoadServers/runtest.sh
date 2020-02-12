@@ -2,14 +2,16 @@
 
 RSCRIPTS=$PROJECT_HOME/benchmark_scripts/remotescripts
 
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_helpers.sh
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_scale_loop_params.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_helpers.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_scale_loop_params.sh
+
 
 
 function start_experiment() {
   export DOCKER=$DOCKER
 
+  export SAPA_HOME=$SAPA_HOME
   if [ "$#" -lt 3 ]; then
       echo "Usage: start_experiment <username> <python scripts dir> <term list textfile>"
   	exit
@@ -97,7 +99,7 @@ function start_experiment() {
   echo "copying exp results to proc_results/  ... "
 
   # wait for slow processes to complete
-  sleep 5
+  sleep 3
   mycounter=1
 
   for i in "${ALL_LOAD_NODES[@]}"; do
@@ -110,9 +112,9 @@ function start_experiment() {
     fi
   done
   wait $!
+  sleep 7
 
   # data transfer can take a few seconds
-  sleep 2
 
 
   printf "\n\n\n RUNNING READ RESULTS SCRIPT"
@@ -245,6 +247,7 @@ cd ~/projects/sapa/benchmark_scripts;
 export procs=$procs
 export SOLRJ_PORT_OVERRIDE=$SOLRJ_PORT_OVERRIDE
 export DOCKER=$DOCKER
+export SAPA_HOME=$SAPA_HOMEs
 export -f setLoadArray
 start_experiment $USER $PY_SCRIPT $TERMS $THREADS $PROCESSES $DURATION $REPLICAS $SHARDS $QUERY $LOOP $SOLRNUM $LOAD $INSTANCES $ENGINE
 

@@ -1,7 +1,7 @@
 ---
 # defaults file for zookeeper
 
-zoo_install_dir: /users/dporte7/
+zoo_install_dir: '{{user_root_dir}}/'
 zoo_conf_dir: /users/dporte7/apache-zookeeper-3.5.5/conf
 zoo_root_dir: /users/dporte7/apache-zookeeper-3.5.5
 zoo_bin_dir: /users/dporte7/apache-zookeeper-3.5.5/bin

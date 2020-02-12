@@ -1,12 +1,12 @@
 #########  EXP PARAMS
-
+keep_solr_state=true
 # constraint -> shards are 1, 2, or 4
-SEARCHENGINES="elastic"
+SEARCHENGINES="solr"
 DSTAT_SWITCH=off
-copy_python_scripts="no"
+copy_python_scripts="yes"
 SHARDS=( 1 )
 # client == solrj, or elastic client api
-QUERYS=( "client" )
+QUERYS=( "roundrobin" )
 RF_MULTIPLE=( 1 )
 load_start=1
 LOAD=1
@@ -26,11 +26,13 @@ WARM_CACHE=false
 DOCKER=yes
 export USER=sapauser
 
-
 #########  PARAMS END
 
 setLoadArray (){
+
 	load_seq=($( seq 1 $MAX_LOAD ))
+	# shellcheck disable=SC2199
+	# shellcheck disable=SC2076
 	if [[ ! " ${load_seq[@]} " =~ " $1 " ]]; then
 			echo "NOT VALID LOAD PARAMETER LOAD ARRAY"
 			return
@@ -51,6 +53,8 @@ export -f setLoadArray
 
 getLoadNum (){
 	load_seq=($( seq 1 $MAX_LOAD ))
+	# shellcheck disable=SC2199
+	# shellcheck disable=SC2076
 	if [[ ! " ${load_seq[@]} " =~ " $1 " ]]; then
 	    # whatever you want to do when arr contains value
 			echo "NOT VALID LOAD PARAMETER LOAD NUM"

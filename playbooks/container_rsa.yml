@@ -1,0 +1,17 @@
+- hosts: all
+  tasks:
+
+    - name: block
+      block:
+        - name: mkdir .ssh
+          file:
+            path: "{{home}}/.ssh/authorized_keys"
+            state: file
+
+        - name: copy pub key
+          copy:
+            src: /Users/dporter/.ssh/id_rsa.pub
+            dest: "{{home}}/.ssh/tmp"
+        - name: shell cat
+          shell: cat "{{home}}/.ssh/tmp" > "{{home}}/.ssh/authorized_keys"
+

@@ -1,7 +1,7 @@
 ---
 # tasks file for upload_data
 - name: include the vars
-  include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
+  include_vars: "{{SAPA_HOME}}/playbooks/roles/upload_data/defaults/main.yml"
 
 - name: pull AWS 8983 index
   shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}/default" .
@@ -17,7 +17,7 @@
   no_log: True
 
   args:
-    chdir: /users/dporte7/node__1
+    chdir: "{{user_root_dir}}/node__1"
 
 
 - name: pull AWS node__2 index
@@ -26,7 +26,7 @@
   no_log: True
 
   args:
-    chdir: /users/dporte7/node__2
+    chdir: "{{user_root_dir}}/node__2"
 
 
 - name: pull AWS node__3 index
@@ -35,4 +35,4 @@
   no_log: True
 
   args:
-    chdir: /users/dporte7/node__3
+    chdir: "{{user_root_dir}}/node__3"

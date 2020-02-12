@@ -8,6 +8,7 @@ services:
     ports:
       - "2999:22"
       - "9922:9200"
+      - "8982:8983"
     tty: true
     deploy:
       resources:
@@ -29,6 +30,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "2888:22"
+      - "9933:9200"
+      - "8983:8983"
     tty: true
     deploy:
       resources:
@@ -49,6 +52,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "2777:22"
+      - "9944:9200"
+      - "8984:8983"
     tty: true
     deploy:
       resources:

@@ -27,8 +27,8 @@
     - zoo_conf
 
 - name: copy zoo.cfg file to hosts
-  copy:
-    src: ./roles/zookeeper/files/zoo.cfg
+  template:
+    src: ./roles/zookeeper/templates/zoo.cfg
     dest: '{{zoo_conf_dir}}/zoo.cfg'
   tags:
     - zoo_conf

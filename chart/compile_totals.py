@@ -5,18 +5,18 @@ import time
 import gzip
 
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
+SAPA_HOME = "/Users/dporter/projects/sapa"
 
 def main(query, codename):
-    proj_home = "~/projects/sapa"
     print('RUNNING compile totals')
     QPS = []
     median_lat = []
     tail_lat = []
-    dirs = os.popen('ls '+proj_home+'/chart/totals | grep '+codename).read()
+    dirs = os.popen('ls '+SAPA_HOME+'/chart/totals | grep '+codename).read()
     print(dirs)
     dirs = dirs.split('\n')
     dirs.pop()
-    final_resting_place='/Users/dporter/projects/sapa/chart/totals/cluster_totals'
+    final_resting_place=SAPA_HOME+'/chart/totals/cluster_totals'
     try:
         os.makedirs(final_resting_place)
     except FileExistsError:
@@ -25,12 +25,12 @@ def main(query, codename):
         pass
 
 # this is for total file
-    fm = open(final_resting_place'/all_cluster_'+query+'_'+codename+'.csv', "w+")
+    fm = open(final_resting_place+'/all_cluster_'+query+'_'+codename+'.csv', "w+")
     fm.write('parallel_requests,QPS,median_lat,P95(ms),clustersize,query,rfshards\n')
 
     for d in dirs:
         print(d)
-        with open('/Users/dporter/projects/sapa/chart/totals/'+d, "r") as f_in:
+        with open(SAPA_HOME+'/chart/totals/'+d, "r") as f_in:
             # flush first line
             f_in.readline()
             for line in f_in:

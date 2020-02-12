@@ -1,13 +1,12 @@
 #!/bin/bash
 
-CLOUDHOME=/users/dporte7
-export USER="dporte7"
-export PROJ_HOME=$PROJ_HOME
 
 # load sugar
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_helpers.sh
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_scale_loop_params.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_helpers.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_scale_loop_params.sh
+CLOUDHOME=/users/dporte7
+export SAPA_HOME=$SAPA_HOME
 
 commence_dstat () {
   # remove previous dstatout
@@ -16,11 +15,11 @@ commence_dstat () {
   SHARD=$3
   SOLRNUM=$4
   echo "dstat should not be running but killing just in case"
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
 
 
   echo "removing prev dstat files"
-  pssh -h $PROJ_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
   # dstat on each node
   # nodecounter just makes it easier to know which node dstat file was
   node_counter=0
@@ -41,9 +40,9 @@ commence_dstat () {
   printf "\n"
 }
 
-LOAD_SCRIPTS="$PROJ_HOME/benchmark_scripts/traffic_gen"
-TERMS="$PROJ_HOME/benchmark_scripts/words.txt"
-ENV_OUTPUT_FILE="$PROJ_HOME/env_output_file.txt"
+LOAD_SCRIPTS="$SAPA_HOME/benchmark_scripts/traffic_gen"
+TERMS="$SAPA_HOME/benchmark_scripts/words.txt"
+ENV_OUTPUT_FILE="$SAPA_HOME/env_output_file.txt"
 touch $ENV_OUTPUT_FILE
 
 
@@ -96,17 +95,17 @@ app_threads=1
 echo "SCALE EXP will increase outstanding query requests (LOAD) from $(($load_server_incrementer*$app_threads*$box_cores*$box_threads)) --->> $(($LOAD*$app_threads*$box_cores*$box_threads)) + $(($EXTRA_ITERS*16))"
 echo "chartname:"
 echo $CHARTNAME
-EXP_HOME=/Users/dporter/projects/sapa/chart/exp_records
+EXP_HOME=${SAPA_HOME}/chart/exp_records
 # mov prev record outside project perview (data size too large)
 echo "moving previous records to long term data store"
-mv $EXP_HOME/* ~/projects/saga_records/
+mv $EXP_HOME/* ~/saga_records/
 
 mkdir $EXP_HOME/$CHARTNAME
 
 # ARCHIVE PREVIOUS EXPs (this shouldnt archive anything if done correctly so first wipe dir)
-rm -rf $PROJ_HOME/benchmark_scripts/tmp/tmp/*
-rm -rf $PROJ_HOME/benchmark_scripts/tmp/proc_results/*
-mkdir $PROJ_HOME/benchmark_scripts/tmp/proc_results
+rm -rf $SAPA_HOME/benchmark_scripts/tmp/tmp/*
+rm -rf $SAPA_HOME/benchmark_scripts/tmp/proc_results/*
+mkdir $SAPA_HOME/benchmark_scripts/tmp/proc_results
 
 # echo "$LOAD_NODES"
 # echo "LOAD_NODES = ${LOAD_NODES[1]}"
@@ -120,23 +119,23 @@ fi
 LOAD=$(getLoadNum $LOAD)
 printf "getting load machine info"
 echo "LOADNODES:::" > $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "SOLR NODES:::" >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "NETWORK BANDWIDTH::: " >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "RAM::: " >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 #
-LOADHOSTS="$PROJ_HOME/utils/ssh_files/pssh_traffic_node_file"
+LOADHOSTS="$SAPA_HOME/utils/ssh_files/pssh_traffic_node_file"
 
 printf "starting loop \n\n"
 for ENGINE in ${SEARCHENGINES[@]};do
@@ -228,7 +227,7 @@ for ENGINE in ${SEARCHENGINES[@]};do
                   if "$WARM_CACHE" == true;then
                     cd ~/projects/sapa;pssh -l dporte7 -h $LOADHOSTS "echo ''>traffic_gen/traffic_gen.log"
                     echo "bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $M_LOAD --engine $ENGINE"
-                    cd ~/projects/sapa/benchmark_scripts/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
+                    cd $SAPA_HOME/benchmark_scripts/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
                   fi
 
                   printf "\n\n********** WARMING CACHE COMPLETE **************\n\n"
@@ -258,7 +257,7 @@ for ENGINE in ${SEARCHENGINES[@]};do
                     for n in $ALL_NODES;do
                       ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
                     done
-                    DSTAT_DIR="${PROJ_HOME}/rf_${RF}_s${SHARD}_solrnum${SOLRNUM}_query${QUERY}"
+                    DSTAT_DIR="${SAPA_HOME}/rf_${RF}_s${SHARD}_solrnum${SOLRNUM}_query${QUERY}"
                     mkdir $DSTAT_DIR
                     for n in $ALL_NODES;do
                       scp -r $USER@${n}:~/*dstat.csv $DSTAT_DIR
@@ -279,7 +278,7 @@ for ENGINE in ${SEARCHENGINES[@]};do
 
           stopElastic $SERVERNODE
           stopSolr $SERVERNODE
-          play post_data_$SERVERNODE.yml --tags aws_exp_reset --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+#          play post_data_$SERVERNODE.yml --tags aws_exp_reset --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
           archivePrev $CHARTNAME $SERVERNODE $QUERY $RF $SHARD
 
           # next RF
@@ -288,9 +287,9 @@ for ENGINE in ${SEARCHENGINES[@]};do
       done
       # next servernode
     done
-    python3 /Users/dporter/projects/sapa/chart/chart_all_full.py $QUERY $CHARTNAME
-    python3 /Users/dporter/projects/sapa/chart/chartit_error_bars.py $QUERY $CHARTNAME
-    zip -r /Users/dporter/projects/sapa/chart/exp_html_out/_$CHARTNAME/exp_zip.zip /Users/dporter/projects/sapa/chart/exp_records/$CHARTNAME
+    python3 ${SAPA_HOME}/chart/chart_all_full.py $QUERY $CHARTNAME
+    python3 ${SAPA_HOME}/chart/chartit_error_bars.py $QUERY $CHARTNAME
+    zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME
     # next query
   done
   # next searchengine

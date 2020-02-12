@@ -1,7 +1,7 @@
 #!/bin/bash
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
 
-cd $PROJ_HOME/utils/ssh_files
+cd $SAPA_HOME/utils/ssh_files
 count=0
 ips=()
 for n in $ALL_LOAD;do

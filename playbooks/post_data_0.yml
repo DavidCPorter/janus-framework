@@ -4,7 +4,7 @@
 - hosts: singleNode
   tasks:
     - name: include the vars
-      include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
+      include_vars: "{{SAPA_HOME}}/playbooks/roles/upload_data/defaults/main.yml"
 
     - name: check if aws has the index
     # aws s3 ls s3://solr-8-dporter/10.10.1.12/reviews_rf32_s1_clustersize12
@@ -40,8 +40,8 @@
 #   tasks:
 #     - name: update solr.xml
 #       copy:
-#         src: /Users/dporter/projects/sapa/playbooks/roles/upload_data/files/solr.xml
-#         dest: /users/dporte7/solr-8_3/solr/server/solr/
+#         src: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/solr.xml"
+#         dest: {{user_root_dir}}/solr-8_3/solr/server/solr/
 #         force: yes
 #   tags:
 #     - begin_exp

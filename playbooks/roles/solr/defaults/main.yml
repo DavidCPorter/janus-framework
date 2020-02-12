@@ -13,6 +13,5 @@
 # Files & Paths
 solr_install_dir: /users/dporte7/solr-8_3
 solr_log_dir: /var/solr/logs
-git_branch_name: "{{git_banch_name}}"
 solr_home: /users/dporte7/solr-8_3/solr/server/solr
 solr_init_file: ./roles/solr/files/solr.in.sh

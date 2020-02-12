@@ -1,5 +1,50 @@
 ## SAPA: a tool for Search Agnostic Performance Analysis
 
+
+Sapa provides a simple interface for tuning elastic and solr cloud deployments and comparing their performance. 
+
+CLI tooling shows a few options presented inutitively with this simple flow and options. Or you can simply do step one, and configure the test cases manually in their respective yaml files. 
+```
+$ sapa create <name1> <name2> <name3>
+$ sapa config <key:value> <key:value> <names>...
+$ sapa workload <key:value> <names>...
+$ sapa env <key:value> <names>...
+$ sapa plug </path/to/binary> <other_options> <names>   # needs work... load balancers, rate limiters, etc can go here
+$ sapa viz <viz_type1> <viz_type2> <names>
+$ sapa show states <names>
+$ sapa run <names>
+```
+
+### HOW IT WORKS
+
+a simple use case:
+John wants to know what search application and configuration has the lowest P99 latency given a particular load. 
+```
+$ cd sapa
+$ sapa create <list of names for each configuration> ;  # e.g. solr1 solr2 elastic1 elastic2
+$ sapa add RAM:60G all!elastic2 ;
+$ sapa add engine:elastic elastic1 elastic2 ; 
+$ sapa add loop:open all ;
+$ sapa add load_start:1 load_finish:100 all ;
+$ sapa add load_balancer:clients ;
+$ sapa plug ratelimiter /path/to/ratelimiter/binary all!elastic1 ;
+$ sapa viz plug 
+$ sapa show states ;
+
+| ****** elastic1 ****** | ******* elastic 2 ******  | 
+    ENGINE: elastic         ENGINE: elastic
+    RAM:    60G             RAM:    1G #default
+    LOOP:   open            LOOP:   open
+    ... 
+
+$ sapa run <experiment_name> ;
+
+```
+
+
+
+
+Requirements:
 To deploy you need to set up a local and remote env:
 
 LOCAL:  
@@ -50,7 +95,7 @@ this will generate >> `inventory_gen.txt` file. swap this file with `./inventory
 - replace git_branch_name=dporter_8_3 in inventory to git_branch_name=<name>
 - replace `dporte7` in ansible role "vars" and "defaults" files with your username in cloudlab
 
-##### LOAD env helpers utils.sh and be sure to replace PROJ_HOME and CL_USER var with your path for this app.
+##### LOAD env helpers utils.sh and be sure to replace SAPA_HOME and CL_USER var with your path for this app.
 
 #### set up shell envs
 1. update all files in utils folder with your current cluster and user-specific info **especially the node strings with the IPS**

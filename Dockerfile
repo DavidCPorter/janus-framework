@@ -42,6 +42,7 @@ RUN bash -c ' \
                        sysstat \
                        systemd \
 					   sudo \
+					   telnet \
                        tcpdump \
                        unzip \
                        vim \
@@ -51,7 +52,7 @@ RUN bash -c ' \
     apt-get clean && \
 	useradd -m -p $(openssl passwd -1 "password") -s /bin/bash -G sudo sapauser'
 
-EXPOSE 22
+EXPOSE 22 8983 9200
 
 CMD service ssh start; sleep 99999
 

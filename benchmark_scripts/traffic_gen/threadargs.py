@@ -37,7 +37,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
     if instances != None:
         csize = '9'+csize
 
-    if query == "direct":
+    if query == "roundrobin":
         r = random.randint(1,len(terms))
 
         for i in range( test_param.max_iters ):
@@ -48,7 +48,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
             urls.append("%s%s" % (prefix_url, q))
 
 # solrj
-    elif query == "solrj":
+    elif query == "client":
         col = 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize
         # port 9111 flow -> via solrJ
         # introduce randomness for each thread

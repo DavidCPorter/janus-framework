@@ -5,13 +5,13 @@ USER="dporte7"
 
 
 # load sugar
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
-source /Users/dporter/projects/sapa/utils/exp_helpers.sh
-source /Users/dporter/projects/sapa/utils/exp_scale_loop_params.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
+source ${SAPA_HOME}/utils/exp_helpers.sh
+source ${SAPA_HOME}/utils/exp_scale_loop_params.sh
 
-LOAD_SCRIPTS="$PROJ_HOME/benchmark_scripts/traffic_gen"
-TERMS="$PROJ_HOME/benchmark_scripts/words.txt"
-ENV_OUTPUT_FILE="$PROJ_HOME/env_output_file.txt"
+LOAD_SCRIPTS="$SAPA_HOME/benchmark_scripts/traffic_gen"
+TERMS="$SAPA_HOME/benchmark_scripts/words.txt"
+ENV_OUTPUT_FILE="$SAPA_HOME/env_output_file.txt"
 touch $ENV_OUTPUT_FILE
 
 
@@ -132,11 +132,11 @@ load_server_incrementer=1
 echo "SCALE EXP will increase outstanding query requests (LOAD) from $(($load_server_incrementer*$app_threads*$box_cores*$box_threads)) --->> $(($LOAD*$app_threads*$box_cores*$box_threads))"
 echo "chartname:"
 echo $CHARTNAME
-EXP_HOME=/Users/dporter/projects/sapa/chart/exp_records
+EXP_HOME=${SAPA_HOME}/chart/exp_records
 mkdir $EXP_HOME/$CHARTNAME
 # ARCHIVE PREVIOUS EXPs (this shouldnt archive anything if done correctly so first wipe dir)
-rm -rf $PROJ_HOME/benchmark_scripts/tmp/tmp/*
-rm -rf $PROJ_HOME/benchmark_scripts/tmp/proc_results/*
+rm -rf $SAPA_HOME/benchmark_scripts/tmp/tmp/*
+rm -rf $SAPA_HOME/benchmark_scripts/tmp/proc_results/*
 
 # echo "$LOAD_NODES"
 # echo "LOAD_NODES = ${LOAD_NODES[1]}"
@@ -150,19 +150,19 @@ fi
 LOAD=$(getLoadNum $LOAD)
 
 echo "LOADNODES:::" > $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "SOLR NODES:::" >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "NETWORK BANDWIDTH::: " >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 echo "RAM::: " >> $ENV_OUTPUT_FILE
-pssh -h $PROJ_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
 echo "********" >> $ENV_OUTPUT_FILE
 
 
@@ -189,7 +189,7 @@ for QUERY in ${QUERYS[@]}; do
 
 
 
-    LOADHOSTS="$PROJ_HOME/utils/ssh_files/pssh_traffic_node_file"
+    LOADHOSTS="$SAPA_HOME/utils/ssh_files/pssh_traffic_node_file"
 
     for SHARD in ${SHARDS[@]}; do
 
@@ -219,11 +219,11 @@ for QUERY in ${QUERYS[@]}; do
           # scale each load up to servernode size then add a load node
         # remove previous dstatout
         echo "dstat should not be running but killing just in case"
-        pssh -h $PROJ_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
+        pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
 
 
         echo "removing prev dstat files"
-        pssh -h $PROJ_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
+        pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
         # dstat on each node
         # nodecounter just makes it easier to know which node dstat file was
         node_counter=0
@@ -274,7 +274,7 @@ for QUERY in ${QUERYS[@]}; do
           ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
         done
 
-        DSTAT_DIR="${PROJ_HOME}/rf_${RF}_s${SHARD}_solrnum${SERVERNODE}_query${QUERY}"
+        DSTAT_DIR="${SAPA_HOME}/rf_${RF}_s${SHARD}_solrnum${SERVERNODE}_query${QUERY}"
         mkdir $DSTAT_DIR
 
         for n in $ALL_NODES;do
@@ -298,7 +298,7 @@ for QUERY in ${QUERYS[@]}; do
     archivePrev $CHARTNAME $SERVERNODE $QUERY
   done
   # next query
-  python3 /Users/dporter/projects/sapa/chart/chart_all_full.py $QUERY $CHARTNAME
-  python3 /Users/dporter/projects/sapa/chart/chartit_error_bars.py $QUERY $CHARTNAME
-  zip -r /Users/dporter/projects/sapa/chart/exp_html_out/_$CHARTNAME/exp_zip.zip /Users/dporter/projects/sapa/chart/exp_records/$CHARTNAME
+  python3 ${SAPA_HOME}/chart/chart_all_full.py $QUERY $CHARTNAME
+  python3 ${SAPA_HOME}/chart/chartit_error_bars.py $QUERY $CHARTNAME
+  zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME
 done

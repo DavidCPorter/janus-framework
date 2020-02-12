@@ -1,5 +1,5 @@
 - name: include the vars
-  include_vars: /Users/dporter/projects/sapa/playbooks/roles/upload_data/defaults/main.yml
+  include_vars: "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
 
 - name: update Query Cache configs
   script: ../files/update_query_cache.sh "{{ansible_subnet}}" "{{collection_name}}"

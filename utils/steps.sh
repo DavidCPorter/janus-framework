@@ -1,10 +1,10 @@
 #!/bin/bash
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
-# play cloud_configure.yml --tags never
-# play zoo_configure.yml
-# play solr_configure_all.yml --tags setup
-# play solr_bench.yml --tags solrj
+source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
+# solo_party cloud_configure.yml --tags never
+# solo_party zoo_configure.yml
+# solo_party solr_configure_chroot.yml --tags setup
+# solo_party solr_bench.yml --tags solrj
 
-play elastic_configure_2.yml --skip-tags main --tags load_json
-play elastic_configure_2.yml --tags setup
-play elastic_configure_2.yml --tags start
+solo_party elastic_configure_2.yml --skip-tags main --tags load_json
+solo_party elastic_configure_2.yml --tags setup
+solo_party elastic_configure_2.yml --tags start

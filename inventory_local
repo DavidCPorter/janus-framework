@@ -5,9 +5,9 @@ sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 
 [zookeeperNodes]
-sapa0:2999   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1:2888   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2:2777   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 [masterNodes]
 sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
@@ -20,7 +20,6 @@ sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 [twoNode]
 sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
 sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 [dataNodes]
 sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
@@ -53,7 +52,8 @@ root_path=/Users/dporter/projects/sapa
 main_class=com.dporte7.solrclientserver.DistributedWebServer
 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 git_branch_name=dporter_8_3
-solr_bin_exec=/users/dporte7/solr-8_3/solr/bin/solr
+solr_bin_exec=/home/sapauser/solr-8_3/solr/bin/solr
 s3_bucket_name=solr-8-3-dporter
 gather_facts=no
 home=/home/sapauser
+SAPA_HOME=/Users/dporter/projects/sapa

@@ -14,8 +14,8 @@ solo_party elastic_configure_2.yml --tags start --extra-vars @sapa_vars.yml
 solo_party elastic_configure_2.yml --tags load_json --extra-vars @sapa_vars.yml
 solo_party elastic_configure_2.yml --tags run_script --extra-vars @sapa_vars.yml
 
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_scale_loop_params.sh
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/utils.sh
-source /Users/dporter/projects/sapa/benchmark_scripts/utils/exp_helpers.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_scale_loop_params.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_helpers.sh
 
-cd $PROJ_HOME/benchmark_scripts; bash exp_scale_loop_docker.sh
+cd $SAPA_HOME/benchmark_scripts; bash exp_scale_loop_docker.sh

@@ -1,5 +1,6 @@
 # playbook for cloudconfig
 
+#checks to see if index exists first
 - hosts: twoNode
   roles:
     - upload_data
@@ -17,11 +18,13 @@
 
 # need to put begin_exp tag here to enable tracing.
 - hosts: twoNode
+  vars_files:
+    - "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
   tasks:
     - name: update solr.xml
       copy:
-        src: /Users/dporter/projects/sapa/playbooks/roles/upload_data/files/solr.xml
-        dest: /users/dporte7/solr-8_3/solr/server/solr/
+        src: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/solr.xml"
+        dest: "{{solr_install_dir}}/solr/server/solr/solr.xml"
         force: yes
   tags:
     - begin_exp
@@ -40,6 +43,7 @@
     - name: update collection configs
       include_tasks:
         file: roles/upload_data/tasks/all_config.yml
+
   tags:
     - never
     - update_collection_configs

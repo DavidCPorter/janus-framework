@@ -1,6 +1,0 @@
-# playbook
-- hosts: sixteenNode
-  roles:
-    - elastic
-  tags:
-    - setup
