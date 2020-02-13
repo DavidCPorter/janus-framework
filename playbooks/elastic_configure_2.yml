@@ -33,13 +33,14 @@
 
 - hosts: singleGenerator
   tasks:
+    - name: include vars for elastic indexing ansible script
+      include_vars: "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
+
     - name: include tasks run indexing
       include_tasks:
         file: roles/elastic/tasks/do_index.yml
         apply:
           vars:
-            replicas: 2
-            shards: 1
             hostname: "{{node0}}"
   tags:
     - run_script

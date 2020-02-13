@@ -45,6 +45,8 @@ services:
       sapa_net:
         ipv4_address: 172.21.0.3
 
+
+#server 3 is only used for synchronization aka masternode not datanode
   sapaserver3:
     container_name: sapaUbuntu3
     build:
@@ -58,11 +60,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 2000M
+          cpus: '1'
+          memory: 400M
         reservations:
           cpus: '1'
-          memory: 2000M
+          memory: 400M
     networks:
       sapa_net:
         ipv4_address: 172.21.0.4

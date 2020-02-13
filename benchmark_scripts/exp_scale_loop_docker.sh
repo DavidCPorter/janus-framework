@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # load sugar
 source ${SAPA_HOME}/benchmark_scripts/utils/exp_scale_loop_params.sh
 source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
@@ -16,9 +15,6 @@ if [ $DOCKER = yes ];then
   echo "wooooo"
   alias play=solo_party
 fi
-
-
-
 
 LOAD_SCRIPTS="$SAPA_HOME/benchmark_scripts/traffic_gen"
 TERMS="$SAPA_HOME/benchmark_scripts/words.txt"
@@ -52,17 +48,12 @@ for SERVERNODE in "$@"; do
   fi
 done
 
-PREFIXER=""
 printf "\n\n\n\n"
 echo "******** STARTING FULL SCALING EXPERIEMENT **********"
 printf "\n"
 echo " SCALE EXP loop will measure performance of solrcloud with these cluster sizes:"
-for SERVERNODE in "$@"; do
-  PREFIXER="${PREFIXER}${SERVERNODE}_"
-  echo $SERVERNODE
-done
-CHARTNAME=$(LC_ALL=C tr -dc 'a-z' </dev/urandom | head -c 7; echo)
-CHARTNAME="$(date +"%m-%d")::${PREFIXER}${CHARTNAME}"
+CHARTNAME=$(LC_ALL=C tr -dc 'a-z' </dev/urandom | head -c 4; echo)
+CHARTNAME="$(date +"%m-%d")_${CHARTNAME}"
 ######## VALIDATION COMPLETE
 printf "\n\n\n"
 
@@ -112,12 +103,12 @@ for ENGINE in ${SEARCHENGINES[@]};do
           # RF=$RF_MULT
 
         # change this to switch statement.
-          if [ $ENGINE == "solr" ];then
+          if [ $ENGINE == "solr" ]
+          then
             # zookeeper loses sight of previous collection node mapping for a single clustersize. chroot mitigates zookeeper failure when clustersize changes for an experiment. Basically, a single instance of Zookeeper can keep track of every config and cluster change for solr without failing if chroot exists to separate each clustersize collection mapping. i.e. we dont need to restart zookeeper ever.
             startSolr $SERVERNODE
           # begin_exp is going to either post to solr a new colleciton or pull down an existing one from aws
-            if [ $keep_solr_state = false ]
-              then
+            if [ $keep_solr_state = false ];then
                 play post_data_$SERVERNODE.yml --tags begin_exp --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
           #  need to restart since pulling index from aws most likely happened and solr (not zookeeper) needs to restart after that hack
                 restartSolr $SERVERNODE
@@ -127,15 +118,21 @@ for ENGINE in ${SEARCHENGINES[@]};do
             sleep 2
 
           #  for solrj ... using chroot requires restart of solrj every time :/
-#            if [ $QUERY == "client" ]; then
-#              sleep 3
-#              restartSolrJ $SERVERNODE
-#              sleep 2
-#            fi
-            # else it will be roundrobin
+            if [ $QUERY == "client" ]; then
+              sleep 3
+              restartSolrJ $SERVERNODE
+              sleep 2
+            fi
+
+
           else
             startElastic $SERVERNODE
-            sleep 5
+
+            if [ $keep_elastic_state = false ];then
+              play elastic_configure_2.yml --tags run_script --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+              sleep 3
+            fi
+
           fi
 
 
@@ -247,7 +244,8 @@ for ENGINE in ${SEARCHENGINES[@]};do
   done
   # next searchengine
 done
+
 export SAPA_HOME=$SAPA_HOME
-python3 ${SAPA_HOME}/chart/chart_all_full.py $CHARTNAME
-python3 ${SAPA_HOME}/chart/chartit_error_bars.py $CHARTNAME
+python3 ${SAPA_HOME}/chart/generate_exp_csvs.py $CHARTNAME
+python3 ${SAPA_HOME}/chart/generate_figures.py $CHARTNAME
 zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME

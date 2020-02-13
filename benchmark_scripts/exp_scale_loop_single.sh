@@ -298,7 +298,7 @@ for QUERY in ${QUERYS[@]}; do
     archivePrev $CHARTNAME $SERVERNODE $QUERY
   done
   # next query
-  python3 ${SAPA_HOME}/chart/chart_all_full.py $QUERY $CHARTNAME
-  python3 ${SAPA_HOME}/chart/chartit_error_bars.py $QUERY $CHARTNAME
+  python3 ${SAPA_HOME}/chart/generate_exp_csvs.py $QUERY $CHARTNAME
+  python3 ${SAPA_HOME}/chart/generate_figures.py $QUERY $CHARTNAME
   zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME
 done

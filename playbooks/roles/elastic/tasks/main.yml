@@ -87,13 +87,6 @@
     - setup
     - never
 
-- name: run post script
-  include_tasks:
-    file: do_index.yml
-  tags:
-    - do_index
-    - never
-
 
 - name: pip elasticsearch
   include_tasks:

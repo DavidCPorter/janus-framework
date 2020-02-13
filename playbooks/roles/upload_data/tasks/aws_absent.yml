@@ -44,6 +44,17 @@
   ignore_errors: yes
   when: "'PRE' not in index_result.stdout"
 
+- debug:
+    var: col_result
+
+- name: try create collection {{collection_name}} AGAIN if failed
+  shell: ./bin/solr create_collection -c {{collection_name}} -s {{shards}} -rf {{replicas}} -d _default -force
+  register: col_result
+  args:
+    chdir: '{{solr_install_dir}}/solr'
+    creates: '{{data_upload_dir}}/{{collection_name}}.txt'
+  ignore_errors: yes
+  when: col_result.changed != true
 
 
 - name: create schema

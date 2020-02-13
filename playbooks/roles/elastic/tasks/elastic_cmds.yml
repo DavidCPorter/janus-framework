@@ -34,17 +34,26 @@
     - start
     - never
 
-- name: start elastic w/ a pointer to config path
-  shell: ./bin/elasticsearch >/dev/null 2>&1 &
-  async: 9999
-  poll: 0
-  register: es_start_result
-  # ignore_errors: yes
+- name: start elastic
+  block:
+    - name: start elastic w/ a pointer to config path
+      shell: ./bin/elasticsearch >/dev/null 2>&1 &
+      async: 9999
+      poll: 5
+      register: es_start_result
+      args:
+        chdir: '{{es_root_dir}}'
+      environment:
+        ES_PATH_CONF: "{{es_root_dir}}/config"
+        # ignore_errors: yes
 
-  args:
-    chdir: '{{es_root_dir}}'
-  environment:
-    ES_PATH_CONF: "{{es_root_dir}}/config"
+
+    - name: wait for port 9200 to open
+      wait_for:
+        host: "{{ansible_subnet}}"
+        port: 9200
+        state: started
+        delay: 5
   tags:
     - start
     - never

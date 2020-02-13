@@ -36,7 +36,7 @@ function show_remote_scripts() {
 }
 
 function update_rscripts() {
-  args=("$@")
+  typeset args=("$@")
 # get number of elements
   ELEMENTS=${#args[@]}
   offset=1

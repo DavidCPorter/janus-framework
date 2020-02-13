@@ -68,6 +68,8 @@ def main(shards, replicas, iname, hostname, shorter_data):
     elif 'error' in response:
         print("ERROR:", response['error']['root_cause'])
         print("TYPE:", response['error']['type'])
+        # exit script if error when creating index
+        return
 
     data_file = "shorter_reviews.json"
     if shorter_data == "false":
@@ -77,9 +79,8 @@ def main(shards, replicas, iname, hostname, shorter_data):
 
 
 if __name__ == "__main__":
-
-    if len(sys.argv) != 5:
-        print("4 args required <shards> <replicas> <index_name> <elastichost>")
+    if len(sys.argv) != 6:
+        print("5 args required <shards> <replicas> <index_name> <elastichost> <shorter_data?>")
         sys.exit()
     shards = sys.argv[1]
     replicas = sys.argv[2]

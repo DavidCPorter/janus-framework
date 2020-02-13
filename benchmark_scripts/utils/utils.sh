@@ -40,6 +40,7 @@ alias checkconfig="cd $SAPA_HOME/; pssh -l $CL_USER -i -h ssh_files/solr_single_
 alias collectionconfig="curl http://128.110.153.162:8983/solr/reviews_rf4_s1_clustersize94/config"
 alias collectionconfigfull="curl http://128.110.153.162:8983/solr/reviews_rf32_s1_clustersize16/config"
 alias daparams="vim $SAPA_HOME/benchmark_scripts/utils/exp_scale_loop_params.sh"
+alias davars="vim $SAPA_HOME/playbooks/sapa_vars.yml"
 
 export CORE_HOME=/users/dporte7/solr-8_3/solr/server/solr
 
@@ -55,10 +56,4 @@ export ALL_LOAD=" $node3 "
 alias ssher="ssh -l $CL_USER"
 source $SAPA_HOME/benchmark_scripts/utils/exp_helpers.sh
 shopt -s expand_aliases
-
-rsa_containers (){
-
-  solo_party
-
-}
 

@@ -60,7 +60,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
             # q = 'solr/reviews_rf2q/select?q='+field+'%3A'+term+'&rows=10'
             urls.append( "/%s/%s/%s" % (field, term, col))
     elif engine == "elastic":
-        index = 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize
+        index = 'reviews_rf'+str(replicas)+'_s'+str(shards)+'_csize'+csize
         r = random.randint(1,len(terms))
         for i in range( test_param.max_iters ):
             i+=r
@@ -68,7 +68,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
             field = indexed_fields[i%len(indexed_fields)]
             # q = '/solr/reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize+'/_search?q='+field+':'+term
             # testing with index reviews right now
-            q='/reviews21/_search?q='+field+':'+term
+            q='/'+index+'/_search?q='+field+':'+term
             urls.append("%s" % q)
     return urls
 
