@@ -107,7 +107,7 @@ function start_experiment() {
       echo "$mycounter == $LOADSIZE"
       scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $SAPA_HOME/benchmark_scripts/tmp/proc_results
     else
-      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $SAPA_HOME/benhmark_scripts/tmp/proc_results &
+      scp -q $USER@$i:~/traffic_gen/http_benchmark_${15}* $SAPA_HOME/benchmark_scripts/tmp/proc_results &
       mycounter=$(($mycounter+1))
     fi
   done

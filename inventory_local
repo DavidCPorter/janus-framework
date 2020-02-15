@@ -40,10 +40,10 @@ sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 
 [all:vars]
 ansible_user=sapauser
+
 ansible_sudo_pass=password
 ansible_connection=ssh
 ansible_password=password
-ansible_connection=ssh
 node0=172.21.0.2
 node1=172.21.0.3
 node2=172.21.0.4

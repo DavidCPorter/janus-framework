@@ -35,8 +35,8 @@ es_log_dir: /var/elasticsearch/log
 cache_percentage: "50%"
 metric_root_dir: "{{home}}/metricbeat"
 discovery_nodes_override:
-  - "{{node0}}"
-  - "{{node1}}"
+  - 10.10.1.1
+  - 10.10.1.2
 masters_override:
   - "{{node0}}"
   - "{{node1}}"
@@ -68,3 +68,4 @@ cred_dir: "{{SAPA_HOME}}/playbooks/roles/cloud-env/files/.aws"
 heapsize: 1
 shorter_data: true
 id_rsa_pub_path: /Users/dporter/.ssh/id_rsa.pub
+

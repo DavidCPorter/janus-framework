@@ -1,21 +1,66 @@
 # playbook
-# masternode are like zookeeper and need to be relaunced for every state change. Simply use the zookeeperNodes
-- hosts: zookeeperNodes
-  tasks:
-    - name: run launch_masternodes.yml
-      include-tasks: roles/elastic/tasks/launch_masternodes.yml
-
 
 - hosts: eightNode
   roles:
     - elastic
   vars:
-    discoverynodes:
-      - "{{node0}}"
-      - "{{node1}}"
-      - "{{node2}}"
-      - "{{node3}}"
-      - "{{node4}}"
-      - "{{node5}}"
-      - "{{node6}}"
-      - "{{node7}}"
+    cache_percentage_of_heap: "{{cache_percentage}}"
+    discovery_nodes: "{{discovery_nodes_override}}"
+    cluster_name: twoNode
+  tags:
+    - main
+
+- hosts: singleGenerator
+  tasks:
+    - name: include tasks download_json
+      include_tasks:
+        file: roles/elastic/tasks/download_json.yml
+  tags:
+    - load_json
+    - never
+
+- hosts: singleGenerator
+  tasks:
+    - name: truncate the json
+      shell: head -n 100000 reviews_Electronics_5.json > reviews.json
+  tags:
+    - docker
+    - never
+
+- hosts: singleGenerator
+  tasks:
+    - debug:
+        var: groups['singleNode']
+  tags:
+    - woah
+
+- hosts: singleGenerator
+  tasks:
+    - name: include vars for elastic indexing ansible script
+      include_vars: "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
+
+    - name: include tasks run indexing
+      include_tasks:
+        file: roles/elastic/tasks/do_index.yml
+        apply:
+          vars:
+            hostname: "{{node0_subnet}}"
+  tags:
+    - run_script
+    - never
+
+
+    # tags:
+    # - start_masternodes
+    # - never
+
+# - hosts: thirdMaster
+#   roles:
+#     - elastic
+#   vars:
+#     master_flag: true
+#     data_flag: false
+#     discovery_nodes:
+#       - "{{node0}}"
+#       - "{{node1}}"
+#     cluster_name: twoNode

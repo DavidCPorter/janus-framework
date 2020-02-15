@@ -45,27 +45,20 @@ alias davars="vim $SAPA_HOME/playbooks/sapa_vars.yml"
 export CORE_HOME=/users/dporte7/solr-8_3/solr/server/solr
 
 
-export node0="128.110.153.102"
-export node1="128.110.153.85"
-export node2="128.110.153.107"
-export node3="128.110.153.77"
-export node4="128.110.153.106"
-export node5="128.110.153.79"
-export node6="128.110.153.73"
-export node7="128.110.153.94"
-export node8="128.110.153.80"
-export node9="128.110.153.104"
-export node10="128.110.153.95"
-export node11="128.110.153.91"
-export node12="128.110.153.93"
-export node13="128.110.153.96"
-export node14="128.110.153.66"
-export node15="128.110.153.97"
+{% for host in groups['allNodes'] %}
+export node{{loop.index-1}}="{{host}}"
+{% endfor %}
 
 # # cannot export ARRAYS in bash : ) so we do this instead
-export ALL_NODES=" $node0 $node1 $node2 $node3 $node4 $node5 $node6 $node7 $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 "
-export ALL_SOLR=" $node0 $node1 $node2 $node3 $node4 $node5 $node6 $node7 "
-export ALL_LOAD=" $node8 $node9 $node10 $node11 $node12 $node13 $node14 $node15 "
+export ALL_NODES="{% for host in groups['allNodes'] %} $node{{loop.index-1}}{%- if loop.last %} "{% endif %}
+{% endfor %}
+
+export ALL_SOLR="{% for host in groups['allSearchNodes'] %} $node{{loop.index-1}}{%- if loop.last %} "{% endif %}
+{% endfor %}
+
+export ALL_LOAD="{% for host in groups['generatorNode'] %} $node{{loop.index+searchnodecount-1}}{%- if loop.last %} "{% endif %}
+{% endfor %}
+
 alias ssher="ssh -l $CL_USER"
 #source $SAPA_HOME/benchmark_scripts/utils/exp_helpers.sh
 shopt -s expand_aliases

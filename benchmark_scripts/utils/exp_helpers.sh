@@ -3,7 +3,7 @@
 
 CLOUDHOME="/users/dporte7"
 export USER=$USER
-DOCKER=yes
+DOCKER=no
 
 
 if [ "$DOCKER" = yes ];then
@@ -41,7 +41,7 @@ function update_rscripts() {
   ELEMENTS=${#args[@]}
   offset=1
   subnet24=10.10.1.
-  home_dir=/users/$user
+  home_dir=/users/$USER
   printf "\n\n\n\n $DOCKER \n\n\n"
   if [ $DOCKER = yes ];then
     offset=2
@@ -292,7 +292,7 @@ startElastic () {
   if [ $DOCKER = yes ];then
     solo_party elastic_configure_$1.yml --tags start --extra-vars "@sapa_vars.yml"
   else
-    play elastic_configure_$1.yml --tags start
+    play elastic_configure_$1.yml --tags start --extra-vars "@sapa_vars.yml"
   fi
 
 }
@@ -301,7 +301,7 @@ stopElastic (){
   if [ $DOCKER = yes ];then
     solo_party elastic_configure_$1.yml --tags stop --extra-vars "@sapa_vars.yml"
   else
-    play elastic_configure_$1.yml --tags stop
+    play elastic_configure_$1.yml --tags stop --extra-vars "@sapa_vars.yml"
   fi
 }
 getHostResourceInfo (){

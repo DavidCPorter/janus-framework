@@ -4,7 +4,7 @@
   include_vars: "{{SAPA_HOME}}/playbooks/roles/upload_data/defaults/main.yml"
 
 - name: pull AWS 8983 index
-  shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}/default" .
+  shell: aws s3 sync "s3://tard/{{ansible_subnet}}/{{collection_name}}/default" .
   ignore_errors: yes
   no_log: True
 
@@ -12,7 +12,7 @@
     chdir: '{{solr_home}}'
 
 - name: pull AWS node__1 index
-  shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}/node__1" .
+  shell: aws s3 sync "s3://tard/{{ansible_subnet}}/{{collection_name}}/node__1" .
   ignore_errors: yes
   no_log: True
 
@@ -21,7 +21,7 @@
 
 
 - name: pull AWS node__2 index
-  shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}/node__2" .
+  shell: aws s3 sync "s3://tard/{{ansible_subnet}}/{{collection_name}}/node__2" .
   ignore_errors: yes
   no_log: True
 
@@ -30,7 +30,7 @@
 
 
 - name: pull AWS node__3 index
-  shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}/node__3" .
+  shell: aws s3 sync "s3://tard/{{ansible_subnet}}/{{collection_name}}/node__3" .
   ignore_errors: yes
   no_log: True
 

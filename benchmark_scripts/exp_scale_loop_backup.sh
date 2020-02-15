@@ -1,20 +1,43 @@
 #!/bin/bash
 
 # load sugar
-source ${SAPA_HOME}/benchmark_scripts/utils/exp_scale_loop_params.sh
 source ${SAPA_HOME}/benchmark_scripts/utils/utils.sh
 source ${SAPA_HOME}/benchmark_scripts/utils/exp_helpers.sh
+source ${SAPA_HOME}/benchmark_scripts/utils/exp_scale_loop_params.sh
+CLOUDHOME=/users/dporte7
+export SAPA_HOME=$SAPA_HOME
 
-#set -e
-#if [ $DOCKER = yes ];then
-#fi
-#set -x
-export DOCKER=$DOCKER
+commence_dstat () {
+  # remove previous dstatout
+  QUERY=$1
+  RF=$2
+  SHARD=$3
+  SOLRNUM=$4
+  echo "dstat should not be running but killing just in case"
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "pkill -f dstat"
 
-if [ $DOCKER = yes ];then
-  echo "wooooo"
-  alias play=solo_party
-fi
+
+  echo "removing prev dstat files"
+  pssh -h $SAPA_HOME/utils/ssh_files/pssh_all --user $USER "rm ~/*dstat.csv"
+  # dstat on each node
+  # nodecounter just makes it easier to know which node dstat file was
+  node_counter=0
+
+
+  echo "COMMENCE DSTAT ON ALL MACHINES..."
+  printf "\n"
+
+
+  ssh $USER@$n "pkill -f dstat" >/dev/null 2>&1 &
+
+  for n in $ALL_NODES;do
+    nohup ssh $USER@$n "dstat -t --cpu --mem --disk --io --net --int --sys --swap --tcp --output node${node_counter}_${n}_${QUERY}::rf${RF}_s${SHARD}_cluster${SOLRNUM}_dstat.csv &" >/dev/null 2>&1 &
+    node_counter=$(($node_counter+1))
+  done
+  printf "\n"
+  echo "DSTAT LIVE"
+  printf "\n"
+}
 
 LOAD_SCRIPTS="$SAPA_HOME/benchmark_scripts/traffic_gen"
 TERMS="$SAPA_HOME/benchmark_scripts/words.txt"
@@ -48,12 +71,17 @@ for SERVERNODE in "$@"; do
   fi
 done
 
+PREFIXER=""
 printf "\n\n\n\n"
 echo "******** STARTING FULL SCALING EXPERIEMENT **********"
 printf "\n"
 echo " SCALE EXP loop will measure performance of solrcloud with these cluster sizes:"
-CHARTNAME=$(LC_ALL=C tr -dc 'a-z' </dev/urandom | head -c 4; echo)
-CHARTNAME="$(date +"%m-%d")_${CHARTNAME}"
+for SERVERNODE in "$@"; do
+  PREFIXER="${PREFIXER}${SERVERNODE}_"
+  echo $SERVERNODE
+done
+CHARTNAME=$(LC_ALL=C tr -dc 'a-z' </dev/urandom | head -c 7; echo)
+CHARTNAME="$(date +"%m-%d")::${PREFIXER}${CHARTNAME}"
 ######## VALIDATION COMPLETE
 printf "\n\n\n"
 
@@ -69,24 +97,46 @@ echo $CHARTNAME
 EXP_HOME=${SAPA_HOME}/chart/exp_records
 # mov prev record outside project perview (data size too large)
 echo "moving previous records to long term data store"
-mv $EXP_HOME/* ~/projects/saga_records/
+mv $EXP_HOME/* ~/saga_records/
+
 mkdir $EXP_HOME/$CHARTNAME
 
 # ARCHIVE PREVIOUS EXPs (this shouldnt archive anything if done correctly so first wipe dir)
-
-mkdir -p $SAPA_HOME/benchmark_scripts/tmp/proc_results
+rm -rf $SAPA_HOME/benchmark_scripts/tmp/tmp/*
 rm -rf $SAPA_HOME/benchmark_scripts/tmp/proc_results/*
-rm -rf $SAPA_HOME/benchmark_scripts/tmp/exp_results/*
+mkdir $SAPA_HOME/benchmark_scripts/tmp/proc_results
 
-
+# echo "$LOAD_NODES"
+# echo "LOAD_NODES = ${LOAD_NODES[1]}"
 if [ $copy_python_scripts == "yes" ]; then
   echo 'Copying python scripts and search terms to load machines'
   play update_loadscripts.yml --extra-vars "scripts_path=$LOAD_SCRIPTS terms_path=$TERMS"
 fi
 
+########## PRINT ENV TO ENV OUTPUT FILE ##########
+
+LOAD=$(getLoadNum $LOAD)
+printf "getting load machine info"
+echo "LOADNODES:::" > $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_traffic_node_file_$LOAD -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+echo "********" >> $ENV_OUTPUT_FILE
+
+echo "SOLR NODES:::" >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_solr_node_file -P "lscpu | grep 'CPU(s)\|Thread(s)\|Core(s)\|Arch\|cache\|Socket(s)'" >> $ENV_OUTPUT_FILE
+echo "********" >> $ENV_OUTPUT_FILE
+
+echo "NETWORK BANDWIDTH::: " >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "cat /sys/class/net/eno1d1/speed" >> $ENV_OUTPUT_FILE
+echo "********" >> $ENV_OUTPUT_FILE
+
+echo "RAM::: " >> $ENV_OUTPUT_FILE
+pssh -h $SAPA_HOME/utils/ssh_files/pssh_all -P "lshw -c memory | grep size" >> $ENV_OUTPUT_FILE
+echo "********" >> $ENV_OUTPUT_FILE
+
+#
 LOADHOSTS="$SAPA_HOME/utils/ssh_files/pssh_traffic_node_file"
 
-printf "\n\n starting loop \n\n"
+printf "starting loop \n\n"
 for ENGINE in ${SEARCHENGINES[@]};do
 
   for QUERY in ${QUERYS[@]}; do
@@ -103,42 +153,42 @@ for ENGINE in ${SEARCHENGINES[@]};do
           # RF=$RF_MULT
 
         # change this to switch statement.
-          if [ $ENGINE == "solr" ]
-          then
+          if [ $ENGINE == "solr" ];then
             # zookeeper loses sight of previous collection node mapping for a single clustersize. chroot mitigates zookeeper failure when clustersize changes for an experiment. Basically, a single instance of Zookeeper can keep track of every config and cluster change for solr without failing if chroot exists to separate each clustersize collection mapping. i.e. we dont need to restart zookeeper ever.
             startSolr $SERVERNODE
           # begin_exp is going to either post to solr a new colleciton or pull down an existing one from aws
-            if [ $keep_solr_state = false ];then
-                play post_data_$SERVERNODE.yml --tags begin_exp --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+            play post_data_$SERVERNODE.yml --tags begin_exp --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
           #  need to restart since pulling index from aws most likely happened and solr (not zookeeper) needs to restart after that hack
-                restartSolr $SERVERNODE
-            fi
+            restartSolr $SERVERNODE
 
             play post_data_$SERVERNODE.yml --tags update_collection_configs --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
             sleep 2
 
-          #  for solrj ... using chroot requires restart of solrj every time :/
             if [ $QUERY == "client" ]; then
+              echo "waiting for solr..."
               sleep 3
+              echo "restarting solrj.."
               restartSolrJ $SERVERNODE
               sleep 2
             fi
+            # else it will be roundrobin
 
-
+          # start elastic search
           else
+            printf "staring elastic \n"
             startElastic $SERVERNODE
-
-            if [ $keep_elastic_state = false ];then
-              play elastic_configure_2.yml --tags run_script --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
-              sleep 3
-            fi
-
+            sleep 5
           fi
 
+
+          #  sfor solrj ... using chroot requires restart of solrj every time :/
 
 
           PROCESSES=$SERVERNODE
           SOLRNUM=$SERVERNODE
+            # scale each load up to servernode size then add a load node
+
+      # these state loops below do not require any index mods, so they are fast
 
           for J_MEM in ${JVM_MEM[@]}; do
             for doc_cache in ${DOC_CACHE[@]}; do
@@ -147,17 +197,17 @@ for ENGINE in ${SEARCHENGINES[@]};do
 
                   STATE_SPACE="
                     \n\n
-                     ENGINE       = $ENGINE
-                     LB           = $QUERY
-                     SERVERNODE   = $SERVERNODE
-                     SHARD        = $SHARD
-                     RF_MULT      = $RF_MULT
-                     JVM_MEM      = $J_MEM
-                     doc_cache    = $doc_cache
-                     filter_cache = $filter_cache
-                     CONTROLLOOP  = $loop
-                     LOADSIZE     = $LOAD
-                     CONNSCALE    = $mincon -> $maxcon
+                    \n ENGINE       = $ENGINE
+                    \n LB           = $QUERY
+                    \n SERVERNODE   = $SERVERNODE
+                    \n SHARD        = $SHARD
+                    \n RF_MULT      = $RF_MULT
+                    \n JVM_MEM      = $J_MEM
+                    \n doc_cache    = $doc_cache
+                    \n filter_cache = $filter_cache
+                    \n CONTROLLOOP  = $loop
+                    \n LOADSIZE     = $LOAD
+                    \n CONNSCALE    = $mincon -> $maxcon
                     \n\n
                   "
                   printf "BEGINNING EXP LOOP FOR THIS STATE SPACE: $STATE_SPACE "
@@ -174,9 +224,9 @@ for ENGINE in ${SEARCHENGINES[@]};do
                   printf "\n\n********** WARMING CACHE... **************\n\n"
 
                   if "$WARM_CACHE" == true;then
-                    cd ~/projects/sapa;pssh -l $USER -h $LOADHOSTS "echo ''>traffic_gen/traffic_gen.log"
-                    echo "bash runtest.sh traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $M_LOAD --engine $ENGINE"
-                    cd ~/projects/sapa/benchmark_scripts/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
+                    cd ~/projects/sapa;pssh -l dporte7 -h $LOADHOSTS "echo ''>traffic_gen/traffic_gen.log"
+                    echo "bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $M_LOAD --engine $ENGINE"
+                    cd $SAPA_HOME/benchmark_scripts/scriptsThatRunLoadServers; bash runtest.sh traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
                   fi
 
                   printf "\n\n********** WARMING CACHE COMPLETE **************\n\n"
@@ -186,14 +236,14 @@ for ENGINE in ${SEARCHENGINES[@]};do
 
                     printf "\n\n********   STARTING EXP PRELIM STEPS   ************\n\n"
                     printf "removing previous exp load script output ::: traffic_gen/traffic_gen.log \n\n"
-                    cd ~/projects/sapa;pssh -l $USER -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
+                    cd ~/projects/sapa;pssh -l dporte7 -h "${LOADHOSTS}_${LOAD}" "echo ''>traffic_gen/traffic_gen.log"
 
                     printf "\n\n PARAMETERS TO runscript.sh:::: \n"
-                    echo "\$ ./benchmark_scripts/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $l --engine $ENGINE"
+                    echo "\$ ./benchmark_scripts/scriptsThatRunLoadServers/runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $l --engine $ENGINE"
 
                     printf "\n\n\n RUNNING runscript.sh .....  \n"
                     # shellcheck disable=SC2086
-                    cd ~/projects/sapa/benchmark_scripts/scriptsThatRunLoadServers || exit; bash runtest.sh traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
+                    cd ~/projects/sapa/benchmark_scripts/scriptsThatRunLoadServers || exit; bash runtest.sh traffic_gen words.txt --user dporte7 -rf $RF -s $SHARD -t ${app_threads} -d 10 -p $l --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
                     sleep 2
 
                   done
@@ -223,13 +273,10 @@ for ENGINE in ${SEARCHENGINES[@]};do
             # next jvm
           done
 
-          if [ $ENGINE = "solr" ]
-          then
-            stopSolr $SERVERNODE
-          else
-            stopElastic $SERVERNODE
-          fi
+          #need to call stopsolr it here since it needs to stop this exp explicitly before running a new one
 
+          stopElastic $SERVERNODE
+          stopSolr $SERVERNODE
 #          play post_data_$SERVERNODE.yml --tags aws_exp_reset --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
           archivePrev $CHARTNAME $SERVERNODE $QUERY $RF $SHARD
 
@@ -239,13 +286,10 @@ for ENGINE in ${SEARCHENGINES[@]};do
       done
       # next servernode
     done
-
+    python3 ${SAPA_HOME}/chart/generate_exp_csvs.py $QUERY $CHARTNAME
+    python3 ${SAPA_HOME}/chart/generate_figures.py $QUERY $CHARTNAME
+    zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME
     # next query
   done
   # next searchengine
 done
-
-export SAPA_HOME=$SAPA_HOME
-python3 ${SAPA_HOME}/chart/generate_exp_csvs.py $CHARTNAME
-python3 ${SAPA_HOME}/chart/generate_figures.py $CHARTNAME
-zip -r ${SAPA_HOME}/chart/exp_html_out/_$CHARTNAME/exp_zip.zip ${SAPA_HOME}/chart/exp_records/$CHARTNAME

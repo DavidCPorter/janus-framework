@@ -8,7 +8,7 @@
     msg: "{{SAPA_HOME}}"
 
 - name: check if aws has the index
-  shell: aws s3 ls "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}"
+  shell: aws s3 ls "s3://tard"
   register: index_result
   ignore_errors: yes
 

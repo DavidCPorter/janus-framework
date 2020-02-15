@@ -4,7 +4,7 @@
   include_vars: "{{SAPA_HOME}}/playbooks/roles/upload_data/defaults/main.yml"
 
 - name: pull AWS index
-  shell: aws s3 sync "s3://{{s3_bucket_name}}/{{ansible_subnet}}/{{collection_name}}" .
+  shell: aws s3 sync "s3://tard/{{ansible_subnet}}/{{collection_name}}" .
   ignore_errors: yes
   no_log: True
 

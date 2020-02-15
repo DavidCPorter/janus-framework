@@ -5,8 +5,6 @@
     - elastic
   vars:
     cache_percentage_of_heap: "{{cache_percentage}}"
-    master_flag: true
-    data_flag: true
     discovery_nodes: "{{discovery_nodes_override}}"
     cluster_name: twoNode
   tags:
@@ -29,7 +27,12 @@
     - docker
     - never
 
-
+- hosts: singleGenerator
+  tasks:
+    - debug:
+        var: groups['singleNode']
+  tags:
+    - woah
 
 - hosts: singleGenerator
   tasks:
@@ -41,7 +44,7 @@
         file: roles/elastic/tasks/do_index.yml
         apply:
           vars:
-            hostname: "{{node0}}"
+            hostname: "{{node0_subnet}}"
   tags:
     - run_script
     - never

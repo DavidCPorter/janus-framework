@@ -15,8 +15,6 @@
         masters: "{{masters_override}}"
         nethost: "{{ansible_subnet}}"
         discoverynodes: "{{discovery_nodes}}"
-        masterflag: "{{master_flag}}"
-        dataflag: "{{data_flag}}"
 
     - name: log4j2.properties
       template:
