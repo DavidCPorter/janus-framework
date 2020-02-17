@@ -1,18 +1,37 @@
 ## SAPA: a tool for Search Agnostic Performance Analysis
 
 
-Sapa provides a simple interface for tuning elastic and solr cloud deployments and comparing their performance. 
+Sapa provides an automation tool for deploying and benchmarking solr and elastic search engines. The overarching purpose of this project is to provide a framework for quickly discovering optimal deployments strategies given organizational constraints. Search engine config state space is insanely large (fig1) and navigating the knobs is very complex job with a lot of guesswork. Unfortunately, there is no silver bullet when it comes to configuration. If you ask 10 domain experts what the best settings are for optimal performance of x, you will be hammered with 10 "it depends"... everyones favorite response. They're not sipping the same gfy koolaid, they're absolutely correct. Optimizing performance is not universal, and that indeed "depends". However, why isn't there a good tool for exploring this labyrinth in a reasonable time. If you have been diagnosed with "search engine configuration fatigue", or suspect there are performance bottlenecks and want to efficiently explore all your options.. SAPA is the tool for you.
 
-CLI tooling shows a few options presented inutitively with this simple flow and options. Or you can simply do step one, and configure the test cases manually in their respective yaml files. 
+Key Terminology:
+- `sapa_bench` = sapa_bench is the term to descibe a sapa run from end to end. Put simply, it's the core use case for sapa. It's defined as a experiment to benchmark N number of search engine deployments and compare the results.
+- `statespace` = the statespace is the particular settings for a single deployment. 
+- `deployment` = a particular instance of elastic or solrcloud with a defined statespace 
+
+Importantly, statespace is composed of three sub spaces, and each has an impact on search performance.
+
+- `config`: these are the knobs provided to users for tuning the instance of the search engine. _e.g. solrconfig.xml, elasticsearch.yml, replicas, shards, etc._
+- `workload`: these settings generally define the interactions with search engines during the experiment, most notably the workload settings. _e.g. search term dictionary, documents, load balancers, client apis, etc_
+- `env`: defines things such as JVM settings, clustersize scaling, local, remote configs.
+**e.g. clustersizes, cluster replications, JVM settings, docker,  network configs, etc**
+
+other sapa_bench options: 
+- `viz`: declare visualizations to generate with the performance data. _e.g. cdfs, latecy->throughput, 
+- `plug`: experimental integrations to plug into the enviornment. The goal with this is to inject a binary into the experimental flow to enhance performance. e.g. rate limiters, service proxies, multitenenant, etc.  
+
+Sapa's CLI makes configuring the statespace for multiple deployments simple. The CLI sole purposes is to populate sapa_.yml files for each deployment. The best practice is to generate the .yml files using for example `sapa create e_1:elastic e_2:elastic s_1:solr s_2:solr`. This will generate the template files which you can manually reconfigure, or do so with the CLI commands. A savvy user may choose to use the cli in a bash script that can be saved and perhaps replayed or archived. 
+
+Importantly, the last paramater for each cli command is a comma separated list of deployment names given in the create step. OPtionnally, all and ! are tokens that represent *all* deployments, and *sans* deployment. So you can for instance use `all,!elastic1` which will apply those settings to all but the elastic1 deployment. 
+
 ```
-$ sapa create <name1> <name2> <name3>
-$ sapa config <key:value> <key:value> <names>...
-$ sapa workload <key:value> <names>...
-$ sapa env <key:value> <names>...
-$ sapa plug </path/to/binary> <other_options> <names>   # needs work... load balancers, rate limiters, etc can go here
-$ sapa viz <viz_type1> <viz_type2> <names>
-$ sapa show states <names>
-$ sapa run <names>
+$ sapa create <key:name1> <key:name2> <key:name3> 
+$ sapa config <key:value> <key:value> <deployments>
+$ sapa workload <key:value> <deployments>
+$ sapa env <key:value> <deployments>
+$ sapa plug </path/to/binary> <other_options> <deployments> 
+$ sapa viz <viz_type1> <viz_type2> <deployments>
+$ sapa show states <deployments>
+$ sapa run <deployments>
 ```
 
 ### HOW IT WORKS
@@ -21,15 +40,15 @@ a simple use case:
 John wants to know what search application and configuration has the lowest P99 latency given a particular load. 
 ```
 $ cd sapa
-$ sapa create <list of names for each configuration> ;  # e.g. solr1 solr2 elastic1 elastic2
-$ sapa add RAM:60G all!elastic2 ;
-$ sapa add engine:elastic elastic1 elastic2 ; 
-$ sapa add loop:open all ;
-$ sapa add load_start:1 load_finish:100 all ;
-$ sapa add load_balancer:clients ;
-$ sapa plug ratelimiter /path/to/ratelimiter/binary all!elastic1 ;
-$ sapa viz plug 
-$ sapa show states ;
+$ sapa create solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
+$ sapa env RAM:20G all,!elastic2 ;
+$ sapa config queryCache:9999 documentCache:9999 all,!elastic1,!elastic2 ;
+$ sapa workload loop:open all ;
+$ sapa workload load_start:1 load_finish:100 solr1,solr2;
+$ sapa workload load_balancer:clients all,!elastic2;
+$ sapa plug ratelimiter /path/to/ratelimiter/binary all,!elastic1 ;
+$ sapa viz cdf_999 cdf_99 cdf_90 cdf_50 all
+$ sapa show states all ;
 
 | ****** elastic1 ****** | ******* elastic 2 ******  | 
     ENGINE: elastic         ENGINE: elastic
@@ -37,7 +56,7 @@ $ sapa show states ;
     LOOP:   open            LOOP:   open
     ... 
 
-$ sapa run <experiment_name> ;
+$ sapa run <experiment_name> all ;
 
 ```
 

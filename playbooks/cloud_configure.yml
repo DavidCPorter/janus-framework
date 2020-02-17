@@ -34,3 +34,4 @@
         dest: "{{SAPA_HOME}}/benchmark_scripts/utils/utils.sh"
   tags:
     - utils
+    - never

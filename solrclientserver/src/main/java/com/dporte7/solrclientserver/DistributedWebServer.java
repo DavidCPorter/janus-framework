@@ -25,7 +25,11 @@ public class DistributedWebServer {
     // need to get clustersize here and pass to optional
 
     public static void main(String[] args) throws Exception {
-        //try passing just one instance of cloudsolrclient to thread generator class
+        // try passing just one instance of cloudsolrclient to thread generator class
+        // one instance proved to perform the same as multiple instance on different ports that
+        // the python script would load balance requrests across. Solr has aknowledged this shortcoming
+        // in their forum, and I think they will implement an asynchronous solrcloud clinet with
+        // http2 in an upcomming release.
         System.out.println("starting Server");
         final Optional<String> znode = Optional.of(args[0]);
         // need to get clustersize here and pass to optional
