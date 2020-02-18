@@ -6,7 +6,7 @@
   vars:
     cache_percentage_of_heap: "{{cache_percentage}}"
     discovery_nodes: "{{discovery_nodes_override}}"
-    cluster_name: twoNode
+    cluster_name: eightNode
   tags:
     - main
 
@@ -45,6 +45,7 @@
         apply:
           vars:
             hostname: "{{node0_subnet}}"
+            hard_replicas: "{{ replicas|int - shards|int }}"
   tags:
     - run_script
     - never

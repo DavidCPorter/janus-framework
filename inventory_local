@@ -37,7 +37,6 @@ sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 [generatorNode]
 sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 
-
 [all:vars]
 ansible_user=sapauser
 

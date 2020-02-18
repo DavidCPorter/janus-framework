@@ -11,6 +11,7 @@ source ${SAPA_HOME}/benchmark_scripts/utils/exp_helpers.sh
 #set -x
 export DOCKER=$DOCKER
 
+
 if [ $DOCKER = yes ];then
   echo "wooooo"
   alias play=solo_party
@@ -129,7 +130,7 @@ for ENGINE in ${SEARCHENGINES[@]};do
             startElastic $SERVERNODE
 
             if [ $keep_elastic_state = false ];then
-              play elastic_configure_2.yml --tags run_script --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
+              play elastic_configure_$SERVERNODE.yml --tags run_script --extra-vars "replicas=$RF shards=$SHARD clustersize=$SERVERNODE"
               sleep 3
             fi
 

@@ -6,7 +6,7 @@
   vars:
     cache_percentage_of_heap: "{{cache_percentage}}"
     discovery_nodes: "{{discovery_nodes_override}}"
-    cluster_name: twoNode
+    cluster_name: fourNode
   tags:
     - main
 
@@ -39,28 +39,21 @@
     - name: include vars for elastic indexing ansible script
       include_vars: "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
 
+
+
     - name: include tasks run indexing
       include_tasks:
         file: roles/elastic/tasks/do_index.yml
         apply:
           vars:
             hostname: "{{node0_subnet}}"
+            hard_replicas: "{{ replicas|int - shards|int }}"
+
+
+
   tags:
     - run_script
     - never
 
 
-    # tags:
-    # - start_masternodes
-    # - never
 
-# - hosts: thirdMaster
-#   roles:
-#     - elastic
-#   vars:
-#     master_flag: true
-#     data_flag: false
-#     discovery_nodes:
-#       - "{{node0}}"
-#       - "{{node1}}"
-#     cluster_name: twoNode

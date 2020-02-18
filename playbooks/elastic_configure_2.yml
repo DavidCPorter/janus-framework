@@ -45,6 +45,8 @@
         apply:
           vars:
             hostname: "{{node0_subnet}}"
+            hard_replicas: "{{ replicas|int - shards|int }}"
+
   tags:
     - run_script
     - never

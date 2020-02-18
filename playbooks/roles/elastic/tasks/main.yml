@@ -50,6 +50,7 @@
     discoverynodes: "{{discovery_nodes}}"
   tags:
     - kibana_config
+    - never
 
 
 - name: do metricbeat things for kibana
