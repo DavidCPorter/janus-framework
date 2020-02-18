@@ -1,11 +1,6 @@
 #
 #  Author: david porter
 #  Date: Mon Feb  3 15:30:24 CST 2020
-#
-#  vim:ts=4
-#  reference:
-#  https://github.com/harisekhon/Dockerfiles
-#
 
 FROM ubuntu:latest
 
