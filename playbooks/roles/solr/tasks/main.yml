@@ -37,7 +37,6 @@
   shell: ant ivy-bootstrap
   args:
     chdir: "{{solr_install_dir}}"
-  when: solr_install_path_status.stat.exists == False
   tags:
     - setup
 
@@ -45,7 +44,7 @@
   shell: ant compile
   args:
     chdir: '{{solr_install_dir}}'
-  when: solr_install_path_status.stat.exists == False
+  creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
   tags:
     - setup
 
@@ -53,10 +52,9 @@
   shell: ant server
   args:
     chdir: '{{solr_install_dir}}/solr'
-  when: solr_install_path_status.stat.exists == False
+  creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
   tags:
     - setup
-
 
 
 - name: copy solr init file to hosts

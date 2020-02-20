@@ -1,5 +1,7 @@
 
 
+
+
 - name: append elastic configs to config
   block:
     - name: elasticsearch.yml
@@ -52,6 +54,7 @@
         port: 9200
         state: started
         delay: 5
+      when: " 'thirdMaster' not in group_names "
   tags:
     - start
     - never

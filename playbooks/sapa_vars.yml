@@ -34,9 +34,6 @@ es_data_dir: /var/elasticsearch/data
 es_log_dir: /var/elasticsearch/log
 cache_percentage: "50%"
 metric_root_dir: "{{home}}/metricbeat"
-discovery_nodes_override:
-  - 10.10.1.1
-  - 10.10.1.2
 masters_override:
   - "{{node0}}"
   - "{{node1}}"

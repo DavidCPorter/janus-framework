@@ -3,10 +3,10 @@ configure_engines=false
 keep_solr_state=false
 keep_elastic_state=false
 # constraint -> shards are 1, 2, or 4
-SEARCHENGINES=( "elastic" "solr" )
+SEARCHENGINES=( "elastic" )
 DSTAT_SWITCH=off
 copy_python_scripts="no"
-SHARDS=( 1 2 )
+SHARDS=( 1 )
 # client == solrj, or elastic client api
 QUERYS=( "roundrobin" )
 # RF_MULTIPLE e.g. if == 1, then replicas == clustersize
@@ -23,7 +23,7 @@ JVM_MEM=( 9 )
 DOC_CACHE=( 1 )
 FILTER_CACHE=( 1 )
 mincon=1
-maxcon=441
+maxcon=141
 conincrementer=40
 WARM_CACHE=true
 DOCKER=no

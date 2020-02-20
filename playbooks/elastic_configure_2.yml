@@ -1,11 +1,18 @@
 # playbook
 
-- hosts: masterNodes:!thirdMaster
+#- hosts: masterNodes
+#  gather_facts: no
+#  tasks:
+#    set_facts:
+#      discovery_nodes: "{{discovery_ ansible_subnet] }}"
+#  tags:
+#    - start
+
+- hosts: masterNodes
   roles:
     - elastic
   vars:
     cache_percentage_of_heap: "{{cache_percentage}}"
-    discovery_nodes: "{{discovery_nodes_override}}"
     cluster_name: twoNode
   tags:
     - main

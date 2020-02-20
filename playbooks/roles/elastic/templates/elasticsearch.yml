@@ -18,7 +18,7 @@ cluster.name: {{clustername}}
 node.master: {% if 'masterNodes' in group_names %} true {% else %} false {% endif %}
 
 
-node.data: {% if 'allSearchNodes' in group_names %} true {% else %} false {% endif %}
+node.data: {% if 'thirdMaster' in group_names and clustername == 'twoNode' %} false {% else %} true {% endif %}
 #
 # ------------------------------------ Node ------------------------------------
 #
@@ -75,19 +75,25 @@ http.max_content_length: 2147483647b
 # The default list of hosts is ["127.0.0.1", "[::1]"]
 #
 discovery.seed_hosts:
-{% for noder in discoverynodes %}
-  - {{noder}}
+{% for noder in ansible_play_hosts %}
+{% if noder not in hostvars[noder]['groups']['thirdMaster']  %}
+  - {{hostvars[noder]['ansible_subnet']}}
+{% endif %}
 {% if not loop.last %}{% endif %}{% endfor %}
 #
 # Bootstrap the cluster using an initial set of master-eligible nodes:
 #
 cluster.initial_master_nodes:
-{% for noder in masters %}
+
+{% for noder in ansible_play_hosts %}
+{% if noder in hostvars[noder]['groups']['masterNodes']  %}
   - {{noder}}
+{% endif %}
 {% if not loop.last %}{% endif %}{% endfor %}
 
 
-discovery.zen.minimum_master_nodes: 1
+
+discovery.zen.minimum_master_nodes: 2
 #
 # For more information, consult the discovery and cluster formation module documentation.
 #

@@ -1,0 +1,28 @@
+Host sapa0 
+  Hostname 0.0.0.0
+  Port 2999 
+  StrictHostKeyChecking no
+
+Host sapa1
+  Hostname 0.0.0.0 
+  Port 2888
+  StrictHostKeyChecking no
+
+Host sapa2
+  Hostname 0.0.0.0 
+  Port 2777
+  StrictHostKeyChecking no
+
+Host sapa3
+  Hostname 0.0.0.0
+  Port 2666
+  StrictHostKeyChecking no
+
+Host local
+	Hostname 0.0.0.0
+	User butters
+
+Host *
+	User butters
+	StrictHostKeyChecking no
+
