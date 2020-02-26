@@ -1,5 +1,5 @@
 ---
-# vars file for cloud-env
+# vars file for servers_up
 
 rem_user: dporte7
 packages:

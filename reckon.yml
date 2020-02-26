@@ -1,0 +1,34 @@
+human:
+	sub: all.failure
+
+first:
+- deploys: (define your configs)
+
+
+run:
+  module: env
+    sub:
+		- deploys.success
+	pub: success|failure
+	human_checkpoint: true
+		wait: 30s
+	on_fail: human|retry
+	async: true
+
+  module: elastic
+    sub: first
+		- env.success
+	pub: success|failure
+	on_fail: human|retry
+	async: true
+
+	elastic:
+		from: env
+		to: configs
+	solr:
+		from: env
+		to: configs
+
+	configs:
+		from: solr,elastic
+		to:

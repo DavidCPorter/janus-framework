@@ -6,7 +6,7 @@ Sapa provides an automation tool for deploying and benchmarking SolrCloud and El
  
  fig 1 | notes 
  ---- | ----
- ![fig_1](./utils/state_explosion.png) | The single line traversing this state space represents a single deployment. This graph illustrates a simple example of a deployment state space definition; each color represents a config category, and each dot represents a configured value. Many production systems will choose to compare many more verticals.  
+ ![fig_1](./utils/readme_figs/state_explosion.png) | The single line traversing this state space represents a single deployment. This graph illustrates a simple example of a deployment state space definition; each color represents a config category, and each dot represents a configured value. Many production systems will choose to compare many more verticals.  
  
 
 
@@ -32,7 +32,7 @@ Sapa's CLI makes configuring the statespace for multiple deployments simple. The
 Importantly, the last paramater for each cli command is a comma separated list of deployment names given in the create step. Optionally, all and ! are tokens that represent *all* deployments, and *sans* deployment. So you can for instance use `all,!elastic1` which will apply those settings to all but the elastic1 deployment. 
 
 ```
-$ sapa create <key:name1> <key:name2> <key:name3> 
+$ sapa deployments <key:name1> <key:name2> <key:name3> 
 $ sapa config <key:value> <key:value> <deployments>
 $ sapa workload <key:value> <deployments>
 $ sapa env <key:value> <deployments>
@@ -49,7 +49,7 @@ a simple use case:
 John wants to know what search application and configuration has the lowest P99 latency given a particular load. 
 ```
 $ cd sapa
-$ sapa create solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
+$ sapa deployments solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
 $ sapa env RAM:20G all,!elastic2 ;
 $ sapa configconfig queryCache:9999 documentCache:9999 all,!elastic1,!elastic2 ;
 $ sapa workload loop:open all ;
@@ -71,10 +71,17 @@ $ sapa run <experiment_name> all ;
 
 __need to tell a story here, basically a placeholder for now__
 
- fig 2: CDF 91 connections | fig 3: Total Throughput
+ fig 2: CDF 1 connection | fig 3: horizontal scaling performance @100k documents
  ---- | ----
- ![fig_2](./utils/cdf_example_fig.png) |  ![fig_3](./utils/total_throughput.png)
+![fig_2](./utils/readme_figs/cdf_1_connections.png) | ![fig_3](./utils/readme_figs/scaling_100k_docs.png)
+ 
+ fig 4: CDF 101 connections | fig 5: MAX Throughput
+ ---- | ----
+ ![fig_4](./utils/readme_figs/cdf_101_connections.png) |  ![fig_5](./utils/readme_figs/max_throughput.png)
 
+ fig 6: median latency | fig 7: P99 latency 
+ ---- | ----
+ ![fig_6](./utils/readme_figs/median_latency.png) |  ![fig_7](./utils/readme_figs/p99_latency.png)
 
 
 

@@ -1,5 +1,5 @@
 ---
-# tasks file for cloud-env
+# tasks file for servers_up
 
 # - name: Ensure ramdisk directory exists
 #   file:

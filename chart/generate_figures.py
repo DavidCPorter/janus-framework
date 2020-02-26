@@ -529,16 +529,16 @@ if __name__ == "__main__":
         _chartname = sys.argv[1]
 
         display_chart_scaling_errorbar(_query, _chartname)
-        Py_max_throughput(_query, _chartname, 50, "QPS")
-        Py_max_throughput(_query, _chartname, 90, "QPS")
-        Py_max_throughput(_query, _chartname, 95, "QPS")
-        Py_max_throughput(_query, _chartname, 99, "QPS")
-        Py_max_throughput(_query, _chartname, 50, "parallel_requests")
-        Py_max_throughput(_query, _chartname, 90, "parallel_requests")
-        Py_max_throughput(_query, _chartname, 95, "parallel_requests")
-        Py_max_throughput(_query, _chartname, 99, "parallel_requests")
-        Py_max_throughput(_query, _chartname, "QPS", "parallel_requests")
-        cdf_TAIL(_query, _chartname)
+        # Py_max_throughput(_query, _chartname, 50, "QPS")
+        # Py_max_throughput(_query, _chartname, 90, "QPS")
+        # Py_max_throughput(_query, _chartname, 95, "QPS")
+        # Py_max_throughput(_query, _chartname, 99, "QPS")
+        # Py_max_throughput(_query, _chartname, 50, "parallel_requests")
+        # Py_max_throughput(_query, _chartname, 90, "parallel_requests")
+        # Py_max_throughput(_query, _chartname, 95, "parallel_requests")
+        # Py_max_throughput(_query, _chartname, 99, "parallel_requests")
+        # Py_max_throughput(_query, _chartname, "QPS", "parallel_requests")
+        # cdf_TAIL(_query, _chartname)
 
     else:
         print("arg length incorrect")
