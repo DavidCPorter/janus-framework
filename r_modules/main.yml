@@ -1,0 +1,24 @@
+
+- hosts: "{{hosts_ui}}"
+  gather_facts: no
+  tasks:
+  - include_vars: "{{module}}/defaults/main.yml"
+    tags:
+      - always
+  - name: including branch_vars = branch_file_ui
+    include_vars: '{{branch_file_ui}}'
+    tags:
+      - always
+
+  - name: evolve to active state,   hosts_ui -> tasks_file_ui
+    include_tasks: '{{module}}/{{tasks_file_ui}}'
+    tags:
+      - activate
+      - never
+
+  - name: revert to inactive state,   hosts_ui -> tasks_file_ui
+    include_tasks: '{{module}}/{{tasks_file_ui}}'
+    tags:
+      - deactivate
+      - never
+

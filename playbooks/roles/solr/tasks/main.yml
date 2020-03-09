@@ -1,156 +1,160 @@
 #get the 8_3 version of solr (this repo was forked from apache on 6/12/19).
 
-
-- name: Check if Solr has been installed already.
-  stat:
-    path: "{{solr_install_dir}}/solr/server/start.jar"
-  register: solr_install_path_status
+- name: from solr
+  shell: echo "hey"
   tags:
-    - setup
-  # tags:
-    # - solr_update
+    - help
 
-- name: Download Solr to -> solr_install_di
-  git:
-    repo: https://github.com/DavidCPorter/lucene-solr.git
-    dest: "{{solr_install_dir}}"
-    version: "{{git_branch_name}}"
-    force: yes
-  register: solr_git_status
-  when: solr_install_path_status.stat.exists == False
-  tags:
-    - solr_update
-    - setup
-
-
-- name: delete
-  file:
-    path: "{{solr_install_dir}}/solr/server/solr/configsets/sample_techproducts_configs"
-    state: absent
-  tags:
-    - rm_sample
-    - solr_update
-    - setup
-
-
-- name: Run ant-ivy.
-  shell: ant ivy-bootstrap
-  args:
-    chdir: "{{solr_install_dir}}"
-  tags:
-    - setup
-
-- name: Build solr with ant.
-  shell: ant compile
-  args:
-    chdir: '{{solr_install_dir}}'
-  creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
-  tags:
-    - setup
-
-- name: run ant server
-  shell: ant server
-  args:
-    chdir: '{{solr_install_dir}}/solr'
-  creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
-  tags:
-    - setup
-
-
-- name: copy solr init file to hosts
-  template:
-    src: "{{solr_init_file}}"
-    dest: '{{solr_install_dir}}/solr/bin/solr.in.sh'
-  tags:
-    - config
-    - solrinsh
-    - setup
-    - solr_start
-
-- name: create and grant log dir permissions for solr
-  file:
-    path: "{{solr_log_dir}}"
-    state: directory
-    mode: "777"
-    recurse: yes
-  become: yes
-  become_user: root
-
-  tags:
-    - setup
-    - logs
-
-# - name: add slow query logging for queries > .5s to default solrconfig.xml
-#   lineinfile:
-#     path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
-#     insertbefore: '</query>'
-#     line: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
-#   tags:
-#     - slow_query
-#     # - setup
-# #  decided to completely disable logging for experiments.
-# - name: rm slow query logging for queries > .5s to default solrconfig.xml
-#   lineinfile:
-#     path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
-#     state: absent
-#     regex: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
-#   tags:
-#     - remove_slow_query
-    # - setup
-
-- name: replace solrconfig.xml with local default copy
-  copy:
-    src: ./roles/solr/files/solrconfig_default.xml
-    dest: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
-  tags:
-    - config
-
-- name: replace solr.xml with local copy
-  copy:
-    src: ./roles/solr/files/solr_default.xml
-    dest: '{{solr_install_dir}}/solr/server/solr/solr.xml'
-  tags:
-    - config
-
-- name: modify solr executable ~/solr-8_3/solr/bin/solr
-  lineinfile:
-    path: '{{solr_install_dir}}/solr/bin/solr'
-    regex: '^REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$SOLR_HOST")'
-    line: 'REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname={{globalIP}}")'
-  tags:
-    - rmi
-    - setup
-
-- debug:
-    msg: "{{chroot}}"
-  tags:
-    - solr_start
-    - solr_restart
-    - setup
-# what the hell here:::
-
-
-- name: restart solr
-  shell: ./solr/bin/solr restart -c -q -z "{{node0}}:2181,{{node1}}:2181,{{node2}}:2181/{{chroot}}"
-  args:
-    chdir: '{{solr_install_dir}}'
-
-  tags:
-    - never
-    - solr_restart
-
-- name: calling handler for stopping solr
-  command: echo "stopping solr..."
-  notify:
-    - "stop solr services"
-  tags:
-    - never
-    - solr_stop
-
-- name: calling handler for starting solr
-  command: echo "starting solr..."
-  notify:
-    - "start solr services"
-  tags:
-    - never
-    - solr_start
+#- name: Check if Solr has been installed already.
+#  stat:
+#    path: "{{solr_install_dir}}/solr/server/start.jar"
+#  register: solr_install_path_status
+#  tags:
+#    - setup
+#  # tags:
+#    # - solr_update
+#
+#- name: Download Solr to -> solr_install_di
+#  git:
+#    repo: https://github.com/DavidCPorter/lucene-solr.git
+#    dest: "{{solr_install_dir}}"
+#    version: "{{git_branch_name}}"
+#    force: yes
+#  register: solr_git_status
+#  when: solr_install_path_status.stat.exists == False
+#  tags:
+#    - solr_update
+#    - setup
+#
+#
+#- name: delete
+#  file:
+#    path: "{{solr_install_dir}}/solr/server/solr/configsets/sample_techproducts_configs"
+#    state: absent
+#  tags:
+#    - rm_sample
+#    - solr_update
+#    - setup
+#
+#
+#- name: Run ant-ivy.
+#  shell: ant ivy-bootstrap
+#  args:
+#    chdir: "{{solr_install_dir}}"
+#  tags:
+#    - setup
+#
+#- name: Build solr with ant.
+#  shell: ant compile
+#  args:
+#    chdir: '{{solr_install_dir}}'
+#  creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
+#  tags:
+#    - setup
+#
+#- name: run ant server
+#  shell: ant server
+#  args:
+#    chdir: '{{solr_install_dir}}/solr'
+#  creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
+#  tags:
+#    - setup
+#
+#
+#- name: copy solr init file to hosts
+#  template:
+#    src: "{{solr_init_file}}"
+#    dest: '{{solr_install_dir}}/solr/bin/solr.in.sh'
+#  tags:
+#    - config
+#    - solrinsh
+#    - setup
+#    - solr_start
+#
+#- name: create and grant log dir permissions for solr
+#  file:
+#    path: "{{solr_log_dir}}"
+#    state: directory
+#    mode: "777"
+#    recurse: yes
+#  become: yes
+#  become_user: root
+#
+#  tags:
+#    - setup
+#    - logs
+#
+## - name: add slow query logging for queries > .5s to default solrconfig.xml
+##   lineinfile:
+##     path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
+##     insertbefore: '</query>'
+##     line: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
+##   tags:
+##     - slow_query
+##     # - setup
+## #  decided to completely disable logging for experiments.
+## - name: rm slow query logging for queries > .5s to default solrconfig.xml
+##   lineinfile:
+##     path: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
+##     state: absent
+##     regex: '<slowQueryThresholdMillis>500</slowQueryThresholdMillis>'
+##   tags:
+##     - remove_slow_query
+#    # - setup
+#
+#- name: replace solrconfig.xml with local default copy
+#  copy:
+#    src: ./roles/solr/files/solrconfig_default.xml
+#    dest: '{{solr_install_dir}}/solr/server/solr/configsets/_default/conf/solrconfig.xml'
+#  tags:
+#    - config
+#
+#- name: replace solr.xml with local copy
+#  copy:
+#    src: ./roles/solr/files/solr_default.xml
+#    dest: '{{solr_install_dir}}/solr/server/solr/solr.xml'
+#  tags:
+#    - config
+#
+#- name: modify solr executable ~/solr-8_3/solr/bin/solr
+#  lineinfile:
+#    path: '{{solr_install_dir}}/solr/bin/solr'
+#    regex: '^REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$SOLR_HOST")'
+#    line: 'REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname={{globalIP}}")'
+#  tags:
+#    - rmi
+#    - setup
+#
+#- debug:
+#    msg: "{{chroot}}"
+#  tags:
+#    - solr_start
+#    - solr_restart
+#    - setup
+## what the hell here:::
+#
+#
+#- name: restart solr
+#  shell: ./solr/bin/solr restart -c -q -z "{{node0}}:2181,{{node1}}:2181,{{node2}}:2181/{{chroot}}"
+#  args:
+#    chdir: '{{solr_install_dir}}'
+#
+#  tags:
+#    - never
+#    - solr_restart
+#
+#- name: calling handler for stopping solr
+#  command: echo "stopping solr..."
+#  notify:
+#    - "stop solr services"
+#  tags:
+#    - never
+#    - solr_stop
+#
+#- name: calling handler for starting solr
+#  command: echo "starting solr..."
+#  notify:
+#    - "start solr services"
+#  tags:
+#    - never
+#    - solr_start

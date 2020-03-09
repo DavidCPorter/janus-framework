@@ -1,5 +1,8 @@
 # playbook for cloudconfig
 - hosts: allNodes
+  tasks:
+    include_tasks: r_modules/cloud-env/tasks/main.yml
+
   roles:
     - cloud-env
   tags:

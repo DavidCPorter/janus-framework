@@ -59,7 +59,7 @@ zoo3-4_link: https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeepe
 # defaults file for cloud-env
 ramdisk_path: /dev/shm
 ptp_install_dir: '/users/{{ansible_user}}/linuxptp'
-cred_dir: "{{SAPA_HOME}}/playbooks/roles/cloud-env/files/.aws"
+cred_dir: "{{SAPA_HOME}}/r_modules/cloud-env/files/.aws"
 
 # other
 heapsize: 1

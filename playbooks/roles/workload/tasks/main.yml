@@ -1,0 +1,51 @@
+---
+# tasks file for workload
+
+hosts: { hosts }
+  #required vars that will need to be defined during setup phase (UI)
+  vars:
+    duration: {duration_from_UI}
+    loop: {loop_from_UI}
+    query: {type_of_query_UI}
+
+
+# example of vars available to this mod
+  included_vars:
+    listening_hosts:
+      {% for x in hosts_from_earlier %}
+      - { x }
+      {% endfor %}
+    listening_ports:
+      - {% x for y in listening_ports %}
+    duration:
+    replicas:
+    shards:
+    solrnum:
+    engine:
+    instances:
+    connections:
+    output-dir: ./
+    threads:
+    processes:
+      - 1
+      - 100
+
+
+  tasks:
+    - name: transfer workload file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

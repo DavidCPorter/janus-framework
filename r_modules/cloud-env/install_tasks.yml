@@ -1,0 +1,74 @@
+---
+#SECTIONS OF THIS PLAY:
+  # activate
+  # check activate
+  # deactivate
+
+
+
+#### ACTIVATE ####
+
+- debug:
+    var: example_var
+  tags:
+    - activate
+
+- name: raise file and proc limits on servers
+  blockinfile:
+    path: '/etc/security/limits.conf'
+    block: |
+      {{ansible_user}}       soft    nproc           65555
+      {{ansible_user}}       hard    nproc           65555
+      {{ansible_user}}       soft    nofile          65555
+      {{ansible_user}}       hard    nofile          65555
+  become: yes
+  become_user: root
+  tags:
+    - activate
+
+- name: update packages
+  apt:
+    update_cache: yes
+  become: yes
+  become_user: root
+  tags:
+    - activate
+
+- name: ensure jdk8 is installed
+  apt:
+    name: openjdk-8-jdk
+  become: yes
+  become_user: root
+  tags:
+    - activate
+
+
+- name: sudo apt-get install packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update-cache: yes
+  become: yes
+  become_user: root
+  tags:
+    - activate
+
+
+
+#### CHECK ACTIVATE ####
+
+- name: verifying activated
+  shell: echo "no check tasks"
+  delegate_to: localhost
+  tags:
+    - activate
+
+
+#### DEACTIVATE ####
+
+- name: deactivate
+  shell: echo "no deactivate tasks"
+  delegate_to: localhost
+  tags:
+    - deactivate
+

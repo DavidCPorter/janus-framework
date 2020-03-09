@@ -1,0 +1,8 @@
+---
+# vars file for workload
+
+
+traffic_gen words.txt --user $USER -rf $RF -s $SHARD -t $app_threads -d 10 -p $maxcon --solrnum $SOLRNUM --query $QUERY --loop $CONTROLLOOP --load $MAX_LOAD --engine $ENGINE
+
+
+

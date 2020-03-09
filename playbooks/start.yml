@@ -1,0 +1,67 @@
+#playbook created by reckon UI (aka the playbook for all playbooks)
+---
+#these handlers should be global
+
+
+
+
+
+- hosts: twoNode
+  gather_facts: no
+
+  tasks:
+    - name: include the vars
+      include_vars:
+        file: sapa_vars.yml
+
+    - name: just notify please
+      command: echo "test"
+      notify:
+      - "launch_env"
+
+
+  handlers:
+    - name: calling cloud main with four nodes
+      include_tasks: r_modules/cloud-env/main.yml
+      args:
+        apply:
+          delegate_to: "{{item}}"
+          tags:
+            - help
+      tags:
+        - always
+      run_once: true
+      with_items:
+        - "{{groups['fourNode']}}"
+      listen:
+        - "launch_env"
+
+    - name: calling install task with eight nodes
+      include_tasks: r_modules/cloud-env/install_task.yml
+      args:
+        apply:
+          delegate_to: "{{item}}"
+          tags:
+            - help
+      tags:
+        - always
+      run_once: true
+      with_items:
+        - "{{groups['eightNode']}}"
+      listen:
+        - "launch_install"
+
+    - name: call aws with 16 nodes
+      include_tasks: r_modules/cloud-env/aws.yml
+      args:
+        apply:
+          delegate_to: "{{item}}"
+          tags:
+            - help
+      tags:
+        - always
+      run_once: true
+      with_items:
+        - "{{groups['sixteenNode']}}"
+      listen:
+        - launch_aws
