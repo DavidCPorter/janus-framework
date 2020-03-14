@@ -1,0 +1,11 @@
+---
+
+- name: ZOO ---> start ZooKeeper
+  shell: "{{zoo_bin_dir}}/zkServer.sh start"
+  tags:
+    - activate
+
+- name: ZOO ---> stop zookeeper
+  shell: "{{zoo_bin_dir}}/zkServer.sh stop"
+  tags:
+    - deactivate

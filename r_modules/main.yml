@@ -11,13 +11,13 @@
       - always
 
   - name: evolve to active state,   hosts_ui -> tasks_file_ui
-    include_tasks: '{{module}}/{{tasks_file_ui}}'
+    include_tasks: '{{module}}/plays/{{tasks_file_ui}}'
     tags:
       - activate
       - never
 
   - name: revert to inactive state,   hosts_ui -> tasks_file_ui
-    include_tasks: '{{module}}/{{tasks_file_ui}}'
+    include_tasks: '{{module}}/plays/{{tasks_file_ui}}'
     tags:
       - deactivate
       - never

@@ -1,0 +1,27 @@
+
+
+- name: Check if data has been downloaded already.
+  stat:
+    path: "{{user_root_dir}}/reviews_Electronics_5.json"
+  register: data_download_path_status
+  tags:
+    - activate
+
+
+- name: download data
+  shell: wget http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Electronics_5.json.gz
+  args:
+    creates: '{{user_root_dir}}/reviews_Electronics_5.json.gz'
+  when:
+    - data_download_path_status.stat.exists == False
+  tags:
+    - activate
+
+- name: unzip data
+  shell: gunzip -f "{{data_upload_dir}}/reviews_Electronics_5.json.gz"
+  args:
+    creates: '{{data_upload_dir}}/reviews_Electronics_5.json'
+  when:
+    - data_download_path_status.stat.exists == False
+  tags:
+    - activate

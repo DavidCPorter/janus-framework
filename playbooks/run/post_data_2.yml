@@ -16,18 +16,18 @@
     - never
     - begin_exp
 
-# need to put begin_exp tag here to enable tracing.
-- hosts: twoNode
-  vars_files:
-    - "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
-  tasks:
-    - name: update solr.xml
-      copy:
-        src: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/solr.xml"
-        dest: "{{solr_install_dir}}/solr/server/solr/solr.xml"
-        force: yes
-  tags:
-    - begin_exp
+## need to put begin_exp tag here to enable tracing.
+#- hosts: twoNode
+#  vars_files:
+#    - "{{SAPA_HOME}}/playbooks/sapa_vars.yml"
+#  tasks:
+#    - name: update solr.xml
+#      copy:
+#        src: "{{SAPA_HOME}}/playbooks/roles/upload_data/files/solr.xml"
+#        dest: "{{solr_install_dir}}/solr/server/solr/solr.xml"
+#        force: yes
+#  tags:
+#    - begin_exp
 
 - hosts: twoNode
   tasks:
