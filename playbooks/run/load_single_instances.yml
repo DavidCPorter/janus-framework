@@ -1,9 +1,0 @@
-- hosts: singleNode
-  tasks:
-    - name: check stats on dirs
-      stat:
-        path: ~/node__1
-      register: instances_dirs
-
-    - name: make dirs
-      stat

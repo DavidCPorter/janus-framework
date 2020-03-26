@@ -8,7 +8,7 @@
 
 - name: copy solrconfig to nodes
   template:
-    src: "{{SAPA_HOME}}/playbooks/index/templates/solrconfig.xml"
+    src: "{{SAPA_HOME}}/r_modules/index_solr/templates/solrconfig.xml"
     dest: "{{solrconfig_xml_dest}}"
   tags:
     - activate
@@ -16,7 +16,7 @@
 
 - name: deactivating solrconfig options by replacing solrconfig.xml with default_solrconfig.xml
   copy:
-    src: "{{SAPA_HOME}}/playbooks/index/files/default_solrconfig.xml"
+    src: "{{SAPA_HOME}}/r_modules/index_solr/files/default_solrconfig.xml"
     dest: "{{solrconfig_xml_dest}}"
   tags:
     - activate

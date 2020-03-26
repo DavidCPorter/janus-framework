@@ -1,8 +1,8 @@
+---
 
+#### ACTIVATE ####
 
-
-
-- name: append elastic configs to config
+- name: ELASTIC --> append elastic configs to config
   block:
     - name: elasticsearch.yml
       template:
@@ -31,10 +31,9 @@
         dest: "{{es_root_dir}}/config"
 
   tags:
-    - start
-    - never
+    - activate
 
-- name: start elastic
+- name: ELASTIC --> start elastic
   block:
     - name: start elastic w/ a pointer to config path
       shell: ./bin/elasticsearch >/dev/null 2>&1 &
@@ -56,8 +55,7 @@
         delay: 5
       when: " 'thirdMaster' not in group_names "
   tags:
-    - start
-    - never
+    - activate
 
 # - name: fail ansible if elastic didn't launch
 #   fail:
@@ -68,36 +66,16 @@
 #     - start
 #     - never
 
-- name: restart elastic
-  shell: ./bin/elasticsearch >/dev/null 2>&1 &
-  register: es_restart_result
-  ignore_errors: yes
 
-  args:
-    chdir: '{{es_root_dir}}'
-
-  tags:
-    - restart
-    - never
+#### DEACTIVATE ####
 
 
-- name: fail ansible if elastic didn't launch
-  fail:
-    msg: "elastic search returned nonzero -- failed"
-  when:
-    - es_restart_result.rc != 0
-  tags:
-    - restart
-    - never
-
-
-- name: stop elastic (ignore error)
+- name: ELASTIC ----> stop elastic (ignore error)
   shell: jps | awk '/Elastic/{printf($1)}' | xargs kill
-  register: es_stop_result
   ignore_errors: yes
-
   args:
     chdir: '{{es_root_dir}}'
   tags:
-    - stop
-    - never
+    - deactivate
+
+

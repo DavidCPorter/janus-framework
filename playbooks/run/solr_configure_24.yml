@@ -1,6 +1,0 @@
-# playbook
-- hosts: twentyfourNode
-  roles:
-    - solr
-  vars:
-    chroot: twentyfourNode

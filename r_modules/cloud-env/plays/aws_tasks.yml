@@ -19,7 +19,7 @@
   stat:
     path: "{{home}}/.aws"
   register: checkpoint
-  failed_when: checkpoint.stat.isdir is defined
+  failed_when: checkpoint.stat.isdir is not defined
   tags:
     - activate
 

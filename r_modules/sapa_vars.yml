@@ -9,6 +9,8 @@
 # then comes facts discovered about a system
 # then "role defaults", which are the most "defaulty" and lose in priority to everything.
 
+SAPA_HOME: /Users/dporter/projects/sapa
+user_root_dir: "{{home}}"
 
 # defaults file for benchmark
 pyscript: traffic_gen.py
@@ -25,13 +27,16 @@ solr_init_file: solr/templates/solr.in.sh
 solr_log4j_props: "{{solr_install_dir}}/solr/server/resources/log4j2.xml"
 solr_heap: 1 #GB
 solr_repo: https://github.com/DavidCPorter/lucene-solr.git
+solr_bin_exec: "{{solr_install_dir}}/solr/bin/solr"
 chroot: "{{hosts_ui}}"
 solrconfig_xml_dest: "{{solr_home}}/configsets/_default/conf/solrconfig.xml"
 
 # defaults file for elastic
-SAPA_HOME: /Users/dporter/projects/sapa
-user_root_dir: "{{home}}"
-es_root_dir: "{{home}}/elasticsearch-7.5.1"
+es_version: 7.5.1
+es_version_download_dict:
+  7.5.1: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.5.1-linux-x86_64.tar.gz
+
+es_root_dir: "{{home}}/elasticsearch-{{es_version}}"
 kibana_root_dir: "{{home}}/kibana"
 es_data_dir: /var/elasticsearch/data
 es_log_dir: /var/elasticsearch/log
@@ -44,12 +49,12 @@ masters_override:
 
 # defaults file for upload_data
 data_upload_dir: "{{home}}"
-collection_name: "reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
+#collection_name: "reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 #aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 aws_dir_name: default
 upload_data_file_path: "{{SAPA_HOME}}/playbooks/roles/upload_data/files"
 nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
-#solr_config_dir: "{{solr_home}}"
+
 
 # defaults file for zookeeper
 zoo_version: 3.5.5
@@ -72,4 +77,12 @@ cred_dir: "{{SAPA_HOME}}/r_modules/cloud-env/files/.aws"
 heapsize: 1
 shorter_data: true
 id_rsa_pub_path: /Users/dporter/.ssh/id_rsa.pub
+
+
+
+# vars for indexing module
+shards: 2
+#replicas is multiplied by #nodes in cluster (e.g. if replicas = 2 and nodes in search engine = 10, then number of replicas == 20)
+replicas: 1
+collection_name: "{{shards}}_{{replicas}}_index"
 

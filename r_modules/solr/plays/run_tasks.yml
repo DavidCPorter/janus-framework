@@ -12,6 +12,7 @@
 
   tags:
     - activate
+    - start
 
 
 - name: SOLR ---> fail the start solr if conditions not met
@@ -49,3 +50,28 @@
 
   tags:
     - deactivate
+
+
+
+# UTILITIES
+
+- name: SOLR ---> stop Solr
+  shell: ./solr/bin/solr stop
+  register: solr_stop_result
+  ignore_errors: yes
+  args:
+    chdir: '{{solr_install_dir}}'
+
+  tags:
+    - solr_stop
+
+- name: SOLR ---> start solr
+  shell: ./solr/bin/solr start -c -q -z "{{node0}}:2181,{{node1}}:2181,{{node2}}:2181/{{chroot}}"
+  register: solr_start_result
+  ignore_errors: yes
+
+  args:
+    chdir: '{{solr_install_dir}}'
+
+  tags:
+    - solr_start

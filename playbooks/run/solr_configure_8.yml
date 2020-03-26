@@ -1,6 +1,0 @@
-# playbook
-- hosts: eightNode
-  roles:
-    - solr
-  vars:
-    chroot: eightNode

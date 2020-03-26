@@ -38,7 +38,7 @@
   shell: ant server
   args:
     chdir: '{{solr_install_dir}}/solr'
-    creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
+#    creates: "{{solr_install_dir}}/lucene/build/core/MANIFEST.MF"
   tags:
     - activate
 

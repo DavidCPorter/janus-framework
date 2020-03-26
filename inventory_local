@@ -49,10 +49,9 @@ node2=172.21.0.4
 node3=172.21.0.5
 root_path=/Users/dporter/projects/sapa
 main_class=com.dporte7.solrclientserver.DistributedWebServer
-ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 git_branch_name=dporter_8_3
-solr_bin_exec=/home/sapauser/solr-8_3/solr/bin/solr
 s3_bucket_name=solr-8-3-dporter
 gather_facts=no
 home=/home/sapauser
 SAPA_HOME=/Users/dporter/projects/sapa
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

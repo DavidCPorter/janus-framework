@@ -34,14 +34,27 @@
   tags:
     - activate
 
-
-- name: SOLR ---> modify solr executable ~/solr-8_3/solr/bin/solr
-  lineinfile:
-    path: '{{solr_install_dir}}/solr/bin/solr'
-    regex: '^REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$SOLR_HOST")'
-    line: 'REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname={{globalIP}}")'
+- name: set singleNode chroot for znodes for all solr node configs
+  shell: bash "{{solr_bin_exec}}" zk mkroot "{{item}}"
+  ignore_errors: yes
+  run_once: yes
+  with_items:
+    - /singleNode
+    - /twoNode
+    - /fourNode
+    - /eightNode
+    - /sixteenNode
+    - /default
   tags:
     - activate
+
+#- name: SOLR ---> modify solr executable ~/solr-8_3/solr/bin/solr
+#  lineinfile:
+#    path: '{{solr_install_dir}}/solr/bin/solr'
+#    regex: '^REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$SOLR_HOST")'
+#    line: 'REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname={{globalIP}}")'
+#  tags:
+#    - activate
 
 - debug:
     msg: "{{chroot}}"
