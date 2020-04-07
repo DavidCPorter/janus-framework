@@ -1,0 +1,36 @@
+---
+
+_http_closed_scripts_dir: "{{module_root}}/files"
+http_closed_scripts_dir: "{{ui_http_closed_scripts_dir | default(_http_closed_scripts_dir)}}"
+
+load_files:
+  - benchstats.py
+  - clparsing.py
+  - testmodes.py
+  - threadargs.py
+  - traffic_gen.py
+
+_load_duration: 10
+load_duration: '{{ui_load_duration | default(_load_duration)}}'
+_l_replicas: 2
+l_replicas: '{{ui_l_replicas | default(_l_replicas)}}'
+_l_shards: 1
+l_shards: '{{ui_l_shards | default(_l_shards)}}'
+_l_query: roundrobin
+l_query: '{{ui_l_query | default(_l_query)}}'
+_l_loop: closed
+l_loop: '{{ui_l_loop | default(_l_loop)}}'
+_l_solrnum: 2
+l_solrnum: '{{ui_l_solrnum | default(_l_solrnum)}}'
+#use 'default' as default engine
+_engine: solr
+engine: '{{ui_engine | default(_engine)}}'
+# following unnecessary yet required 4.3.2020
+_l_threads: 1
+l_threads: '{{ui_l_threads | default(_l_threads)}}'
+
+_l_procs: 16
+l_procs: '{{ui_l_procs | default(_l_procs)}}'
+l_docker: true
+endpoint_host: '172.21.0.'
+endpoint_port: 8983

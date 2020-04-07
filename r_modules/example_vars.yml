@@ -44,7 +44,6 @@ data_upload_dir: "{{home}}"
 collection_name: "reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 #aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
 aws_dir_name: default
-upload_data_file_path: "{{SAPA_HOME}}/playbooks/roles/upload_data/files"
 nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
 tasks_dir: "{{SAPA_HOME}}/playbooks/roles/upload_data/tasks"
 

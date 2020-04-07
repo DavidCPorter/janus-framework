@@ -1,0 +1,18 @@
+---
+# defaults file for cloud-env
+ramdisk_path: '{{ ui_ramdisk_path | default("/dev/shm") }}'
+_ptp_install_dir: '/users/{{ansible_user}}/linuxptp'
+ptp_install_dir: '{{ui_ptp_install_dir | default(_ptp_install_dir)}}'
+_cred_dir: "{{module_root}}/files/.aws"
+cred_dir: '{{ui_cred_dir | default(_cred_dir)}}'
+rem_user: '{{ui_rem_user | default(ansible_user)}}'
+packages:
+  - awscli
+  - python3-pip
+  - python3-dev
+  - htop
+  - dstat
+  - maven
+  - ant
+  - virtualenv #required for pip
+# - setuptools #required for pip

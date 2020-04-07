@@ -3,11 +3,16 @@ source $OYSTER_HOME/utils/sapautils.sh
 #echo $OYSTER_HOME
 
 createModule(){
-  MOD_LOC=$OYSTER_HOME/r_modules/$1
+  if [ "$#" -ne 2 ]; then
+    # shellcheck disable=SC1065
+    printf "\n > oyster create requires 2 parameters: stage, module_name \n"
+  fi
+
+  MOD_LOC=$OYSTER_HOME/r_modules/$1/$2
   mkdir $MOD_LOC
   cd $MOD_LOC;mkdir plays defaults tests files templates
   touch defaults/main.yml tests/main.yml README.md
-  printf "\nMODULE $1 created here: $MOD_LOC \n\n"
+  printf "\nMODULE $2 created here: $MOD_LOC \n\n"
 }
 
 
@@ -22,9 +27,10 @@ while (( "$#" )); do
   case "$1" in
     create|c)
       COMMAND='create'
-      MODULE="$2"
-      shift 2
-      createModule $MODULE
+      STAGE="$2"
+      MODULE="$3"
+      shift 3
+      createModule $STAGE $MODULE
       ;;
 
     -*|--*=) # unsupported flags

@@ -105,3 +105,15 @@ OYSTA provides benchmarking even if you don't have cloud resources but emulating
 
 
 ### RUNNING WITH LOCAL
+
+
+### required variables 
+when a deploy is run, oysta will load the UI variables, which override any defaults for that module (module/defaults/main.yml). Defaults will use jinja syntax to set var value to {{ui_var | 'default_string'}}. Since oysta has a predetermined variables, branch variables are also set for next branch in branch_vars/
+
+
+
+next:
+
+- load should save the results to default location on remote load machines. These results might include data from multiple iterations. 
+- pipeline should retrieve remote results, filter results, and save locally
+- viz should run once for entire oysta experiment at the end. 

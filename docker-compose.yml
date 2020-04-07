@@ -81,14 +81,44 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 500M
-        reservations:
-          cpus: '1'
-          memory: 300M
+          memory: 200M
     networks:
       sapa_net:
         ipv4_address: 172.21.0.5
 
+  sapaserver5:
+    container_name: sapaWorkhorse2
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2667:22"
+    tty: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 200M
+    networks:
+      sapa_net:
+        ipv4_address: 172.21.0.6
+
+  sapaserver6:
+    container_name: sapaWorkhorse3
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "2668:22"
+    tty: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 200M
+    networks:
+      sapa_net:
+        ipv4_address: 172.21.0.7
 
 networks:
   sapa_net:

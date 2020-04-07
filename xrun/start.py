@@ -19,17 +19,16 @@ def tree_closure(inv):
         nonlocal branch_count
 
         hosts = dfs_dict['hosts']
+        stage = dfs_dict['stage']
         play = dfs_dict['play']
         vars = dfs_dict['vars']
         module = dfs_dict['module']
-        vars = 'branch_file_ui=' + vars + ' hosts_ui=' + hosts + ' tasks_file_ui=' + play + ' module=' + module
+        vars = 'branch_file_ui=' + vars + ' hosts_ui=' + hosts + ' tasks_file_ui=' + play + ' module=' + module + ' stage=' + stage
 
-        if levels > 7:
-            print(levels)
-            print(vars)
-            subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
-        # output = subprocess.run(['cat', '../inventory'])
-        # ansible-playbook - i inventory extra-vars "hosts =$HOSTS vars =$VARS $PLAY"
+        # if levels > 7:
+        print(levels)
+        print(vars)
+        subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
 
         if len(dfs_dict['next']) > 0:
             levels += 1
@@ -48,67 +47,79 @@ def tree_closure(inv):
 
 
 def main(inv):
-    default_vars = "sapa_vars.yml"
+    default_vars = "ui_sapa_vars.yml"
     example_of_branch_vars = "example_vars.yml"
 
     DFS_dict = {
+        "stage": "env",
         "module": "cloud-env",
         "hosts": "all:!mylocal",
         "play": "install_tasks.yml",
         "vars": default_vars,
         "next": {
+            "stage": "env",
             "module": "cloud-env",
             "hosts": "all:!mylocal",
             "play": "aws_tasks.yml",
             "vars": default_vars,
             "next": {
+                "stage": "service",
                 "module": "zookeeper",
                 "hosts": "zookeeperNodes",
                 "play": "download_tasks.yml",
                 "vars": default_vars,
                 "next": {
+                    "stage": "service",
                     "module": "zookeeper",
                     "hosts": "zookeeperNodes",
                     "play": "configure_tasks.yml",
                     "vars": default_vars,
                     "next": {
+                        "stage": "service",
                         "module": "zookeeper",
                         "hosts": "zookeeperNodes",
                         "play": "run_tasks.yml",
                         "vars": default_vars,
                         "next": {
+                            "stage": "service",
                             "module": "solr",
                             "hosts": "twoNode",
                             "play": "install_tasks.yml",
                             "vars": default_vars,
                             "next": {
+                                "stage": "service",
                                 "module": "solr",
                                 "hosts": "twoNode",
                                 "play": "config_tasks.yml",
                                 "vars": default_vars,
                                 "next": {
+                                    "stage": "service",
                                     "module": "solr",
                                     "hosts": "twoNode",
                                     "play": "run_tasks.yml",
                                     "vars": default_vars,
                                     "next": {
-                                        "module": "index_solr",
+                                        "stage": "service",
+                                        "module": "amazon-reviews-large",
                                         "hosts": "singleNode",
                                         "play": "download_json.yml",
                                         "vars": default_vars,
                                         "next": {
+                                            "stage": "service",
                                             "module": "index_solr",
                                             "hosts": "twoNode",
                                             "play": "0_pre_index_config.yml",
                                             "vars": default_vars,
                                             "next": {
+                                                "stage": "service",
                                                 "module": "index_solr",
-                                                "hosts": "twoNode",
+                                                "hosts": "singleNode",
                                                 "play": "1_index.yml",
                                                 "vars": default_vars,
                                                 "next": {
+                                                    "stage": "service",
                                                     "module": "index_solr",
-                                                    "hosts": "twoNode",
+                                                    "hosts": "singleNode",
                                                     "play": "3_post_index_config.yml",
                                                     "vars": default_vars,
                                                     "next": {
@@ -134,19 +145,19 @@ def main(inv):
                 "branches": []
             },
             "branches": [{
-                "module": "zookeeper",
-                "hosts": "zookeeperNodes",
-                "play": "download_tasks.yml",
-                "vars": example_of_branch_vars,
-                "next": {
-                    "module": "zookeeper",
-                    "hosts": "zookeeperNodes",
-                    "play": "download_tasks.yml",
-                    "vars": default_vars,
-                    "next": {},
-                    "branches": []
-                },
-                "branches": []
+                # "module": "zookeeper",
+                # "hosts": "zookeeperNodes",
+                # "play": "download_tasks.yml",
+                # "vars": example_of_branch_vars,
+                # "next": {
+                #     "module": "zookeeper",
+                #     "hosts": "zookeeperNodes",
+                #     "play": "download_tasks.yml",
+                #     "vars": default_vars,
+                #     "next": {},
+                #     "branches": []
+                # },
+                # "branches": []
             }]
         },
         "branches": []
@@ -171,8 +182,9 @@ def utils(args):
     module = dfs_dict['--module']
     inv = dfs_dict['--inv']
     tags = dfs_dict['--tags']
+    stage = dfs_dict['--stage']
 
-    extra_vars_param = 'branch_file_ui=' + var_file + ' hosts_ui=' + hosts + ' tasks_file_ui=' + play + ' module=' + module
+    extra_vars_param = 'branch_file_ui=' + var_file + ' hosts_ui=' + hosts + ' tasks_file_ui=' + play + ' module=' + module + ' stage=' + stage
     ansible_prefix = ['ansible-playbook', '-i', inv, '../r_modules/main.yml']
 
     subprocess.run(ansible_prefix + ['--extra-vars', extra_vars_param, '--tags', "utils," + tags])
@@ -180,15 +192,21 @@ def utils(args):
 
 if __name__ == "__main__":
 
-    if sys.argv[1] == 'utils':
+    if sys.argv[1] == 'utils' and len(sys.argv) < 4:
+        print("utils option requires additional parameters e.g.: \n python3 start.py utils --hosts all --play "
+              "main.yml --vars ui_sapa_vars.yml --module example_mod --inv /Users/dporter/projects/sapa/inventory_local --tags "
+              "rsa_config --stage service")
+
+    if sys.argv[1] == 'utils' and len(sys.argv) >= 4:
         print("running utils function")
         sys.exit(
             utils(sys.argv[2:])
         )
     if len(sys.argv) < 1:
         print('usage: python3 start.py <path_to_inventory>')
+
     sys.exit(
-
         main(sys.argv[1])
-
     )
+
+    sys.exit()
