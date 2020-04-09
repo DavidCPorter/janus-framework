@@ -1,0 +1,17 @@
+---
+- name: mkdir for this branches data
+  file:
+    path: "{{local_data_dir}}/{{deploy_name}}"
+    state: directory
+    mode: '777'
+
+  tags:
+    - activate
+
+
+- debug:
+    msg: "{{local_data_dir}}/{{deploy_name}}"
+
+
+  tags:
+    - activate

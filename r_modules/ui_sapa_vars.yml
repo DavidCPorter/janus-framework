@@ -34,6 +34,7 @@
 
 #### OYSTA VARIABLE LOADING
 
+ui_local_data_dir: "{{SAPA_HOME}}/data_dir"
 
 # defaults file for benchmark
 ui_pyscript: traffic_gen.py
@@ -119,3 +120,12 @@ ui_engine: solr
 # following unnecessary yet required 4.3.2020
 ui_l_threads: 1
 ui_l_procs: 16
+ui_l_instances: 0
+
+
+#pipeline
+ui_output_dir: "{{home}}/traffic_gen"
+ui_deploy_name: "{{ui_engine}}-{{ui_l_query}}-{{ui_l_replicas}}-{{ui_l_shards}}"
+
+
+

@@ -12,3 +12,9 @@
 
   tags:
     - rsa_config
+
+
+- name: install numpy
+  shell: pip3 install numpy
+  tags:
+    - numpy

@@ -1,0 +1,7 @@
+---
+_output_dir: "{{home}}/traffic_gen"
+output_dir: "{{ui_output_dir | default(_output_dir)}}"
+_deploy_name: solr_default
+deploy_name: "{{ui_deploy_name | default(_deploy_name)}}"
+_local_data_dir: "{{SAPA_HOME}}/data_dir"
+local_data_dir: "{{ui_local_data_dir | default(_local_data_dir)}}"

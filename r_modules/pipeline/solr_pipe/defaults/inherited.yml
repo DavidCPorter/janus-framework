@@ -1,0 +1,13 @@
+---
+processes: "{{ui_l_procs}}"
+threads: "{{ui_l_threads}}"
+duration: "{{ui_load_duration}}"
+replicas: "{{ui_l_replicas}}"
+query: "{{ui_l_query}}"
+loop: "{{ui_l_loop}}"
+shards: "{{ui_l_shards}}"
+solrnum: "{{ui_l_solrnum}}"
+instances: "{{ui_l_instances}}"
+engine: "{{ui_engine}}"
+csv_location: "{{output_dir}}"
+result_filename: "rf{{replicas}}_s{{shards}}__clustersize{{solrnum}}::query={{query}}::proc={{processes}}::threads={{threads}}::dur={{duration}}.csv"

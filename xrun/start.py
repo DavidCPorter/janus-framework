@@ -7,8 +7,11 @@ import time
 import subprocess
 import copy
 
+from mydicts import *
 
 # anticipating the need to track things in this closure
+
+
 def tree_closure(inv):
     ansible_prefix = ['ansible-playbook', '-i', inv, '../r_modules/main.yml']
     levels = 0
@@ -47,124 +50,8 @@ def tree_closure(inv):
 
 
 def main(inv):
-    default_vars = "ui_sapa_vars.yml"
-    example_of_branch_vars = "example_vars.yml"
 
-    DFS_dict = {
-        "stage": "env",
-        "module": "cloud-env",
-        "hosts": "all:!mylocal",
-        "play": "install_tasks.yml",
-        "vars": default_vars,
-        "next": {
-            "stage": "env",
-            "module": "cloud-env",
-            "hosts": "all:!mylocal",
-            "play": "aws_tasks.yml",
-            "vars": default_vars,
-            "next": {
-                "stage": "service",
-                "module": "zookeeper",
-                "hosts": "zookeeperNodes",
-                "play": "download_tasks.yml",
-                "vars": default_vars,
-                "next": {
-                    "stage": "service",
-                    "module": "zookeeper",
-                    "hosts": "zookeeperNodes",
-                    "play": "configure_tasks.yml",
-                    "vars": default_vars,
-                    "next": {
-                        "stage": "service",
-                        "module": "zookeeper",
-                        "hosts": "zookeeperNodes",
-                        "play": "run_tasks.yml",
-                        "vars": default_vars,
-                        "next": {
-                            "stage": "service",
-                            "module": "solr",
-                            "hosts": "twoNode",
-                            "play": "install_tasks.yml",
-                            "vars": default_vars,
-                            "next": {
-                                "stage": "service",
-                                "module": "solr",
-                                "hosts": "twoNode",
-                                "play": "config_tasks.yml",
-                                "vars": default_vars,
-                                "next": {
-                                    "stage": "service",
-                                    "module": "solr",
-                                    "hosts": "twoNode",
-                                    "play": "run_tasks.yml",
-                                    "vars": default_vars,
-                                    "next": {
-                                        "stage": "service",
-                                        "module": "amazon-reviews-large",
-                                        "hosts": "singleNode",
-                                        "play": "download_json.yml",
-                                        "vars": default_vars,
-                                        "next": {
-                                            "stage": "service",
-                                            "module": "index_solr",
-                                            "hosts": "twoNode",
-                                            "play": "0_pre_index_config.yml",
-                                            "vars": default_vars,
-                                            "next": {
-                                                "stage": "service",
-                                                "module": "index_solr",
-                                                "hosts": "singleNode",
-                                                "play": "1_index.yml",
-                                                "vars": default_vars,
-                                                "next": {
-                                                    "stage": "service",
-                                                    "module": "index_solr",
-                                                    "hosts": "singleNode",
-                                                    "play": "3_post_index_config.yml",
-                                                    "vars": default_vars,
-                                                    "next": {
-                                                    },
-                                                    "branches": []
-                                                },
-                                                "branches": []
-                                            },
-                                            "branches": []
-                                        },
-                                        "branches": []
-                                    },
-                                    "branches": []
-                                },
-                                "branches": []
-                            },
-                            "branches": []
-                        },
-                        "branches": []
-                    },
-                    "branches": []
-                },
-                "branches": []
-            },
-            "branches": [{
-                # "module": "zookeeper",
-                # "hosts": "zookeeperNodes",
-                # "play": "download_tasks.yml",
-                # "vars": example_of_branch_vars,
-                # "next": {
-                #     "module": "zookeeper",
-                #     "hosts": "zookeeperNodes",
-                #     "play": "download_tasks.yml",
-                #     "vars": default_vars,
-                #     "next": {},
-                #     "branches": []
-                # },
-                # "branches": []
-            }]
-        },
-        "branches": []
-    }
-
-    print(DFS_dict)
-
+    DFS_dict = getDfsDict()
     # DFS_dict = toolUIgenerator()  # this generates a dict like the one at the top
     t_walker = tree_closure(inv)
     t_walker(DFS_dict)
@@ -172,17 +59,25 @@ def main(inv):
     # exit()
 
 
+
 def utils(args):
     dfs_dict = {args[x]: args[x + 1] for x in range(0, len(args) - 1) if x % 2 == 0}
-    print(dfs_dict)
 
-    hosts = dfs_dict['--hosts']
-    play = dfs_dict['--play']
-    var_file = dfs_dict['--vars']
-    module = dfs_dict['--module']
-    inv = dfs_dict['--inv']
-    tags = dfs_dict['--tags']
-    stage = dfs_dict['--stage']
+    tags = dfs_dict.get('--tags', 'activate')
+
+    if tags != "activate" and tags != "deactivate":
+        d = getAdHocDict()
+        if tags in d:
+            # do predefined tasks via custom tags if exist, otherwise run utils with default params
+            utils(d[tags].split(' '))
+            return
+    # if tags != activate or deactivate, then default params are loaded here which point to default module in utils stage.
+    hosts = dfs_dict.get("--hosts", 'all')
+    play = dfs_dict.get("--play", 'main.yml')
+    var_file = dfs_dict.get("--vars", 'ui_sapa_vars.yml')
+    module = dfs_dict.get('--module', 'default')
+    inv = dfs_dict.get('--inv', '/Users/dporter/projects/sapa/inventory_local')
+    stage = dfs_dict.get('--stage', 'utils')
 
     extra_vars_param = 'branch_file_ui=' + var_file + ' hosts_ui=' + hosts + ' tasks_file_ui=' + play + ' module=' + module + ' stage=' + stage
     ansible_prefix = ['ansible-playbook', '-i', inv, '../r_modules/main.yml']
@@ -194,19 +89,22 @@ if __name__ == "__main__":
 
     if sys.argv[1] == 'utils' and len(sys.argv) < 4:
         print("utils option requires additional parameters e.g.: \n python3 start.py utils --hosts all --play "
-              "main.yml --vars ui_sapa_vars.yml --module example_mod --inv /Users/dporter/projects/sapa/inventory_local --tags "
+              "main.yml --vars ui_sapa_vars.yml --module example_mod --inv "
+              "/Users/dporter/projects/sapa/inventory_local --tags "
               "rsa_config --stage service")
 
-    if sys.argv[1] == 'utils' and len(sys.argv) >= 4:
+    elif sys.argv[1] == 'utils' and len(sys.argv) >= 4:
         print("running utils function")
         sys.exit(
             utils(sys.argv[2:])
         )
-    if len(sys.argv) < 1:
+    elif len(sys.argv) < 2:
         print('usage: python3 start.py <path_to_inventory>')
 
-    sys.exit(
-        main(sys.argv[1])
-    )
-
+    elif len(sys.argv) == 2:
+        print('running exp')
+        sys.exit(
+            main(sys.argv[1])
+        )
+    print(len(sys.argv))
     sys.exit()
