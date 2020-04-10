@@ -15,3 +15,4 @@ records*
 remotescripts/
 utils/ssh_files/pssh_*
 exp_html_out/
+*html
