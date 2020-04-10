@@ -30,6 +30,9 @@
 
 
 
+### name of the oysta experiment
+oysta_name: testing_solr_implementations
+
 
 
 #### OYSTA VARIABLE LOADING

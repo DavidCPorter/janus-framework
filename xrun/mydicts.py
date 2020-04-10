@@ -11,6 +11,7 @@ def getAdHocDict():
     d['runscripts']  = "--hosts generatorNode --play run.yml --vars ui_sapa_vars.yml --module http_closed_loop --inv /Users/dporter/projects/sapa/inventory_local --tags activate --stage load"
     d['mkdatadir']  = "--hosts localhost --play mkdir_data_local.yml --vars ui_sapa_vars.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory_local --tags activate --stage pipeline"
     d['readresults']  = "--hosts generatorNode --play read_results.yml --vars ui_sapa_vars.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory_local --tags activate --stage pipeline"
+    d['appendresults']  = "--hosts localhost --play append_results_to_total.yml --vars ui_sapa_vars.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory_local --tags activate --stage pipeline"
     return d
 
 def getDfsDict():

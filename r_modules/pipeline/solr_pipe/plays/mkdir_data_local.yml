@@ -9,6 +9,16 @@
     - activate
 
 
+- name: mkdir for total result csv
+  file:
+    path: "{{local_data_dir}}/{{oysta_name}}"
+    state: directory
+    mode: '777'
+
+  tags:
+    - activate
+
+
 - debug:
     msg: "{{local_data_dir}}/{{deploy_name}}"
 

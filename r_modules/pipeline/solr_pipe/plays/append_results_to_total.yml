@@ -1,0 +1,18 @@
+---
+
+- name: include inherited vars that should not be modified
+  include_vars: '{{module_root}}/defaults/inherited.yml'
+  tags:
+    - activate
+
+- debug:
+    msg: python3 generate_exp_csvs.py --exp_name {{oysta_name}} --sapa_home {{SAPA_HOME}} --deploy_name {{deploy_name}} --shards {{shards}} --replicas {{replicas}} --query {{query}} --clustersize {{solrnum}} --engine {{engine}}
+  tags:
+    - activate
+
+- name: append results to csv
+  command: python3 generate_exp_csvs.py --exp_name {{oysta_name}} --sapa_home {{SAPA_HOME}} --deploy_name {{deploy_name}} --shards {{shards}} --replicas {{replicas}} --query {{query}} --clustersize {{solrnum}} --engine {{engine}}
+  args:
+    chdir: "{{module_root}}/files"
+  tags:
+    - activate
