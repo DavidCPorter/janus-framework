@@ -31,6 +31,9 @@ l_threads: '{{ui_l_threads | default(_l_threads)}}'
 
 _l_procs: 16
 l_procs: '{{ui_l_procs | default(_l_procs)}}'
-l_docker: true
-endpoint_host: '172.21.0.'
-endpoint_port: 8983
+_l_docker: true
+l_docker: '{{ui_l_docker | default(_l_docker)}}'
+_endpoint_host: '172.21.0.'
+endpoint_host: '{{ui_endpoint_host | default(_endpoint_host)}}'
+_endpoint_port: 80
+endpoint_port: '{{ui_endpoint_port | default(_endpoint_port)}}'

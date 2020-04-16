@@ -2,36 +2,9 @@
 
 # PLEASE NOTE: prior to loading these vars we inherit both start.py & inventory variables. r_modules/main.yml loads this file and 'module'/defaults/main.yml to inject all vars into the respective 'play'.
 
-# ANSIBLE VARIABLE PRECEDENCE REMINDER
-# If multiple variables of the same name are defined in different places, they win in a certain order, which is (in least to greatest precendence): ... ps - another reminder of ansible's lack of vision and simplicity.
-
-#command line values (eg “-u user”) - LEAST
-#role defaults [1]
-#inventory file or script group vars [2]
-#inventory group_vars/all [3] *USED*
-#playbook group_vars/all [3]
-#inventory group_vars/* [3] *USED*
-#playbook group_vars/* [3]
-#inventory file or script host vars [2]
-#inventory host_vars/* [3]
-#playbook host_vars/* [3] *USED*
-#host facts / cached set_facts [4]
-#play vars *USED*
-#play vars_prompt
-#play vars_files
-#role vars (defined in role/vars/main.yml)
-#block vars (only for tasks in block)
-#task vars (only for the task)
-#include_vars *USED*
-#set_facts / registered vars
-#role (and include_role) params
-#include params
-#extra vars (always win precedence) *USED* - GREATEST
-
-
 
 ### name of the oysta experiment
-oysta_name: testing_solr_implementations
+oysta_name: cloudlab_tests
 
 
 
@@ -111,6 +84,10 @@ ui_load_files:
   - testmodes.py
   - threadargs.py
   - traffic_gen.py
+_l_docker: false
+ui_endpoint_host: '10.10.1.'
+ui_endpoint_port: 8983
+
 # temp
 ui_load_duration: 10
 ui_l_replicas: "{{ui_replicas}}"
@@ -122,7 +99,7 @@ ui_l_solrnum: 2
 ui_engine: solr
 # following unnecessary yet required 4.3.2020
 ui_l_threads: 1
-ui_l_procs: 16
+ui_l_procs: 8
 ui_l_instances: 0
 
 
@@ -131,4 +108,6 @@ ui_output_dir: "{{home}}/traffic_gen"
 ui_deploy_name: "{{ui_engine}}-{{ui_l_query}}-{{ui_l_replicas}}-{{ui_l_shards}}"
 
 
+#utils
+searchGroupArg: sixteenNode
 

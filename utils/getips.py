@@ -68,6 +68,7 @@ for hostname in node_dict.values():
 zoo_dict.update(nodes_dict)
 zoo_dict.update(load_dict)
 nodes_dict = zoo_dict
+thirdmaster = list(nodes_dict.values())[2]
 zoo_list = list(nodes_dict.values())[:3]
 singleNode = list(nodes_dict.values())[:1]
 twoNode = list(nodes_dict.values())[:2]
@@ -79,7 +80,7 @@ twentyfourNode = list(nodes_dict.values())[:24]
 print("...generating inventory file with Ips -> ./inventory_gen.txt\n *** please check output file then run $ cat inventory_gen.txt > inventory *** ")
 with open('../inventory_file_template.j2') as file_:
     template = Template(file_.read())
-template = template.render(nodes_dict=nodes_dict,zoo_list=zoo_list,zoo_dict=zoo_dict,load_dict=load_dict,host_user=user,singleNode=singleNode,twoNode=twoNode,fourNode=fourNode,eightNode=eightNode, sixteenNode=sixteenNode,twentyfourNode=twentyfourNode)
+template = template.render(nodes_dict=nodes_dict,zoo_list=zoo_list,zoo_dict=zoo_dict,load_dict=load_dict,host_user=user,singleNode=singleNode,thirdMaster=thirdmaster, twoNode=twoNode,fourNode=fourNode,eightNode=eightNode, sixteenNode=sixteenNode,twentyfourNode=twentyfourNode)
 
 with open("../inventory_gen.txt", "w") as inv:
     inv.write(template)

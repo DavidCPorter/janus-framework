@@ -1,5 +1,5 @@
 ---
-_output_dir: "{{home}}/traffic_gen"
+_89output_dir: "{{home}}/traffic_gen"
 output_dir: "{{ui_output_dir | default(_output_dir)}}"
 _deploy_name: solr_default
 deploy_name: "{{ui_deploy_name | default(_deploy_name)}}"

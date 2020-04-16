@@ -1,0 +1,7 @@
+[solr1]
+local1 ansible_connection=local path=/Users/dporter/projects/sapa/experiments/solr1-vs-solr2/solr1
+[solr2]
+local2 ansible_connection=local path=/Users/dporter/projects/sapa/experiments/solr1-vs-solr2/solr2
+
+[all:vars]
+ansible_user=dporter

@@ -8,9 +8,10 @@ def main(args_dict):
 
     SAPA_HOME=args_dict.get('--proj_home',"/Users/dporter/projects/sapa")
     oysta_name=args_dict.get('--exp_name')
+    # deploy_name is used to list files in deploy_name dir for the current iteration to be mapped to total.csv
     deploy_name=args_dict.get('--deploy_name')
-    exp_home = SAPA_HOME + "/data_dir"
-    totals_dir = exp_home+'/oysta_total_csvs'
+    exp_home = SAPA_HOME + "/data_dir/"+oysta_name
+    totals_dir = exp_home
     total_scale_file = totals_dir + '/total_' + oysta_name + '.csv'
 
     query=args_dict.get('--query')

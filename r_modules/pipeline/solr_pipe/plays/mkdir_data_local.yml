@@ -1,15 +1,5 @@
 ---
-- name: mkdir for this branches data
-  file:
-    path: "{{local_data_dir}}/{{deploy_name}}"
-    state: directory
-    mode: '777'
-
-  tags:
-    - activate
-
-
-- name: mkdir for total result csv
+- name: mkdir for {{oysta_namme}} result data
   file:
     path: "{{local_data_dir}}/{{oysta_name}}"
     state: directory
@@ -19,9 +9,13 @@
     - activate
 
 
-- debug:
-    msg: "{{local_data_dir}}/{{deploy_name}}"
-
+- name: mkdir for this branches data
+  file:
+    path: "{{local_data_dir}}/{{oysta_name}}/{{deploy_name}}"
+    state: directory
+    mode: '777'
 
   tags:
     - activate
+
+

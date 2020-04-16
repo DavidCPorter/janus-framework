@@ -4,6 +4,12 @@
 [zookeeperNodes]
 {% for host in zoo_list %}{{host}}{% if not loop.last %}{% endif %}{% endfor %}
 
+[masterNodes]
+{% for host in zoo_list %}{{host}}{% if not loop.last %}{% endif %}{% endfor %}
+
+[thirdMaster]
+{% for host in thirdMaster %}{{host}}{% if not loop.last %}{% endif %}{% endfor %}
+
 [twoNode]
 {% for host in twoNode %}{{host}}{% if not loop.last %}{% endif %}{% endfor %}
 
@@ -39,9 +45,8 @@ ansible_connection=ssh
 ansible_user={{host_user}}
 {% for key, value in nodes_dict.items() %}node{{key}}={{nodes_dict[key][:15]}}
 {% if not loop.last %}{% endif %}{% endfor %}
-root_path=/Users/dporter/projects/solrcloud/
+SAPA_HOME=/Users/dporter/projects/sapa
+home=/users/dporte7
 main_class=com.dporte7.solrclientserver.DistributedWebServer
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-git_branch_name=dporter_8_3
-solr_bin_exec=/users/dporte7/solr-8_3/solr/bin/solr
-s3_bucket_name=solr-8-3-dporter
+gather_facts=no

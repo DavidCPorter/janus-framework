@@ -1,0 +1,17 @@
+
+- hosts: "{{hosts_ui}}"
+
+  # OYSTA main vars
+  gather_facts: no
+
+  tasks:
+
+    - name: set vars
+      template:
+        src: "{{main_path_root}}/experiments/test.yml"
+        dest: "{{path}}/variables.yml"
+      tags:
+        - activate
+        - utils
+        - never
+

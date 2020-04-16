@@ -19,9 +19,9 @@ module_root = ''
 
 def setGlobalDataPath(home,codename,chart_type,m_root):
     global static_dir, html_dir, totals_csv, module_root
-    html_dir = home+'/data_dir/oysta_total_csvs/'+codename+'_htmls/'+chart_type
-    static_dir = home+'/data_dir/oysta_total_csvs/'+codename+'_jps/'+chart_type
-    totals_csv = home+ '/data_dir/oysta_total_csvs/total_'+codename+'.csv'
+    html_dir = home+'/data_dir/'+codename+'/'+codename+'_htmls/'+chart_type
+    static_dir = home+'/data_dir/'+codename+'/'+codename+'_jps/'+chart_type
+    totals_csv = home+ '/data_dir/'+codename+'/total_'+codename+'.csv'
     module_root = m_root
 
 

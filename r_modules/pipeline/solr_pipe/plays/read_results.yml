@@ -15,11 +15,11 @@
     - name: retrieve the readresults_output
       fetch:
         src: "{{output_dir}}/readresults_dir/{{result_filename}}"
-        dest: "{{local_data_dir}}/{{deploy_name}}/{{inventory_hostname}}{{result_filename}}"
+        dest: "{{local_data_dir}}/{{oysta_name}}/{{deploy_name}}/{{inventory_hostname}}{{result_filename}}"
         flat: yes
 
     - name: remove csvs for this branch exp
-      command: rm -rf *.csv
+      shell: rm *.csv
       args:
         chdir: "{{output_dir}}"
 
