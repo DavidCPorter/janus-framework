@@ -7,17 +7,17 @@ import copy
 
 def getAdHocDict():
     d = dict()
-    d['test'] = "--hosts solr1,solr2 -vars ui_sapa_vars.yml --inv /Users/dporter/projects/sapa/inv_special --tags activate --path experiments/main.yml"
-    d['copyscripts'] = "--hosts generatorNode --play copy_scripts.yml --vars ui_sapa_vars.yml --module http_closed_loop --inv /Users/dporter/projects/sapa/inventory --tags activate --stage load"
-    d['runscripts']  = "--hosts generatorNode --play run.yml --vars ui_sapa_vars.yml --module http_closed_loop --inv /Users/dporter/projects/sapa/inventory --tags activate --stage load"
-    d['mkdatadir']  = "--hosts localhost --play mkdir_data_local.yml --vars ui_sapa_vars.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory --tags activate --stage pipeline"
-    d['readresults']  = "--hosts generatorNode --play read_results.yml --vars ui_sapa_vars.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory --tags activate --stage pipeline"
-    d['appendresults']  = "--hosts localhost --play append_results_to_total.yml --vars ui_sapa_vars.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory --tags activate --stage pipeline"
-    d['cdf']  = "--hosts localhost --play generate_cdf.yml --vars ui_sapa_vars.yml --module cdf --inv /Users/dporter/projects/sapa/inventory --tags activate --stage viz"
+    d['test'] = "--hosts solr1,solr2 -vars example_variables.yml --inv /Users/dporter/projects/sapa/inv_special --tags activate --path experiments/main.yml"
+    d['copyscripts'] = "--hosts generatorNode --play copy_scripts.yml --vars example_variables.yml --module http_closed_loop --inv /Users/dporter/projects/sapa/inventory --tags activate --stage load"
+    d['runscripts']  = "--hosts generatorNode --play run.yml --vars example_variables.yml --module http_closed_loop --inv /Users/dporter/projects/sapa/inventory --tags activate --stage load"
+    d['mkdatadir']  = "--hosts localhost --play mkdir_data_local.yml --vars example_variables.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory --tags activate --stage pipeline"
+    d['readresults']  = "--hosts generatorNode --play read_results.yml --vars example_variables.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory --tags activate --stage pipeline"
+    d['appendresults']  = "--hosts localhost --play append_results_to_total.yml --vars example_variables.yml --module solr_pipe --inv /Users/dporter/projects/sapa/inventory --tags activate --stage pipeline"
+    d['cdf']  = "--hosts localhost --play generate_cdf.yml --vars example_variables.yml --module cdf --inv /Users/dporter/projects/sapa/inventory --tags activate --stage viz"
     return d
 
 def getDfsDict():
-    default_vars = "ui_sapa_vars.yml"
+    default_vars = "example_variables.yml"
     example_of_branch_vars = "example_vars.yml"
     DFS_dict = {
         "stage": "env",

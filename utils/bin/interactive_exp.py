@@ -4,12 +4,15 @@ import os
 import subprocess
 import oysterutils as OysterUtils
 import _ssh_import as ssh_import
+from _branch_class.py import Experiment
 
 def commandDispatcher(exp_dict):
+    name = exp_dict.get('--name')
     home_dir= exp_dict.get('--home')
+    r_modules = home_dir+'/r_modules'
     stages = ['env','load','pipeline','service','viz']
     available_modules={stages[x]:list() for x in range(0, len(stages))}
-    for stage in os.scandir(home_dir+'/r_modules'):
+    for stage in os.scandir(r_modules):
         if stage.name in stages:
             available_modules.update({stage.name: [x.name for x in os.scandir(stage.path)]})
     branches=[]
@@ -25,44 +28,52 @@ def commandDispatcher(exp_dict):
     # make inventory file for vars
     ssh_import.new_inventory(branches,exp_dict.get('--home_user'))
 
-    all_modules=available_modules.values()
     # experiment_modules
 
+    experiment = Experiment(name,available_modules,r_modules)
+
+
+
+
     def cmdFetcher(command):
-        def show(vars):
-            print(vars)
+        def ls(vars):
+            nonlocal experiment
             if vars[0] == 'modules':
                 print(available_modules.values())
-            if vars[0] in stages and vars[1] == "vars":
-                pass
 
-            # {vars[x]: list() for x in range(0, len(vars))}
-            # print(var)
-
-        def add(vars):
-            if vars[0] == 'branch':
-                OysterUtils.add_branch(vars[1])
-                branches.append(vars[1])
-                print('success')
-
-        def rm(vars):
-            if vars[0] == 'branch':
-                OysterUtils.rm_branch(vars[1])
-                branches.remove(vars[1])
-                print('success')
-
-        def ls(vars):
             if vars[0] == 'vars':
                 vars.pop()
 
+        def add(vars):
+            if len(vars) != 3:
+                print("vars incorrect", vars)
+                return
 
-                pass
+            nonlocal experiment
+            if vars[0] == 'branch':
+                experiment.add_branch(vars[1])
+                branches.append(vars[1])
+                print('success')
+
+            if vars[0] == 'modules' or vars[0] == 'module':
+                experiment.update_modules('add',vars[1].split(','),vars[2])
+
+            if vars[0] == 'vars':
+                user_variables = vars[1:-1]
+                ansible_groups = vars[-1]
+                experiment.update_variables(user_variables, ansible_groups,)
+
+
+        def rm(vars):
+            nonlocal experiment
+            if vars[0] == 'branch':
+                experiment.rm_branch(vars[1])
+                branches.remove(vars[1])
+                print('success')
 
 
 
-
-
-        decorated_command = dict(show=show, add=add, rm=rm, ls=ls)
+        decorated_command = dict(add=add, rm=rm, ls=ls)
 
         return_function = decorated_command.get(command)
 
@@ -73,22 +84,14 @@ def commandDispatcher(exp_dict):
 def main(interactive_dict):
     print(interactive_dict)
     os.chdir(str(interactive_dict.get('--home'))+'/experiments/'+str(interactive_dict.get('--name')))
-    # subprocess.run(['ls'])
-    # files = os.popen('ls ' + str(interactive_dict.get('--home'))+'/experiments/'+str(interactive_dict.get('--name')+ '| grep solr1').read()
-    # default_variables =
-    # branch_list=arg_dict.get("--branches")
-    # exp_name=arg_dict.get("--name")
-    # home=arg_dict.get("--home")
-    # branch_list = branch_list.split(',')
-    # output = subprocess.run(['mkdir', home + '/experiments/' + exp_name ], capture_output=True)
 
-    fetch_the_command = commandDispatcher(interactive_dict)
-    user_input = input('> ')
-    while user_input != 'exit':
-        user_input_list = user_input.split(' ')
-        cmd = fetch_the_command(user_input_list[0])
-        cmd(user_input_list[1:])
-        user_input = input('> ')
+    experiment_context = commandDispatcher(interactive_dict)
+    user_command = input('> ')
+    while user_command != 'exit':
+        user_command_list = user_command.split(' ')
+        cmd = experiment_context(user_command_list[0])
+        cmd(user_command_list[1:])
+        user_command = input('> ')
 
 
 if __name__ == '__main__':

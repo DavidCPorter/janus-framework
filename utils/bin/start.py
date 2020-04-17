@@ -75,7 +75,7 @@ def utils(args):
     # if tags != activate or deactivate, then default params are loaded here which point to default module in utils stage.
     hosts = dfs_dict.get("--hosts", 'all')
     play = dfs_dict.get("--play", 'main.yml')
-    var_file = dfs_dict.get("--vars", 'ui_sapa_vars.yml')
+    var_file = dfs_dict.get("--vars", 'example_variables.yml')
     module = dfs_dict.get('--module', 'default')
     inv = dfs_dict.get('--inv', '/Users/dporter/projects/sapa/inventory')
     stage = dfs_dict.get('--stage', 'utils')
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     if sys.argv[2] == 'utils' and len(sys.argv) < 7:
         print("utils option requires additional parameters e.g.: \n python3 start.py utils --hosts all --play "
-              "main.yml --vars ui_sapa_vars.yml --module example_mod --inv "
+              "main.yml --vars example_variables.yml --module example_mod --inv "
               "/Users/dporter/projects/sapa/inventory_local --tags "
               "rsa_config --stage service")
 

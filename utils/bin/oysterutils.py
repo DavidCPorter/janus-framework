@@ -26,3 +26,10 @@ def rm_branch(branch_list):
         subprocess.run(['mkdir', i+'/service'])
         subprocess.run(['mkdir', i+'/viz'])
 
+
+def add_module(var_list):
+    modules = var_list.split(' ')
+    branches = modules.pop()
+
+
+

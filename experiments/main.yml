@@ -2,16 +2,34 @@
 - hosts: "{{hosts_ui}}"
 
   # OYSTA main vars
+  vars:
+    module_root: "{{SAPA_HOME}}/r_modules/{{stage}}/{{module}}"
+    user_root_dir: "{{home}}"
+
   gather_facts: no
 
   tasks:
 
-    - name: set vars
-      template:
-        src: "{{main_path_root}}/experiments/test.yml"
-        dest: "{{path}}/variables.yml"
-      tags:
-        - activate
-        - utils
-        - never
+  - name: including variables for this branch (these variables override all except start.py cl vars)
+    include_vars: '{{branch_file_ui}}'
+    tags:
+      - always
+
+  - name: including default variables for this play
+    include_vars: '{{module_root}}/defaults/main.yml'
+    tags:
+      - always
+
+  - name: evolve to active state,   hosts_ui -> tasks_file_ui
+    include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'
+    tags:
+      - activate
+      - utils
+      - never
+
+  - name: revert to inactive state,   hosts_ui -> tasks_file_ui
+    include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'
+    tags:
+      - deactivate
+      - never
 

@@ -26,3 +26,15 @@ Host solr2
 Host solr1
   hostname 0.0.0.0
   User dporter
+
+Host solr4shards
+  hostname 0.0.0.0
+  User dporter
+
+Host solr2shards
+  hostname 0.0.0.0
+  User dporter
+
+Host solr1shard
+  hostname 0.0.0.0
+  User dporter
