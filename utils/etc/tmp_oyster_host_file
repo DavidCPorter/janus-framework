@@ -38,3 +38,683 @@ Host solr2shards
 Host solr1shard
   hostname 0.0.0.0
   User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host all
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter
+
+Host branch2
+  hostname 0.0.0.0
+  User dporter
+
+Host branch3
+  hostname 0.0.0.0
+  User dporter
+
+Host branch1
+  hostname 0.0.0.0
+  User dporter

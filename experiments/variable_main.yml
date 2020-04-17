@@ -1,27 +1,32 @@
 
 - hosts: "{{hosts_ui}}"
 
+  vars:
+    SAPA_HOME: /Users/dporter/projects/sapa
+    home: /users/dporte7
+    module_root: "{{SAPA_HOME}}/r_modules/{{stage}}/{{module}}"
+    user_root_dir: "{{home}}"
+
+  gather_facts: no
+
   tasks:
 
     - name: include user variables
-      include_vars: "{{}}
+      include_vars: "{{branch_path}}/user_variables.yml"
       tags:
         - always
 
-    - name: including default variables for this play
+    - name: including default variables
       include_vars: '{{module_root}}/defaults/main.yml'
       tags:
         - always
 
-    - name:
-      include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'
-      tags:
-        - activate
-        - utils
-        - never
+    - name: Print vars
+      vars:
+        msg: |
+          Module Variables ("vars"):
+          --------------------------------
+          {{ vars | to_nice_json }}
 
-    - name: revert to inactive state,   hosts_ui -> tasks_file_ui
-      include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'
-      tags:
-        - deactivate
-        - never
+      debug:
+        msg: "{{ msg.split('\n') }}"

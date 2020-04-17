@@ -51,7 +51,7 @@ while (( "$#" )); do
         exit
       fi
       #for non interactive commands
-      python3 $OYSTER_HOME/utils/bin/$COMMAND.py $ARGS || echo "> oyster $COMMAND $ARGS is not a valid command. Please be sure to follow API parameter rules"
+      python3 $OYSTER_HOME/utils/bin/$COMMAND.py $ARGS || echo "> oyster $ARGS is not a valid command. Please be sure to follow API parameter rules"
       shift "$#"
       ;;
 
