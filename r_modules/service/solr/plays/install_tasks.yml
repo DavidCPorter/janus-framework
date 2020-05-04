@@ -1,5 +1,7 @@
 ---
 #### ACTIVATE ####
+# {{solr_version}}
+
 
 - name: SOLR ---> Check if Solr has been installed already.
   stat:

@@ -2,6 +2,7 @@ import pip
 import sys
 import os
 import subprocess
+from yaml import safe_load, safe_dump
 
 def main(args):
     print(args)
@@ -20,6 +21,10 @@ def main(args):
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/pipeline'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/service'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/viz'])
+        with open(home+'/experiments/'+exp_name+'/'+i+'/mod_order.yml', 'w+') as f:
+            safe_dump({'module_order': None}, f)
+        with open(home+'/experiments/'+exp_name+'/'+i+'/user_variables.yml', 'w+') as f:
+            pass
 
 if __name__ == '__main__':
     # print (sys.argv)

@@ -95,7 +95,7 @@ def utils(args):
 if __name__ == "__main__":
 
     if sys.argv[2] == 'utils' and len(sys.argv) < 7:
-        print("utils option requires additional parameters e.g.: \n python3 start.py utils --hosts all --play "
+        print("utils option requires additional parameters e.g.: \n python3 _start_basic.py utils --hosts all --play "
               "main.yml --vars example_variables.yml --module example_mod --inv "
               "/Users/dporter/projects/sapa/inventory_local --tags "
               "rsa_config --stage service")
@@ -106,7 +106,7 @@ if __name__ == "__main__":
             utils(sys.argv[3:])
         )
     elif len(sys.argv) < 5:
-        print('usage: python3 start.py <path_to_inventory>')
+        print('usage: python3 _start_basic.py <path_to_inventory>')
 
     elif len(sys.argv) == 5:
         print('running exp')

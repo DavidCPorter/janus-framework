@@ -2,3 +2,5 @@
 
 _data_upload_dir: "{{home}}"
 data_upload_dir: '{{ui_data_upload_dir | default(_data_upload_dir)}}'
+_amazon-reviews-large:
+  - download_json.yml

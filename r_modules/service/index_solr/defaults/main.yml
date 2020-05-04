@@ -28,3 +28,9 @@ _solrconfig_xml_dest: "{{ui_solr_home}}/configsets/_default/conf/solrconfig.xml"
 solrconfig_xml_dest: '{{ui_solrconfig_xml_dest | default(_solrconfig_xml_dest)}}'
 _shorter_data: true
 shorter_data: '{{ui_shorter_data | default(_shorter_data)}}'
+
+_index_solr:
+  - 0_pre_index_config
+  - 1_index
+  - 2_solr_aws
+  - 3_post_index_config

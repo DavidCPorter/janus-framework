@@ -16,3 +16,7 @@ packages:
   - ant
   - virtualenv #required for pip
 # - setuptools #required for pip
+
+cloud-env:
+  - install_tasks
+  - aws_tasks

@@ -18,3 +18,8 @@ _zoo_bin_dir: '{{zoo_root_dir}}/bin'
 zoo_bin_dir: '{{ui_zoo_bin_dir | default(_zoo_bin_dir)}}'
 _zoo_version: 3.5.5
 zoo_version: '{{ui_zoo_version | default(_zoo_version)}}'
+
+_zookeeper:
+  - download_tasks
+  - configure_tasks
+  - run_tasks

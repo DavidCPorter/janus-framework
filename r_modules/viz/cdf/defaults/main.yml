@@ -4,3 +4,5 @@ _local_data_dir: "{{SAPA_HOME}}/data_dir"
 local_data_dir: "{{ui_local_data_dir | default(_local_data_dir)}}"
 chart_type: cdf
 
+_cdf:
+  - generate_cdf

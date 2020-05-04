@@ -10,7 +10,7 @@
 
   tasks:
 
-  - name: including variables for this branch (these variables override all except start.py cl vars)
+  - name: including variables for this branch (these variables override all except _start_basic.py cl vars)
     include_vars: '{{branch_file_ui}}'
     tags:
       - always

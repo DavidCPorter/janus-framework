@@ -36,3 +36,9 @@ _chroot: "{{hosts_ui}}"
 chroot: '{{ui_chroot | default(_chroot)}}'
 _solrconfig_xml_dest: "{{solr_home}}/configsets/_default/conf/solrconfig.xml"
 solrconfig_xml_dest: "{{ui_solrconfig_xml_dest | default(_solrconfig_xml_dest)}}"
+
+
+_solr:
+  - install
+  - config
+  - run

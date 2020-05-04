@@ -1,5 +1,7 @@
 ---
 
+#{{solr_heap}}
+
 - name: SOLR ---> copy solr init file to hosts
   template:
     src: "{{solr_init_file}}"

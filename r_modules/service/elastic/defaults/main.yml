@@ -3,3 +3,6 @@
 es_data_dir: /var/elasticsearch/data
 es_log_dir: /var/elasticsearch/log
 cache_percentage: "50%"
+_elastic:
+  - install
+  - run

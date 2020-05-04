@@ -37,3 +37,7 @@ _endpoint_host: '172.21.0.'
 endpoint_host: '{{ui_endpoint_host | default(_endpoint_host)}}'
 _endpoint_port: 80
 endpoint_port: '{{ui_endpoint_port | default(_endpoint_port)}}'
+
+_http_closed_loop:
+  - copy_scripts
+  - run

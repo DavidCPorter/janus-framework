@@ -1,0 +1,5 @@
+cred_dir: dpisser
+deploy_name: bungalo_jordan
+es_log_dir: jordan_dunky
+solr_version: '8.2'
+zoo_version: '3.15'

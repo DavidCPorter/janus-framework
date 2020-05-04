@@ -1,6 +1,6 @@
 ---
 
-# PLEASE NOTE: prior to loading these vars we inherit both start.py & inventory variables. r_modules/main.yml loads this file and 'module'/defaults/main.yml to inject all vars into the respective 'play'.
+# PLEASE NOTE: prior to loading these vars we inherit both _start_basic.py & inventory variables. r_modules/main.yml loads this file and 'module'/defaults/main.yml to inject all vars into the respective 'play'.
 
 
 ### name of the oysta experiment
