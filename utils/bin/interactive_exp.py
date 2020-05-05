@@ -99,7 +99,7 @@ def commandDispatcher(exp_dict):
         for branch in tmp:
             ssh_import.new_branch(branch, exp_dict.get('--home_user'), home_dir)
 
-        # make inventory file for vars
+        # make local_var_inventory file for vars
         ssh_import.new_inventory(tmp, exp_dict.get('--home_user'))
 
 
@@ -112,6 +112,7 @@ def commandDispatcher(exp_dict):
 
     # experiment_modules
     experiment = Experiment(name, available_modules, r_modules, module_play_order, module_var_order, [b_name for b_name in tmp])
+
 
     # this dict maps ansible groupname notation to a set of branch_names
     valid_groupnames_dict = update_groupnames(tmp)
@@ -263,6 +264,10 @@ def commandDispatcher(exp_dict):
             print(ordered_set)
             final = experiment.get_final_mod_play_levels(ordered_set, full_branch_flow)
             # walk the branches connected
+
+            shotgun,first_branch,mod_start,play_start = experiment.execute_experiment(final)
+            print(first_branch,mod_start,play_start)
+            shotgun(first_branch,mod_start,play_start)
 
 
 

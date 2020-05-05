@@ -77,7 +77,7 @@ eightNode = list(nodes_dict.values())[:8]
 sixteenNode = list(nodes_dict.values())[:16]
 twentyfourNode = list(nodes_dict.values())[:24]
 
-print("...generating inventory file with Ips -> ./inventory_gen.txt\n *** please check output file then run $ cat inventory_gen.txt > inventory *** ")
+print("...generating local_var_inventory file with Ips -> ./inventory_gen.txt\n *** please check output file then run $ cat inventory_gen.txt > local_var_inventory *** ")
 with open('../inventory_file_template.j2') as file_:
     template = Template(file_.read())
 template = template.render(nodes_dict=nodes_dict,zoo_list=zoo_list,zoo_dict=zoo_dict,load_dict=load_dict,host_user=user,singleNode=singleNode,thirdMaster=thirdmaster, twoNode=twoNode,fourNode=fourNode,eightNode=eightNode, sixteenNode=sixteenNode,twentyfourNode=twentyfourNode)

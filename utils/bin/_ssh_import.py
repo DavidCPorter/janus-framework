@@ -10,7 +10,7 @@ def new_branch(name,homeuser,homedir):
 def new_inventory(branch_names,homeuser):
     current_dir = subprocess.run(['pwd'], capture_output=True)
     current_dir = current_dir.stdout.decode("utf-8")
-    with open('./inventory', 'a+') as f:
+    with open('./local_var_inventory', 'a+') as f:
         for name in branch_names:
             f.write('\n'+'['+ name +']'+'\n'+ name +' ansible_connection=local path='+ current_dir[:-1] +'/'+ name + ' ansible_user='+homeuser+'\n')
     return
