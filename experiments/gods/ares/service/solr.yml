@@ -1,0 +1,44 @@
+---
+# defaults file for solr
+
+# VARIABLE PRECEDENCE
+# If multiple variables of the same name are defined in different places, they win in a certain order, which is:
+# extra vars (-e in the command line) always win
+# then comes connection variables defined in local_var_inventory (ansible_ssh_user, etc)
+# then comes "most everything else" (command line switches, vars in play, included vars, role vars, etc)
+# then comes the rest of the variables defined in local_var_inventory
+# then comes facts discovered about a system
+# then "role defaults", which are the most "defaulty" and lose in priority to everything.
+
+# Files & Paths
+
+_solr_version: dporter_8_3
+solr_version: 'dporter_8_3'
+_solr_install_dir: "/home/sapauser/solr-dporter_8_3"
+solr_install_dir: '/home/sapauser/solr-dporter_8_3'
+_solr_log_dir: "/var/solr/logs"
+solr_log_dir: '/var/solr/logs'
+_solr_git_branch_name: "dporter_8_3"
+solr_git_branch_name: 'dporter_8_3'
+_solr_home: "/home/sapauser/solr-dporter_8_3/solr/server/solr"
+solr_home: '/home/sapauser/solr-dporter_8_3/solr/server/solr'
+_solr_init_file: '/Users/dporter/projects/sapa/r_modules/service/solr/templates/solr.in.sh'
+solr_init_file: '/Users/dporter/projects/sapa/r_modules/service/solr/templates/solr.in.sh'
+_solr_log4j_props: "/home/sapauser/solr-dporter_8_3/solr/server/resources/log4j2.xml"
+solr_log4j_props: '/home/sapauser/solr-dporter_8_3/solr/server/resources/log4j2.xml'
+_solr_heap: 1 #GB
+solr_heap: '1'
+_solr_repo: https://github.com/DavidCPorter/lucene-solr.git
+solr_repo: 'https://github.com/DavidCPorter/lucene-solr.git'
+_solr_bin_exec: "/home/sapauser/solr-dporter_8_3/solr/bin/solr"
+solr_bin_exec: "/home/sapauser/solr-dporter_8_3/solr/bin/solr"
+_chroot: "twoNode"
+chroot: 'twoNode'
+_solrconfig_xml_dest: "/home/sapauser/solr-dporter_8_3/solr/server/solr/configsets/_default/conf/solrconfig.xml"
+solrconfig_xml_dest: "/home/sapauser/solr-dporter_8_3/solr/server/solr/configsets/_default/conf/solrconfig.xml"
+
+
+_solr:
+  - install
+  - config
+  - run

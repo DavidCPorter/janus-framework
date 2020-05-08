@@ -3,7 +3,7 @@
 _data_upload_dir: '/home/sapauser'
 data_upload_dir: '{{ui_data_upload_dir | default(_data_upload_dir)}}'
 # collection name is passed in now
-_aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{clustersize}}"
+_aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{hosts_ui}}"
 aws_dir_name: "{{ui_aws_dir_name | default(_aws_dir_name)}}"
 _solr_install_dir: /users/dporte7/solr-8_3
 solr_install_dir: '{{ui_solr_install_dir | default(_solr_install_dir)}}'
@@ -24,7 +24,7 @@ _replicas: 1
 replicas: '{{ui_replicas | default(_replicas)}}'
 _collection_name: "{{shards}}_{{replicas}}_index"
 collection_name: '{{ui_collection_name | default(_collection_name)}}'
-_solrconfig_xml_dest: "{{ui_solr_home}}/configsets/_default/conf/solrconfig.xml"
+_solrconfig_xml_dest: "{{solr_home}}/configsets/_default/conf/solrconfig.xml"
 solrconfig_xml_dest: '{{ui_solrconfig_xml_dest | default(_solrconfig_xml_dest)}}'
 _shorter_data: true
 shorter_data: '{{ui_shorter_data | default(_shorter_data)}}'

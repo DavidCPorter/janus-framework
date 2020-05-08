@@ -1,0 +1,12 @@
+
+[athena]
+athena ansible_connection=local path=/Users/dporter/projects/sapa/experiments/gods/athena ansible_user=dporter
+
+[artemis]
+artemis ansible_connection=local path=/Users/dporter/projects/sapa/experiments/gods/artemis ansible_user=dporter
+
+[ares]
+ares ansible_connection=local path=/Users/dporter/projects/sapa/experiments/gods/ares ansible_user=dporter
+
+[apollo]
+apollo ansible_connection=local path=/Users/dporter/projects/sapa/experiments/gods/apollo ansible_user=dporter

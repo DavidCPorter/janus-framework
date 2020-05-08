@@ -1,7 +1,7 @@
 ---
 - name: mkdir for {{oysta_namme}} result data
   file:
-    path: "{{local_data_dir}}/{{oysta_name}}"
+    path: "{{local_data_dir}}/{{experiment_name}}"
     state: directory
     mode: '777'
 
@@ -11,7 +11,7 @@
 
 - name: mkdir for this branches data
   file:
-    path: "{{local_data_dir}}/{{oysta_name}}/{{deploy_name}}"
+    path: "{{local_data_dir}}/{{experiment_name}}/{{deploy_name}}"
     state: directory
     mode: '777'
 

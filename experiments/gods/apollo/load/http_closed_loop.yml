@@ -1,0 +1,43 @@
+---
+
+_http_closed_scripts_dir: "/Users/dporter/projects/sapa/r_modules/load/http_closed_loop/files"
+http_closed_scripts_dir: "/Users/dporter/projects/sapa/r_modules/load/http_closed_loop/files"
+
+load_files:
+  - benchstats.py
+  - clparsing.py
+  - testmodes.py
+  - threadargs.py
+  - traffic_gen.py
+
+_load_duration: 10
+load_duration: '10'
+_l_replicas: 2
+l_replicas: '1'
+_l_shards: 1
+l_shards: '2'
+_l_query: roundrobin
+l_query: 'roundrobin'
+_l_loop: closed
+l_loop: 'closed'
+_l_solrnum: 2
+l_solrnum: '2'
+#use 'default' as default engine
+_engine: solr
+engine: 'solr'
+# following unnecessary yet required 4.3.2020
+_l_threads: 1
+l_threads: '1'
+
+_l_procs: 16
+l_procs: '16'
+_l_docker: true
+l_docker: 'True'
+_endpoint_host: '172.21.0.'
+endpoint_host: '172.21.0.'
+_endpoint_port: 80
+endpoint_port: '8983'
+
+_http_closed_loop:
+  - copy_scripts
+  - run

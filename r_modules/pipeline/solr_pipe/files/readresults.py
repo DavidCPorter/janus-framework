@@ -100,7 +100,7 @@ def main(args_dict):
         # fct_percentiles_95=[fct_total_list[incrementer*x] for x in range(0,20)]
         # fct_percentiles_95=[fct_total_list[incrementer*x] for x in range(0,20)]
 
-        # simply to denote this is a single node cluster record
+        # denote this is a single node cluster record if not default 0.
         if instances != "0":
             print("SINGLE NODE READRESULTS ")
             solrnum = '9' + str(solrnum)

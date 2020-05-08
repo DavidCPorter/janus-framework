@@ -1,0 +1,36 @@
+---
+# defaults file for upload_data
+_data_upload_dir: '/home/sapauser'
+data_upload_dir: '/home/sapauser'
+# collection name is passed in now
+_aws_dir_name: "172.21.0.3/reviews_rf1_s2_clustersizetwoNode"
+aws_dir_name: "172.21.0.3/reviews_rf1_s2_clustersizetwoNode"
+_solr_install_dir: /users/dporte7/solr-8_3
+solr_install_dir: '/users/dporte7/solr-8_3'
+_solr_home: "/users/dporte7/solr-8_3/solr/server/solr"
+solr_home: '/users/dporte7/solr-8_3/solr/server/solr'
+_upload_data_file_path: "/Users/dporter/projects/sapa/playbooks/roles/upload_data/files"
+upload_data_file_path: '/Users/dporter/projects/sapa/playbooks/roles/upload_data/files'
+_nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
+nfs_root: '/proj/uic-cs-edu-PG0/exp/solr8/datastore'
+_aws_dir: dporter
+aws_dir: 'dporter'
+
+# vars for indexing module
+_shards: 2
+shards: '2'
+#replicas is multiplied by #nodes in cluster (e.g. if replicas = 2 and nodes in search engine = 10, then number of replicas == 20)
+_replicas: 1
+replicas: '1'
+_collection_name: "2_1_index"
+collection_name: '2_1_index'
+_solrconfig_xml_dest: "/users/dporte7/solr-8_3/solr/server/solr/configsets/_default/conf/solrconfig.xml"
+solrconfig_xml_dest: '/users/dporte7/solr-8_3/solr/server/solr/configsets/_default/conf/solrconfig.xml'
+_shorter_data: true
+shorter_data: 'true'
+
+_index_solr:
+  - 0_pre_index_config
+  - 1_index
+  - 2_solr_aws
+  - 3_post_index_config

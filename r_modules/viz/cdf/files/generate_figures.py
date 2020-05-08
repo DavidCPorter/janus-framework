@@ -542,14 +542,14 @@ if __name__ == "__main__":
     arg_dict = {args[x]: args[x + 1] for x in range(0, len(args) - 1) if x % 2 == 0}
 
     _query = arg_dict.get('--query')
-    _oysta_name = arg_dict.get('--oysta_name')
+    _experiment_name = arg_dict.get('--experiment_name')
     home_path = arg_dict.get('--home_path')
     chart_type= arg_dict.get('--chart_type')
     m_root= arg_dict.get('--module_root')
     # quick hack to pass in value to legacy global variable
-    setGlobalDataPath(home_path,_oysta_name,chart_type,m_root)
+    setGlobalDataPath(home_path,_experiment_name,chart_type,m_root)
 
-    cdf_TAIL(_query, _oysta_name)
+    cdf_TAIL(_query, _experiment_name)
 
     print(" ***** FINAL STEP COMPLETE ******")
 

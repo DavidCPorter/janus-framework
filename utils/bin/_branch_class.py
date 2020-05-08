@@ -105,7 +105,6 @@ class Branch:
         output.check_returncode()
 
     def add_modules(self, module_name_list: OrderedDict):
-        print(module_name_list)
         for module_name, plays_dict in module_name_list.items():
             if module_name in Module._available_module_names and module_name not in self.modules.keys():
                 self.modules.update({module_name: Module(module_name, self.name)})
@@ -136,7 +135,9 @@ class Branch:
             # for each variable user wishes to update on this branch, grab the module associated with it, update the
             # corresponding variable dictionary for that module with the singe variable update. Repeat
             for key in var_dict.keys():
-                mod = self.inverted_var_to_mod_lookup.get(key)
+                # to remove 'ui_' for lookup
+                # pdb.set_trace()
+                mod = self.inverted_var_to_mod_lookup.get(key[3:])
                 mod_instance = self.modules.get(mod)
                 mod_instance.variables.add_variables({key: var_dict.get(key)})
                 # for task ordering key needs to be _mod_name: {play: host}
@@ -151,7 +152,6 @@ class Branch:
 
                     cur_file.update({key: var_dict.get(key)})
 
-                print(cur_file, 'currrr')
                 if cur_file:
                     with open(self.name + '/user_variables.yml', 'w') as f:
                         yaml.safe_dump(cur_file, f)
@@ -202,7 +202,6 @@ class Branch:
         for m in write_list:
             mod = self.modules.get(m)
             modorder_dict.update({m: dict(mod.play_order)})
-        print(modorder_dict)
 
         with open(self.name + '/mod_order.yml', 'w+') as f:
            yaml.safe_dump({'module_order': modorder_dict}, default_flow_style=False, sort_keys=False, stream=f)
@@ -234,6 +233,7 @@ class Experiment():
         exp_dir = exp_dir.strip('\n')
         Experiment._exp_dir = exp_dir
         Experiment._parent_dir = exp_dir[:-len(name) - 1]
+        self.name = name
         self.branches = {}
         for b in branch_names:
             self.add_branch(b, new_interactive=True)
@@ -312,7 +312,6 @@ class Experiment():
                 for m in module_names:
                     play_dict = Experiment._module_play_order.get(m)
                     ordered_mod_name_dict.update({m: OrderedDict(play_dict)})
-                print(ordered_mod_name_dict)
                 branch.add_modules(ordered_mod_name_dict)
 
             elif cmd == 'rm':
@@ -360,13 +359,13 @@ class Experiment():
         def find_earliest_diff(self, varset, mod_name):
             earliest_diff = (9999, None)
             for var in varset:
-                earliest_diff = min((earliest_diff, self._mod_to_ordered_vars[mod_name][var[0]]), key=lambda t: t[0])
+                # remove 'ui_'
+                earliest_diff = min((earliest_diff, self._mod_to_ordered_vars[mod_name][var[0][3:]]), key=lambda t: t[0])
             return earliest_diff
 
         # greatest var value gets precedence because that means it shares the most
         module_branch_variable_tuple = [vars_branch for vars_branch in zip(varset_list,respective_branches)]
         module_branch_variable_tuple.sort(key=lambda tup: tup[1])  # sorts in place
-        print(module_branch_variable_tuple)
         return_list = []
 
 
@@ -388,7 +387,6 @@ class Experiment():
 
     def get_ordered_set(self, play_diffs, final_list):
         # each list in play_diffs contains a set of variables representing a branch that branches at same module as others in list... we need to order them by variable precedence
-        print(final_list)
         return_list = []
         count= 0
         for module_varset in play_diffs:
@@ -402,10 +400,10 @@ class Experiment():
                     branch = self.branches.get(bname)
                     var_tup = b[0]
                     key = var_tup[0]
-                    mod = branch.inverted_var_to_mod_lookup.get(key)
+                    # remove 'ui'
+                    mod = branch.inverted_var_to_mod_lookup.get(key[3:])
                     # print(mod)
 
-                print(module_varset, arb_bname_list, mod)
                 # return
                 return_val = self.order_branches_by_var_precedence(module_varset, arb_bname_list, mod)
                 return_list.append(return_val)
@@ -492,11 +490,9 @@ class Experiment():
 
 
     def get_vars_to_branch_on(self, list_of_sets, full_branch_flow):
-        # pdb.set_trace()
         branch_order = list_of_sets
         # the list is in correct order, however, these sets of branches are in arbitrary order
         bs_module_diff_level = self.get_mod_diff_level(branch_order, full_branch_flow)
-        print(bs_module_diff_level)
         index = 0
         pdiffs = []
         # diff level is the module the furthest shared var module in the DAG, so we wan tot find the play diffs at that moduleindex+1
@@ -647,7 +643,6 @@ class Experiment():
                 for j in range(0, len(list(tmp_return_list[i]))):
                     if len(tmp_return_list[i][j]) <= 1:
                         if len(tmp_return_list[i])-rm_count == 1:
-                            print('should run once')
                             rm_sequence.append(tmp_return_list[i])
                         else:
                             first_rm_sequence.append((i,tmp_return_list[i][j]))
@@ -662,15 +657,6 @@ class Experiment():
 
 
         return return_list
-
-    # change r
-    # def get_mod_play_resume_recurse(self, branch1, branch2, full_branch_flow):
-    #     mod_level_to_recurse_to = self.get_mod_diff_level({branch1, branch2}, full_branch_flow)
-
-
-    def change_value_of_tails(self, branch1, branch2, full_branch_flow):
-        vars = self.get_mod_diff_level([{branch1,branch2}], full_branch_flow)
-        self.get_ordered_set(vars, )
 
 
 
@@ -708,7 +694,6 @@ class Experiment():
 
         mod_diff = self.get_mod_diff_level(branch_sets, full_branch_flow, flag=True)
         variable_mods = self.get_vars_to_branch_on(branch_sets, full_branch_flow)
-        print(variable_mods)
         variable_to_recurse_to = []
         for i in variable_mods:
             variable_to_recurse_to.append(i.pop())
@@ -722,7 +707,7 @@ class Experiment():
                 continue
             mod_name = mod_diff[count]
             var = variable_to_recurse_to[0].pop()
-            play_name = self._mod_to_ordered_vars[mod_name][var[0]][1]
+            play_name = self._mod_to_ordered_vars[mod_name][var[0][3:]][1]
             irrelevant = 999
             replacements_adustments.append((i[0], mod_name, irrelevant, play_name))
             count+=1
@@ -738,18 +723,21 @@ class Experiment():
             i_prefix = [replacements_adustments[count]]
             return_final.append(i_prefix + i[1:])
 
-        print(ordered_set)
-        print(return_final)
-        return return_final
+        return [y for x in return_final for y in x]
 
 
-    def execute_experiment(self, branch_order):
+    def prepare_experiment(self, branch_order, experiment_flag=None):
         ansible_prefix = ['ansible-playbook', '-i', self._exp_dir+'/inventory', self._parent_dir+'/main.yml']
         stage_lookup = Module._inverted_stage_module
         b_order = branch_order
         branch_index = 0
+        branches_remaining = True
+        experiment_name = self.name
 
         def tree_walker(branch, mod_llist, play_tuple_list):
+
+            nonlocal branch_index, branches_remaining
+            branches_remaining = False if branch_index == len(b_order)-1 else True
         #     pass first branch, then recurse until branch_order.next.play == current.play (after recursed)
             mod_name = mod_llist.value
 
@@ -759,47 +747,81 @@ class Experiment():
             play_name = play_tuple_list[0][0]
             play_hosts = play_tuple_list[0][1]
             stage = stage_lookup.get(mod_name)
+            show_vars_file =  self._exp_dir+'/'+branch.name+'/'+stage+'/'+mod_name+'.yml'
             # will need to do some more work here to help with variable dependencies on previous plays
             variable_filename = self._exp_dir+'/'+branch.name+'/'+'user_variables.yml'
-            vars = 'branch_file_ui=' + variable_filename + ' hosts_ui=' + play_hosts + ' tasks_file_ui=' + play_name + ' module=' + mod_name + ' stage=' + stage
+            vars = 'branch_file_ui=' + variable_filename + ' hosts_ui=' + play_hosts + ' tasks_file_ui=' + play_name + ' module=' + mod_name + ' stage=' + stage + ' experiment_name=' + experiment_name + ' show_vars_file='+ show_vars_file
 
-            subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
-            # get next mod order if mod has no plays left
-            if len(play_tuple_list) > 1:
-                tree_walker(branch, mod_llist, play_tuple_list[1:])
-            else:
-            #     get next module
+            if experiment_flag == 'show_vars':
+                ansible_output_rc = subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'debug'])
+                # if ansible_output_rc:
+                #     print(ansible_output_rc)
+
+                print(f'getting output \n\n')
+
+                with open(show_vars_file, 'r') as f:
+                    var_dict = yaml.safe_load(f)
+                    print(f'branch = {branch.name} \n    stage = {stage} \n      module = {mod_name} \n\n VARS:')
+                    for k,v in var_dict.items():
+                        if k[0] != '_':
+                            print(f'{k} = {v}')
+                    print(f'***************\n\n')
+
                 if mod_llist.next is not None:
                     tree_walker(branch, mod_llist.next, 'start')
 
-            next_branch_tuple = b_order[branch_index]
 
-            if mod_name == next_branch_tuple[1] and play_name == next_branch_tuple[3]:
-                next_branch_instance = self.branches.get(next_branch_tuple[0])
-                module_order_root = next_branch_instance.ordered_modules.first
-                for m in range(0, len(module_order_root)):
-                    if module_order_root.value == mod_name:
-                        next_branch_module = next_branch_instance.modules.get(module_order_root.value)
-                        play_order = list(next_branch_module.play_order.items())
-                        count = 0
-                        for play,_hosts in play_order:
-                            if play == play_name:
-                                break
-                            count += 1
-                        play_order = play_order[count:]
-                        # decativate current play once more before passing to new branch
-                        subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'deactivate'])
+            else:
+                subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
+            # get next mod order if mod has no plays left
+                if len(play_tuple_list) > 1:
+                    tree_walker(branch, mod_llist, play_tuple_list[1:])
+                else:
+                #     get next module
+                    if mod_llist.next is not None:
+                        tree_walker(branch, mod_llist.next, 'start')
 
-                        return tree_walker(next_branch_instance, mod, play_order)
-                    else:
-                        module_order_root = module_order_root.next
 
+            # if there are no more plays or modules, then branch only if we've recursed to the correct mod_name and
+            # play_name, else deactivate
+            if branches_remaining:
+                next_branch_tuple = b_order[branch_index+1]
+                if mod_name == next_branch_tuple[1] and play_name == next_branch_tuple[3]:
+                    next_branch_instance = self.branches.get(next_branch_tuple[0])
+                    module_order_root = next_branch_instance.ordered_mods.first
+                    # this loop is just trying to find the correct module and play, so it increments branch_index once it does and hops to the branch to begin activating states for that branch.
+                    while module_order_root is not None:
+                        if module_order_root.value == mod_name:
+                            next_branch_module = next_branch_instance.modules.get(module_order_root.value)
+                            play_order = list(next_branch_module.play_order.items())
+                            count = 0
+                            for play,_hosts in play_order:
+                                if play == play_name:
+                                    break
+                                count += 1
+                            play_order = play_order[count:]
+
+                            # decativate current play once more before passing to new branch
+                            if experiment_flag != 'show_vars':
+                                subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'deactivate'])
+
+                            branch_index+=1
+                            print(f'------- BRANCH INITIATED -------\n\n')
+                            print(next_branch_instance, module_order_root, play_order)
+                            print(f'--------------------------------\n\n')
+                            return tree_walker(next_branch_instance, module_order_root, play_order)
+                        else:
+                            module_order_root = module_order_root.next
+
+            # if we are just showing variables, we do not need to do run anything when we recurse.
+            if experiment_flag == 'show_vars':
+                return
+            # recurse if no more plays or modules or branches matching play and module
             return subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'deactivate'])
 
 
-        first_branch = self.branches.get(branch_order[0][0][0])
+        first_branch = self.branches.get(branch_order[0][0])
         mod_start = first_branch.ordered_mods.first
-        mod = first_branch.modules.get(mod_start.value)
         return tree_walker, first_branch, mod_start, 'start'
 
 

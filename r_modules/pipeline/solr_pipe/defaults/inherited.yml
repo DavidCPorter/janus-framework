@@ -1,13 +1,34 @@
 ---
-processes: "{{ui_l_procs}}"
-threads: "{{ui_l_threads}}"
-duration: "{{ui_load_duration}}"
-replicas: "{{ui_l_replicas}}"
-query: "{{ui_l_query}}"
-loop: "{{ui_l_loop}}"
-shards: "{{ui_l_shards}}"
-solrnum: "{{ui_l_solrnum}}"
-instances: "{{ui_l_instances}}"
-engine: "{{ui_engine}}"
-csv_location: "{{output_dir}}"
-result_filename: "rf{{replicas}}_s{{shards}}__clustersize{{solrnum}}::query={{query}}::proc={{processes}}::threads={{threads}}::dur={{duration}}.csv"
+#these variables will be requested from Janus control program
+# any variables in an inherit file will load the global variables
+
+_load_duration: 10
+load_duration: '{{ui_load_duration | default(_load_duration)}}'
+_l_replicas: 2
+l_replicas: '{{ui_l_replicas | default(_l_replicas)}}'
+_l_shards: 1
+l_shards: '{{ui_l_shards | default(_l_shards)}}'
+_l_query: roundrobin
+l_query: '{{ui_l_query | default(_l_query)}}'
+_l_loop: closed
+l_loop: '{{ui_l_loop | default(_l_loop)}}'
+_l_solrnum: 2
+l_solrnum: '{{ui_l_solrnum | default(_l_solrnum)}}'
+# following unnecessary yet required 4.3.2020
+_l_threads: 1
+l_threads: '{{ui_l_threads | default(_l_threads)}}'
+_l_procs: 16
+l_procs: '{{ui_l_procs | default(_l_procs)}}'
+
+processes: "{{l_procs}}"
+threads: "{{l_threads}}"
+duration: "{{load_duration}}"
+replicas: "{{l_replicas}}"
+query: "{{l_query}}"
+loop: "{{l_loop}}"
+shards: "{{l_shards}}"
+solrnum: "{{l_solrnum}}"
+instances: "{{l_instances}}"
+_engine: solr
+engine: '{{ui_engine | default(_engine)}}'
+

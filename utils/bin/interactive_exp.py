@@ -10,7 +10,6 @@ import _ssh_import as ssh_import
 from _branch_class import Experiment
 from typing import Set
 from itertools import permutations
-import _start_basic as Start
 
 import yaml
 from collections import OrderedDict
@@ -73,7 +72,7 @@ def commandDispatcher(exp_dict):
                     ordered_var_dict = module_var_order.get(m.name)
 
                     rgx = re.compile('{{(?P<name>[^{}]+)}}')
-                    #                 open play file and read the variabels in order to pass as a control dict to Experiment cls
+                    #  open play file and read the variabels in order to pass as a control dict to Experiment cls
                     with open(r_modules+'/'+stage.name+'/'+m.name+'/'+'plays/'+pname, 'r') as playfile:
                         for line in playfile.readlines():
                             if '{{' not in line:
@@ -86,7 +85,7 @@ def commandDispatcher(exp_dict):
                                     ordered_var_dict.update({v:(variable_pos,pname)})
                                     variable_pos+=1
 
-                    print(m.name)
+                    # print(m.name)
 
     tmp = set()
     try:
@@ -96,8 +95,7 @@ def commandDispatcher(exp_dict):
                 tmp.add(branch.name)
 
         # create a hostfile that ~/.ssh/config includes temporarily that treats branches as a host so you can apply var updates to them all... just my preferred way to keep tabs on all var updates for the exp.
-        for branch in tmp:
-            ssh_import.new_branch(branch, exp_dict.get('--home_user'), home_dir)
+        ssh_import.new_branch(tmp, exp_dict.get('--home_user'), home_dir)
 
         # make local_var_inventory file for vars
         ssh_import.new_inventory(tmp, exp_dict.get('--home_user'))
@@ -108,21 +106,16 @@ def commandDispatcher(exp_dict):
         print(e)
         return 1
 
-
-
     # experiment_modules
     experiment = Experiment(name, available_modules, r_modules, module_play_order, module_var_order, [b_name for b_name in tmp])
-
 
     # this dict maps ansible groupname notation to a set of branch_names
     valid_groupnames_dict = update_groupnames(tmp)
 
-    for i in valid_groupnames_dict.keys():
-        print(f'{i} --> {valid_groupnames_dict.get(i)}')
+    # for i in valid_groupnames_dict.keys():
+    #     print(f'{i} --> {valid_groupnames_dict.get(i)}')
 
-
-
-
+    # this is experimental context used to pass commands to in the user input loop in main
     def cmdFetcher(args):
         nonlocal valid_groupnames_dict
 
@@ -197,11 +190,10 @@ def commandDispatcher(exp_dict):
                 branch_order = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='filtered')
                 print(branch_order)
                 return
-
-
-
-
-
+            if vars[0] == 'order':
+                start_args = ['show', 'modules']
+                start(start_args, target_branches)
+                return
 
         # oyster cmd does project operations when in interactive mode
         def oyster(vars,target_branches):
@@ -214,7 +206,7 @@ def commandDispatcher(exp_dict):
             else:
                 print('oyster command did not match operation')
 
-
+        # offers "module" order support.
         def order(vars,target_branches):
             nonlocal experiment
             ordered_list = vars[1:]
@@ -222,6 +214,7 @@ def commandDispatcher(exp_dict):
 
         def start(vars, target_branches):
             nonlocal experiment
+            params_dict = {vars[x]: vars[x + 1] for x in range(0, len(vars) - 1) if x % 2 == 0}
             # returns a list of lists of sets each set in a list represents a single branch, and each list in a list is a different point in the module order.
             branch_order = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='filtered')
             full_branch_flow = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='unfiltered')
@@ -257,68 +250,39 @@ def commandDispatcher(exp_dict):
             explore_next(rootNode)
             # want to order modules within the set correctly
             # list list(_branches_sharing_mod) set(variables) tuple(key,value)
+            # pdb.set_trace()
+            # TODO below todo stems from this function becuase it returns empty list for branches
             llst_branches_variables = experiment.get_vars_to_branch_on(final_list, full_branch_flow)
-            print(llst_branches_variables)
             # returns list of list tuples(branch_name, module, play_to_start_from)
             ordered_set = experiment.get_ordered_set(llst_branches_variables, final_list)
-            print(ordered_set)
+            pdb.set_trace()
+            # TODO need to append solo branchsets aka branches with no common stages/modules
             final = experiment.get_final_mod_play_levels(ordered_set, full_branch_flow)
-            # walk the branches connected
+            # pdb.set_trace()
 
-            shotgun,first_branch,mod_start,play_start = experiment.execute_experiment(final)
+            # this would be called by show modules
+            if params_dict.get('show') == 'modules':
+                pref = 1
+                print(f'\n\nbranch_name  |  branch_on_module  |  branch_on_play\n ')
+                for b in final:
+                    print(f' {pref}) {b[0]}  |  {b[1]}  |  {b[3]}')
+                    pref+=1
+                return
+            # walk the branches connected
+            ex_flag = None
+            if params_dict.get('flag'):
+                ex_flag = params_dict.get('flag')
+
+            shotgun,first_branch,mod_start,play_start = experiment.prepare_experiment(final, ex_flag)
             print(first_branch,mod_start,play_start)
             shotgun(first_branch,mod_start,play_start)
 
-
-
-            #  {branchname,
-            # start at module,play - passed in from previous branch recurse
-            #  starts playing from module,play_order
-            # continues through modules
-            # recurses to point 'module,play'
-            #
-            # "stage": "env",
-            # "module": "cloud-env",
-            # "hosts": "all:!mylocal",
-            # "play": "install_tasks.yml",
-            # "vars": default_vars,
-            # "next": {module}
-            # "branch": {next branch in ordered_set}
-
-            # for b_name,branch_play in branch_play_tuple_list:
-            #     branch = experiment.branches.get(b_name)
-            #     for m in branch.ordered_mods:
-            #         m_instance = branch.modules.get(m)
-            #         print(m)
-            #         mod_execution_tuple = []
-            #         for k,v in m_instance.play_order.items():
-            #             mod_execution_tuple.append((k,v))
-            #         print(mod_execution_tuple)
-
-
-
-
-
-
-
             return
-            #
-            # branch_order = experiment.get_dfs_branch_order(target_branches)
-            # ordered_branch_playbranch_tuple_list = experiment.get_branch_at_play(branch_order)
-            # for branch_name,play_to_branch_on in ordered_branch_playbranch_tuple_list:
-            #     b_instance = experiment.branches.get(branch_name)
-            #
-
-
-
-
 
 
         decorated_command = dict(add=add, rm=rm, ls=ls, oyster=oyster, order=order, show=show, start=start)
 
         return_function = decorated_command.get(args[0])
-
-        # add vars as a default if command is only "ls"
 
         # if command was 'ls [group]' or 'ls' then default to vars
         if len(args) == 1 and args[0] == 'ls':

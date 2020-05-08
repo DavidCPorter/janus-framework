@@ -1,0 +1,46 @@
+---
+_load_duration: 10
+load_duration: '10'
+_l_replicas: 2
+l_replicas: '1'
+_l_shards: 1
+l_shards: '2'
+_l_query: roundrobin
+l_query: 'roundrobin'
+_l_loop: closed
+l_loop: 'closed'
+_l_solrnum: 2
+l_solrnum: '2'
+# following unnecessary yet required 4.3.2020
+_l_threads: 1
+l_threads: '1'
+_l_procs: 16
+l_procs: '16'
+_l_instances: 0
+l_instances: '0'
+
+processes: "16"
+threads: "1"
+duration: "10"
+replicas: "1"
+query: "roundrobin"
+loop: "closed"
+shards: "2"
+solrnum: "2"
+instances: "0"
+_engine: solr
+engine: 'solr'
+
+_output_dir: "/home/sapauser/traffic_gen"
+output_dir: "/home/sapauser/traffic_gen"
+_deploy_name: solr_default
+deploy_name: "apollo"
+_local_data_dir: "/Users/dporter/projects/sapa/data_dir"
+local_data_dir: "/Users/dporter/projects/sapa/data_dir"
+result_filename: "rf1_s2__clustersize2::query=roundrobin::proc=16::threads=1::dur=10.csv"
+csv_location: "/home/sapauser/traffic_gen"
+_solr_pipe:
+  - mkdir_data_local
+  - read_results
+  - append_results_to_total
+

@@ -1,0 +1,8 @@
+---
+
+_local_data_dir: "/Users/dporter/projects/sapa/data_dir"
+local_data_dir: "/Users/dporter/projects/sapa/data_dir"
+chart_type: cdf
+
+_cdf:
+  - generate_cdf

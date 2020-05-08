@@ -10,7 +10,7 @@
 
   tasks:
 
-  - name: including variables for this branch (these variables override all except _start_basic.py cl vars)
+  - name: including user-defined variables for this branch
     include_vars: '{{branch_file_ui}}'
     tags:
       - always
@@ -19,6 +19,15 @@
     include_vars: '{{module_root}}/defaults/main.yml'
     tags:
       - always
+
+  - name:
+    template:
+      src: '{{module_root}}/defaults/main.yml'
+      dest: '{{show_vars_file}}'
+    delegate_to: localhost
+    tags:
+      - never
+      - debug
 
   - name: evolve to active state,   hosts_ui -> tasks_file_ui
     include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'

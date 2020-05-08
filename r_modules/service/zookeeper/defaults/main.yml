@@ -8,16 +8,17 @@ zoo_version_download_dict:
   3.4.13: https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz
   3.5.5: https://archive.apache.org/dist/zookeeper/zookeeper-3.5.5/apache-zookeeper-3.5.5.tar.gz
 
+_zoo_version: 3.5.5
+zoo_version: '{{ui_zoo_version | default(_zoo_version)}}'
 zoo_install_dir: '{{ui_zoo_install_dir | default(user_root_dir)}}'
-_zoo_root_dir: '{{zoo_install_dir}}/zoo-{{ui_zoo_version}}'
+_zoo_root_dir: '{{zoo_install_dir}}/zoo-{{zoo_version}}'
 zoo_root_dir: '{{ui_zoo_root_dir | default(_zoo_root_dir)}}'
-zoo_download_link: '{{ui_zoo_download_link | default(zoo_version_download_dict[ui_zoo_version])}}'
+zoo_download_link: '{{ui_zoo_download_link | default(zoo_version_download_dict[ui_zoo_version]) | default(_zoo_version)}}'
 _zoo_conf_dir: '{{zoo_root_dir}}/conf'
 zoo_conf_dir: '{{ui_zoo_conf_dir | default(_zoo_conf_dir)}}'
 _zoo_bin_dir: '{{zoo_root_dir}}/bin'
 zoo_bin_dir: '{{ui_zoo_bin_dir | default(_zoo_bin_dir)}}'
-_zoo_version: 3.5.5
-zoo_version: '{{ui_zoo_version | default(_zoo_version)}}'
+
 
 _zookeeper:
   - download_tasks
