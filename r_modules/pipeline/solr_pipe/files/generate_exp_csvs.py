@@ -6,7 +6,7 @@ import gzip
 
 def main(args_dict):
 
-    SAPA_HOME=args_dict.get('--proj_home',"/Users/dporter/projects/sapa")
+    SAPA_HOME=args_dict.get('--proj_home',"/Users/dporter/projects/janus")
     experiment_name=args_dict.get('--exp_name')
     # deploy_name is used to list files in deploy_name dir for the current iteration to be mapped to total.csv
     deploy_name=args_dict.get('--deploy_name')
@@ -44,7 +44,7 @@ def main(args_dict):
         for d in dirs:
             print(d)
             bench_files = os.popen('ls '+exp_home+'/'+d ).read()
-            print("these are the output files for "+d+" sapa experiment")
+            print("these are the output files for "+d+" janus experiment")
             print(bench_files)
             bench_files = bench_files.split('\n')
             bench_files.pop()

@@ -1,5 +1,5 @@
 #!/bin/bash
-export SAPA_HOME=/Users/dporter/projects/sapa
+export SAPA_HOME=/Users/dporter/projects/janus
 CL_USER=dporte7
 CHECKSOLRARGS='ps aux | grep solr'
 CHECKPORTSARGS='lsof -i | grep LISTEN'

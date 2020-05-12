@@ -9,8 +9,8 @@ _solr_install_dir: /users/dporte7/solr-8_3
 solr_install_dir: '/users/dporte7/solr-8_3'
 _solr_home: "/users/dporte7/solr-8_3/solr/server/solr"
 solr_home: '/users/dporte7/solr-8_3/solr/server/solr'
-_upload_data_file_path: "/Users/dporter/projects/sapa/playbooks/roles/upload_data/files"
-upload_data_file_path: '/Users/dporter/projects/sapa/playbooks/roles/upload_data/files'
+_upload_data_file_path: "/Users/dporter/projects/janus/playbooks/roles/upload_data/files"
+upload_data_file_path: '/Users/dporter/projects/janus/playbooks/roles/upload_data/files'
 _nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
 nfs_root: '/proj/uic-cs-edu-PG0/exp/solr8/datastore'
 _aws_dir: dporter

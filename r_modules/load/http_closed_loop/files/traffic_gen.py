@@ -34,7 +34,7 @@ def main():
     elif main_args.engine == "solr":
 
         if main_args.query == 'roundrobin':
-            # distributed sapa scenario
+            # distributed janus scenario
             if main_args.instances is None:
                 main_args.port = 8983
 

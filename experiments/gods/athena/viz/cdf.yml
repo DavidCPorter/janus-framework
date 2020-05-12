@@ -1,7 +1,7 @@
 ---
 
-_local_data_dir: "/Users/dporter/projects/sapa/data_dir"
-local_data_dir: "/Users/dporter/projects/sapa/data_dir"
+_local_data_dir: "/Users/dporter/projects/janus/data_dir"
+local_data_dir: "/Users/dporter/projects/janus/data_dir"
 chart_type: cdf
 
 _cdf:

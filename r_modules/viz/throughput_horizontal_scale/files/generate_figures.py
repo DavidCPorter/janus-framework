@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 # class GroupBucket(list):
 
-SAPA_HOME = "/Users/dporter/projects/sapa"
+SAPA_HOME = "/Users/dporter/projects/janus"
 
 
 def get_py(py):

@@ -1,7 +1,7 @@
 ---
 
-_http_closed_scripts_dir: "/Users/dporter/projects/sapa/r_modules/load/http_closed_loop/files"
-http_closed_scripts_dir: "/Users/dporter/projects/sapa/r_modules/load/http_closed_loop/files"
+_http_closed_scripts_dir: "/Users/dporter/projects/janus/r_modules/load/http_closed_loop/files"
+http_closed_scripts_dir: "/Users/dporter/projects/janus/r_modules/load/http_closed_loop/files"
 
 load_files:
   - benchstats.py

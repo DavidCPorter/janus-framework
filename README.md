@@ -1,203 +1,127 @@
-## SAPA: a tool for Search Agnostic Performance Analysis
+![fig_1](./utils/img/logos/blackgreen.png) 
 
-### OVERVIEW
+## JANUS: cloud-native benchmarking framework 
 
-Sapa provides an automation tool for deploying and benchmarking SolrCloud and Elastic search engines. The overarching purpose of this project is to provide a framework for quickly discovering optimal deployment strategies given organizational constraints. Search engine config state space is incredibly large (fig1). Consequentially, tuning these apps for performance requires a lot of guesswork since there is no silver bullet when it comes to the best configuration. Sapa takes the guesswork out of performance tuning by providing a tight feedback loop on your deployment strategies. If you have been diagnosed with "search engine configuration fatigue", or suspect there are performance bottlenecks and want to efficiently explore all your options?... SAPA is the tool for you.
- 
- fig 1 | notes 
+JANUS is a framework to orchestrate, manage, and execute cloud-native benchmarking experiments.
+
+Open source cloud-native development has become a double edge sword. Cherry picking services for domain-specific architectures makes enterprise development swift and powerful. However, the vast number of services in the open source ecosystem can leave engineers paralyzed by choice. Moreover, each service can be configured and operated in any number of infinite states, exponentially increasing the complexity of conducting a fair evaluation (x systems * y configurations * z evaluations). 
+
+JANUS simplifies this approach with a generalized framework to orchestrate, manage, and execute experiments across a variety of system configurations and deployments. 
+
+
+### Architecture Overview
+
+Out of the box, JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. Fig1 highlights the LOCAL operations and indicates REMOTE operations are delegated via ANSIBLE. The Management Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
+
+![fig_1](./utils/img/janus_architecture.png) 
+
+
+An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. There are 5 categories of modules users can plug into JANUS:
+
+1) `ENV` environment running the software
+2) `SERVICES` core features of the cloud-native system
+3) `LOAD` hammer the servers with requests
+4) `PIPE` pipe and filter data tasks
+5) `VIZ` interactive visualizations
+
+
+
+
+ module interface | *  
  ---- | ----
- ![fig_1](./utils/state_explosion.png) | The single line traversing this state space represents a single deployment. This graph illustrates a simple example of a deployment state space definition; each color represents a config category, and each dot represents a configured value. Many production systems will choose to compare many more verticals.  
- 
+![fig_2](./utils/img/module_interface.png) | Each module contains at least one yaml file describing the operations to "activate" the module using Ansible syntax. JANUS will parse varibles in these files to learn dependencies and provide a default VARS file for users. 
+
+Users can dynamically set variables with JANUS cli, or leave to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG, and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+
+### Install
 
 
 
-Key Terminology:
-- `sapa_bench` = sapa_bench is the term to descibe a sapa run from end to end. Put simply, it's the core use case for sapa. It's defined as a experiment to benchmark N number of search engine deployments and compare the results.
-- `statespace` = the statespace is the particular settings for a single deployment. 
-- `deployment` = a particular instance of elastic or solrcloud with a defined statespace 
 
-Importantly, statespace is composed of three sub spaces, and each has an impact on search performance.
-
-- `config`: these are the knobs provided to users for tuning the instance of the search engine. _e.g. solrconfig.xml, elasticsearch.yml, replicas, shards, etc._
-- `workload`: these settings generally define the interactions with search engines during the experiment, most notably the workload settings. _e.g. search term dictionary, documents, load balancers, client apis, etc_
-- `env`: defines things such as JVM settings, clustersize scaling, local, remote configs.
-**e.g. clustersizes, cluster replications, JVM settings, docker,  network configs, etc**
-
-other sapa_bench options: 
-- `viz`: declare visualizations to generate with the performance data. _e.g. cdfs, latecy->throughput, 
-- `plug`: experimental integrations to plug into the enviornment. The goal with this is to inject a binary into the experimental flow to enhance performance. e.g. rate limiters, service proxies, multitenenant, etc.  
-
-Sapa's CLI makes configuring the statespace for multiple deployments simple. The CLI sole purposes is to populate sapa_.yml files for each deployment. The best practice is to generate the .yml files using for example `sapa create e_1:elastic e_2:elastic s_1:solr s_2:solr`. This will generate the template files which you can manually reconfigure, or do so with the CLI commands. A savvy user may choose to use the cli in a bash script that can be saved and perhaps replayed or archived. 
-
-Importantly, the last paramater for each cli command is a comma separated list of deployment names given in the create step. Optionally, all and ! are tokens that represent *all* deployments, and *sans* deployment. So you can for instance use `all,!elastic1` which will apply those settings to all but the elastic1 deployment. 
-
+### Usage
+Once installed, JANUS can be used with this CLI:
 ```
-$ sapa create <key:name1> <key:name2> <key:name3> 
-$ sapa config <key:value> <key:value> <deployments>
-$ sapa workload <key:value> <deployments>
-$ sapa env <key:value> <deployments>
-$ sapa plug </path/to/binary> <other_options> <deployments> 
-$ sapa viz <viz_type1> <viz_type2> <deployments>
-$ sapa show states <deployments>
-$ sapa run <deployments>
+$ JANUS new --name <name> --branches <branchlist>
 ```
- 
- 
-### SIMPLE EXAMPLE
-
-a simple use case:
-John wants to know what search application and configuration has the lowest P99 latency given a particular load. 
 ```
-$ cd sapa
-$ sapa create solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
-$ sapa env RAM:20G all,!elastic2 ;
-$ sapa configconfig queryCache:9999 documentCache:9999 all,!elastic1,!elastic2 ;
-$ sapa workload loop:open all ;
-$ sapa workload load_start:1 load_finish:100 solr1,solr2;
-$ sapa workload load_balancer:clients all,!elastic2;
-$ sapa plug ratelimiter /path/to/ratelimiter/binary all,!elastic1 ;
-$ sapa viz cdf_91 total_throughput all
-$ sapa show states all ;
+$ JANUS new --name experiemnt --branches branch1,branch2,branch3
+$ JANUS <name> 
+ > add [modules] [module_names] [branches]
+ > add [vars] [key] [value] [branches]
+ > add [hosts] [groupName] [module] and/or [play] [branches]
+ > order [modules] [module1] [module2] ... [branches]
 
-| ****** elastic1 ****** | ******* elastic 2 ******  | 
-    ENGINE: elastic         ENGINE: elastic
-    RAM:    60G             RAM:    1G #default
-    LOOP:   open            LOOP:   open
-    ... 
+* "ls" will display user-entered info 
+ > ls [vars] 
+ > ls [modules]
 
-$ sapa run <experiment_name> all ;
-
+* "show" will show execution order and will show runtime values
+ > show [vars]
+ > show [modules]
 ```
 
-__need to tell a story here, basically a placeholder for now__
+example:
 
- fig 2: CDF 91 connections | fig 3: Total Throughput
- ---- | ----
- ![fig_2](./utils/cdf_example_fig.png) |  ![fig_3](./utils/total_throughput.png)
+```
+$ janus new --name experiment1 --branches branch1,branch2,branch3
+$ janus experiment1
+ > 
+ > add modules cloud-env all http_closed_loop cdf all
+ > 
+ > add modules solr solr_index solr_pipe zookeeper all!branch3
+ > order modules cloud-env zookeeper solr solr_index http_closed_loop solr_pipe cdf all!branch3
+ > 
+ > add modules elastic elastic_index http_closed_loop es_pipe cdf branch3
+ > order modules cloud-env elastic elastic_index es_pipe cdf branch3
+ > 
+ > add vars shards 2 replicas 6 all
+ > add vars min_conn 1 max_conn 300 increment 10 all
+ > add vars heap 5 branch1
+ > add vars heap 2 branch2
+ > add vars heap 1 branch3 
+ > 
+ > add hosts fourNode solr all
+ > add hosts fourNode elastic
+ > 
+ > start all
+```
+Longer term goal is to implement a UI using REACT and reactdnd. 
 
 
 
+Once the Management Plane does it's job of preparing the orchestration of each deployment, the control plane's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
+ ![fig_2](./utils/img/control_program.png)
 
-### INSTALLATION
 
-Requirements:
-To deploy you need to set up a local and remote env
-
-##### LOCAL:  
+##### LOCAL ENV:
 Create a python3 virtual env:  
 `pyenv activate your_env`
 
 install packages:  
 `pip install ansible paramiko Jinja2 numpy`
 
+##### CLOUD INFRASTRUCTURE:  
+create inventory file with hosts
 
+###### cloudlab setup 
+(JANUS provides an optional cloudlab profile creation script JANUS/utils/cloudlab_profiles)
+If you are using cloudlab resources, the cloud infrastructure creation is supported by JANUS. 
+*first, place the domain names of your nodes in JANUS/utils/cloudlabDNS; then run:*
+```
+JANUS create inventory [max_component_nodes] [max_load_nodes]
 
+```
+this will create JANUS/inventory file
 
-##### REMOTE:  
+###### other setup
+Most notably, you will need globally addressible nodes and a subnet connecting them.
+Please emulate the inventory example with your own IPs. 
+[add more]
 
-_SAPA provides benchmarking even if you don't have cloud resources but emulating them with Docker locally. So, if you choose this route, please_:
+###### emulating cloud infrastructure with local docker env
+JANUS provides benchmarking even if you don't have cloud resources but emulating them with Docker locally. Steps to activate this env:
 - add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
 - make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
-- run `$ bash container_rsa.yml` to load ssh keyss into your containers. 
-
-
-###### for standard cloud deployment:
-step1: 
-place the domain names in clouddnsfile and run `getips.py <username> <clouddnsfile> <path_to_private_rsa_key> <#load nodes>` 
-clouddns file example:
-```
-ms1.utah.cloudlab.us
-ms9.utah.cloudlab.us
-ms5.utah.cloudlab.us
-ms4.utah.cloudlab.us
-ms3.utah.cloudlab.us
-...
-```
-
-this will generate >> `inventory_gen.txt` file. swap this file with `./inventory`
-
-
-#### -> if you are installing from github source:
-*these steps fork the solr repo, check out a specific branch, and duplicate that branch to your own dev branch.*
-- fork the lucene-solr repo https://github.com/DavidCPorter/lucene-solr.git
-- add ssh keys from solr nodes to github account (temp solution so ansible can easily update repos remotely)
-- locally clone repo
-- checkout branch_8_3 (or whatever solr version you want)
-- create new branch <name> e.g. `git checkout -b <name>`
-- push <name> branch to origin
-- replace git_branch_name=dporter_8_3 in inventory to git_branch_name=<name>
-- replace `dporte7` in ansible role "vars" and "defaults" files with your username in cloudlab
-
-#### -> else: 
-- you will simply specify version in yaml. 
-
-
-##### LOAD env helpers utils.sh and be sure to replace SAPA_HOME and CL_USER var with your path for this app.
-
-#### set up shell envs
-1. run `ansible-playbook cloud_configure.yml` .. this will also generate utils.sh locally @ /benchmarkscripts/utils/utils.sh
-2. then, run `ssh_files/produce_ssh_files.sh` to create files for pssh tasks dependencies in runtest.sh (this uses utils.sh)
-
-
-#### FOLLOWING IS README WIP :::
-
-#### run experiment
-*before you run any experiment you want to make sure solr is not running `checksolr` and that there is no indicies on the cores `listcores`*
-*make sure the utils are updated  loaded first*
-*make sure to edit params file*
-fulltest < list of solr clusters >
-e.g. if i wanted to run scaling experiment on 2 4 8 and 16 clusters and compare the performance, I would run this:
-`fulltest 2 4 8 16`
-
-**IF YOU EVER EXIT an experiment or it fails... make sure to remember run `stopSolr <clustersize>` and `wipecores` and `killallbyname dstat` `callingnodes rm *.csv` before you continue**
-*FURTHERMORE, if the exp posted_data (indexed) for the first time, you might want to consider deleting that collection via solr admin and redoing the experiemnt becuase the final step in the exp is to save to aws and that would not have happened in a failed exp... you can either run the ansible script to post to aws, or just redo it after deleting*
-
-**It's important to remember that the disk space on the cluster is small ~10GB so any more that 4 replicas will prolly fail due to disk size failure. This is why there is the posting the index to aws (if prev nott there ) and removing it after each exp so you dont hit the limit.**
-
-
-### NOTES
-#### Notes on Solr Config
-*This is completed automatically during the solr config step with the ansible playbooks.*
-
-I found the easiest way to connect with the remote JMX is to modify this line in the ~/solr-8_0/solr/bin/solr executable
-
-`REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$SOLR_HOST")`  
-to  
-`REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$GLOBALIP")`
-
-
-#### Notes on Ansible Roles:
-There are five roles in this repo `cloudenv, solr, zookeeper, upload_data, benchmark, elastic` located in the /playbooks/roles dir. You can take a look at the procedures for setting up the envs in ./roles/<role_name>/tasks/main.yml
-
-#### Notes on Ansible Variables
-when you run ansible playbooks, the process will generate sys variables, and to view these you can run `ansible -i inventory -m setup`
-`hostvars`
-`VARIABLE PRECEDENCE`
-If multiple variables of the same name are defined in different places, they win in a certain order, which is (least to greatest):
-
-The idea here to follow is that the more explicit you get in scope, the more precedence it takes with command line -e extra vars always winning. Host and/or inventory variables can win over role defaults, but not explicit includes like the vars directory or an include_vars task.
-
-- command line values (eg “-u user”)
-- role defaults
-- inventory file or script group vars
-- inventory group_vars/all
-- playbook group_vars/all 
-- inventory group_vars/* 
-- playbook group_vars/* 
-- inventory file or script host vars 
-- inventory host_vars/* 
-- playbook host_vars/* 
-- host facts / cached set_facts 
-- play vars
-- play vars_prompt
-- play vars_files
-- role vars (defined in role/vars/main.yml)
-- block vars (only for tasks in block)
-- task vars (only for the task)
-- include_vars
-- set_facts / registered vars
-- role (and include_role) params
-- include params
-- extra vars (always win precedence)
+- run `$ bash container_rsa.yml` to load ssh keys into your containers. 
 
 

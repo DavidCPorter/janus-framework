@@ -3,8 +3,8 @@
 ramdisk_path: '/dev/shm'
 _ptp_install_dir: '/users/sapauser/linuxptp'
 ptp_install_dir: '/users/sapauser/linuxptp'
-_cred_dir: "/Users/dporter/projects/sapa/r_modules/env/cloud-env/files/.aws"
-cred_dir: '/Users/dporter/projects/sapa/r_modules/env/cloud-env/files/.aws'
+_cred_dir: "/Users/dporter/projects/janus/r_modules/env/cloud-env/files/.aws"
+cred_dir: '/Users/dporter/projects/janus/r_modules/env/cloud-env/files/.aws'
 rem_user: 'sapauser'
 packages:
   - awscli

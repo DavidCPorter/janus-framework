@@ -18,7 +18,7 @@ createModule(){
   MOD_LOC=$OYSTER_HOME/r_modules/$1/$2
   mkdir $MOD_LOC
   cd $MOD_LOC;mkdir plays defaults tests files templates
-  touch defaults/main.yml tests/main.yml README.md
+  touch defaults/main.yml tests/main.yml janus_example_search.md
   printf "\nMODULE $2 created here: $MOD_LOC \n\n"
 }
 
@@ -29,7 +29,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 MODULE='x'
-OYSTER_HOME=/Users/dporter/projects/sapa
+OYSTER_HOME=/Users/dporter/projects/janus
 while (( "$#" )); do
   case "$1" in
     create|c)

@@ -3,7 +3,6 @@
 
 #dependent default values begin with underscore e.g. _zoo_root_dir so template doesn't complain about | operator.
 
-#this dict should remain hardcoded
 zoo_version_download_dict:
   3.4.13: https://archive.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz
   3.5.5: https://archive.apache.org/dist/zookeeper/zookeeper-3.5.5/apache-zookeeper-3.5.5.tar.gz
