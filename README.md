@@ -4,19 +4,19 @@
 
 JANUS is a framework to orchestrate, manage, and execute cloud-native benchmarking experiments.
 
-Open source cloud-native development has become a double edge sword. Cherry picking services for domain-specific architectures makes enterprise development swift and powerful. However, the vast number of services in the open source ecosystem can leave engineers paralyzed by choice. Moreover, each service can be configured and operated in any number of infinite states, exponentially increasing the complexity of conducting a fair evaluation (x systems * y configurations * z evaluations). 
+Open source cloud-native development has become a double edge sword. Cherry picking services for domain-specific architectures makes enterprise development swift and powerful. However, the vast number of services in the open source ecosystem can leave engineers paralyzed by choice. A prudent engineer would conduct a fair evaluation of these architectures before making an investment. One key type of evaluation is performance benchmarking. Benchmarking is often a fickle task, requiring each service to be configured and operated in any number of infinite states. This quickly becomes unrealistic as you expand the scope of systems to evaluate since the complexity of conducting a fair evaluation reduces to (x systems * y configurations * z evaluations). 
 
 JANUS simplifies this approach with a generalized framework to orchestrate, manage, and execute experiments across a variety of system configurations and deployments. 
 
 
 ### Architecture Overview
 
-Out of the box, JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. Fig1 highlights the LOCAL operations and indicates REMOTE operations are delegated via ANSIBLE. The Management Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
+JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. The Management Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
 
 ![fig_1](./utils/img/janus_architecture.png) 
 
 
-An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. There are 5 categories of modules users can plug into JANUS:
+An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. Modules can be created and plugged into JANUS in one of 5 layers:
 
 1) `ENV` environment running the software
 2) `SERVICES` core features of the cloud-native system
@@ -29,9 +29,9 @@ An important design goal of JANUS was maintaining an abstract view of the module
 
  module interface | *  
  ---- | ----
-![fig_2](./utils/img/module_interface.png) | Each module contains at least one yaml file describing the operations to "activate" the module using Ansible syntax. JANUS will parse varibles in these files to learn dependencies and provide a default VARS file for users. 
+![fig_2](./utils/img/module_interface.png) | Each module contains at least one yaml file describing the operations to "activate" and "deactivate" the module using Ansible syntax. JANUS will parse varibles in these files to learn dependencies and provide a default VARS file for users. 
 
-Users can dynamically set variables with JANUS cli, or leave to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG, and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+Users can dynamically set variables with JANUS cli, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG, and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
 
 ### Install
 
