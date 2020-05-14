@@ -375,7 +375,7 @@ def display_chart_scaling_errorbar(query, codename):
 
     total_scale_file = totals_csv
 
-    # ideal_path = SAPA_HOME + '/chart/scaling_exp_csvs/ideal_line_direct.csv'
+    # ideal_path = JANUS_HOME + '/chart/scaling_exp_csvs/ideal_line_direct.csv'
 
     if query == "client":
         global module_root

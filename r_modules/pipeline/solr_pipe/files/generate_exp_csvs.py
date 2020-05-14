@@ -6,11 +6,11 @@ import gzip
 
 def main(args_dict):
 
-    SAPA_HOME=args_dict.get('--proj_home',"/Users/dporter/projects/janus")
+    JANUS_HOME=args_dict.get('--proj_home',"/Users/dporter/projects/janus")
     experiment_name=args_dict.get('--exp_name')
     # deploy_name is used to list files in deploy_name dir for the current iteration to be mapped to total.csv
     deploy_name=args_dict.get('--deploy_name')
-    exp_home = SAPA_HOME + "/data_dir/"+experiment_name
+    exp_home = JANUS_HOME + "/data_dir/"+experiment_name
     totals_dir = exp_home
     total_scale_file = totals_dir + '/total_' + experiment_name + '.csv'
 
@@ -21,7 +21,7 @@ def main(args_dict):
     shards=args_dict.get('--shards')
 
     def main_inner():
-        nonlocal SAPA_HOME,experiment_name,deploy_name,exp_home,totals_dir,total_scale_file,query,engine,csize,replicas,shards
+        nonlocal JANUS_HOME,experiment_name,deploy_name,exp_home,totals_dir,total_scale_file,query,engine,csize,replicas,shards
         print('******** FINISHED FULL SCALING EXPERIEMENT **********')
         print("\n\nRUNNING generate_exp_csvs.py ")
         QPS = []

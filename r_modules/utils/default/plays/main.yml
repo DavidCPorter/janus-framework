@@ -22,6 +22,6 @@
 - name: configure utils.sh
   template:
     src: "{{module_root}}/templates/utils.sh"
-    dest: "{{SAPA_HOME}}/utils/local_variables.sh"
+    dest: "{{JANUS_HOME}}/utils/local_variables.sh"
   tags:
     - local_variables

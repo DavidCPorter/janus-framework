@@ -1,7 +1,7 @@
 ---
 # defaults file for upload_data
-_data_upload_dir: '/home/sapauser'
-data_upload_dir: '/home/sapauser'
+_data_upload_dir: '/home/janususer'
+data_upload_dir: '/home/janususer'
 # collection name is passed in now
 _aws_dir_name: "172.21.0.2/reviews_rf1_s2_clustersizetwoNode"
 aws_dir_name: "172.21.0.2/reviews_rf1_s2_clustersizetwoNode"

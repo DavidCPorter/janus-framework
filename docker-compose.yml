@@ -1,7 +1,7 @@
 version: '3'
 services:
-  sapaserver1:
-    container_name: sapaUbuntu1
+  janusserver1:
+    container_name: janusUbuntu1
     build:
       context: ./
       dockerfile: Dockerfile
@@ -20,11 +20,11 @@ services:
           memory: 2000M
 
     networks:
-      sapa_net:
+      janus_net:
         ipv4_address: 172.21.0.2
 
-  sapaserver2:
-    container_name: sapaUbuntu2
+  janusserver2:
+    container_name: janusUbuntu2
     build:
       context: ./
       dockerfile: Dockerfile
@@ -42,13 +42,13 @@ services:
           cpus: '1'
           memory: 2000M
     networks:
-      sapa_net:
+      janus_net:
         ipv4_address: 172.21.0.3
 
 
 #server 3 is only used for synchronization aka masternode not datanode
-  sapaserver3:
-    container_name: sapaUbuntu3
+  janusserver3:
+    container_name: janusUbuntu3
     build:
       context: ./
       dockerfile: Dockerfile
@@ -66,11 +66,11 @@ services:
           cpus: '1'
           memory: 400M
     networks:
-      sapa_net:
+      janus_net:
         ipv4_address: 172.21.0.4
 
-  sapaserver4:
-    container_name: sapaWorkhorse
+  janusserver4:
+    container_name: janusWorkhorse
     build:
       context: ./
       dockerfile: Dockerfile
@@ -83,11 +83,11 @@ services:
           cpus: '1'
           memory: 200M
     networks:
-      sapa_net:
+      janus_net:
         ipv4_address: 172.21.0.5
 
-  sapaserver5:
-    container_name: sapaWorkhorse2
+  janusserver5:
+    container_name: janusWorkhorse2
     build:
       context: ./
       dockerfile: Dockerfile
@@ -100,11 +100,11 @@ services:
           cpus: '1'
           memory: 200M
     networks:
-      sapa_net:
+      janus_net:
         ipv4_address: 172.21.0.6
 
-  sapaserver6:
-    container_name: sapaWorkhorse3
+  janusserver6:
+    container_name: janusWorkhorse3
     build:
       context: ./
       dockerfile: Dockerfile
@@ -117,11 +117,11 @@ services:
           cpus: '1'
           memory: 200M
     networks:
-      sapa_net:
+      janus_net:
         ipv4_address: 172.21.0.7
 
 networks:
-  sapa_net:
+  janus_net:
     ipam:
       driver: default
       config:

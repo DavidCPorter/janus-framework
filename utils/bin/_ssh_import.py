@@ -7,7 +7,7 @@ import subprocess
 
 def new_branch(names,homeuser,homedir):
 
-    with open(homedir+'/utils/etc/tmp_oyster_host_file', 'w') as f:
+    with open(homedir+'/utils/etc/tmp_janus_host_file', 'w') as f:
         for name in names:
             f.write("\nHost "+name+"\n  hostname 0.0.0.0\n  User "+homeuser+'\n')
     return

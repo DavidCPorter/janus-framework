@@ -45,7 +45,7 @@ ansible_connection=ssh
 ansible_user={{host_user}}
 {% for key, value in nodes_dict.items() %}node{{key}}={{nodes_dict[key][:15]}}
 {% if not loop.last %}{% endif %}{% endfor %}
-SAPA_HOME=/Users/dporter/projects/sapa
+JANUS_HOME=/Users/dporter/projects/janus
 home=/users/dporte7
 main_class=com.dporte7.solrclientserver.DistributedWebServer
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'

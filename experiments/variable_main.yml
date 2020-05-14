@@ -2,9 +2,9 @@
 - hosts: "{{hosts_ui}}"
 
   vars:
-    SAPA_HOME: /Users/dporter/projects/janus
+    JANUS_HOME: /Users/dporter/projects/janus
     home: /users/dporte7
-    module_root: "{{SAPA_HOME}}/r_modules/{{stage}}/{{module}}"
+    module_root: "{{JANUS_HOME}}/r_modules/{{stage}}/{{module}}"
     user_root_dir: "{{home}}"
 
   gather_facts: no

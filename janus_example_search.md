@@ -2,7 +2,7 @@
 
 ### OVERVIEW
 
-Sapa provides an automation tool for deploying and benchmarking SolrCloud and Elastic search engines. The overarching purpose of this project is to provide a framework for quickly discovering optimal deployment strategies given organizational constraints. Search engine config state space is incredibly large (fig1). Consequentially, tuning these apps for performance requires a lot of guesswork since there is no silver bullet when it comes to the best configuration. Sapa takes the guesswork out of performance tuning by providing a tight feedback loop on your deployment strategies. If you have been diagnosed with "search engine configuration fatigue", or suspect there are performance bottlenecks and want to efficiently explore all your options?... SAPA is the tool for you.
+janus provides an automation tool for deploying and benchmarking SolrCloud and Elastic search engines. The overarching purpose of this project is to provide a framework for quickly discovering optimal deployment strategies given organizational constraints. Search engine config state space is incredibly large (fig1). Consequentially, tuning these apps for performance requires a lot of guesswork since there is no silver bullet when it comes to the best configuration. janus takes the guesswork out of performance tuning by providing a tight feedback loop on your deployment strategies. If you have been diagnosed with "search engine configuration fatigue", or suspect there are performance bottlenecks and want to efficiently explore all your options?... janus is the tool for you.
  
  fig 1 | notes 
  ---- | ----
@@ -12,7 +12,7 @@ Sapa provides an automation tool for deploying and benchmarking SolrCloud and El
 
 
 Key Terminology:
-- `sapa_bench` = sapa_bench is the term to descibe a sapa run from end to end. Put simply, it's the core use case for sapa. It's defined as a experiment to benchmark N number of search engine deployments and compare the results.
+- `janus_bench` = janus_bench is the term to descibe a janus run from end to end. Put simply, it's the core use case for janus. It's defined as a experiment to benchmark N number of search engine deployments and compare the results.
 - `statespace` = the statespace is the particular settings for a single deployment. 
 - `deployment` = a particular instance of elastic or solrcloud with a defined statespace 
 
@@ -23,23 +23,23 @@ Importantly, statespace is composed of three sub spaces, and each has an impact 
 - `env`: defines things such as JVM settings, clustersize scaling, local, remote configs.
 **e.g. clustersizes, cluster replications, JVM settings, docker,  network configs, etc**
 
-other sapa_bench options: 
+other janus_bench options: 
 - `viz`: declare visualizations to generate with the performance data. _e.g. cdfs, latecy->throughput, 
 - `plug`: experimental integrations to plug into the enviornment. The goal with this is to inject a binary into the experimental flow to enhance performance. e.g. rate limiters, service proxies, multitenenant, etc.  
 
-Sapa's CLI makes configuring the statespace for multiple deployments simple. The CLI sole purposes is to populate sapa_.yml files for each deployment. The best practice is to generate the .yml files using for example `sapa create e_1:elastic e_2:elastic s_1:solr s_2:solr`. This will generate the template files which you can manually reconfigure, or do so with the CLI commands. A savvy user may choose to use the cli in a bash script that can be saved and perhaps replayed or archived. 
+janus's CLI makes configuring the statespace for multiple deployments simple. The CLI sole purposes is to populate janus_.yml files for each deployment. The best practice is to generate the .yml files using for example `janus create e_1:elastic e_2:elastic s_1:solr s_2:solr`. This will generate the template files which you can manually reconfigure, or do so with the CLI commands. A savvy user may choose to use the cli in a bash script that can be saved and perhaps replayed or archived. 
 
 Importantly, the last paramater for each cli command is a comma separated list of deployment names given in the create step. Optionally, all and ! are tokens that represent *all* deployments, and *sans* deployment. So you can for instance use `all,!elastic1` which will apply those settings to all but the elastic1 deployment. 
 
 ```
-$ sapa create <key:name1> <key:name2> <key:name3> 
-$ sapa config <key:value> <key:value> <deployments>
-$ sapa workload <key:value> <deployments>
-$ sapa env <key:value> <deployments>
-$ sapa plug </path/to/binary> <other_options> <deployments> 
-$ sapa viz <viz_type1> <viz_type2> <deployments>
-$ sapa show states <deployments>
-$ sapa run <deployments>
+$ janus create <key:name1> <key:name2> <key:name3> 
+$ janus config <key:value> <key:value> <deployments>
+$ janus workload <key:value> <deployments>
+$ janus env <key:value> <deployments>
+$ janus plug </path/to/binary> <other_options> <deployments> 
+$ janus viz <viz_type1> <viz_type2> <deployments>
+$ janus show states <deployments>
+$ janus run <deployments>
 ```
  
  
@@ -48,16 +48,16 @@ $ sapa run <deployments>
 a simple use case:
 John wants to know what search application and configuration has the lowest P99 latency given a particular load. 
 ```
-$ cd sapa
-$ sapa create solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
-$ sapa env RAM:20G all,!elastic2 ;
-$ sapa configconfig queryCache:9999 documentCache:9999 all,!elastic1,!elastic2 ;
-$ sapa workload loop:open all ;
-$ sapa workload load_start:1 load_finish:100 solr1,solr2;
-$ sapa workload load_balancer:clients all,!elastic2;
-$ sapa plug ratelimiter /path/to/ratelimiter/binary all,!elastic1 ;
-$ sapa viz cdf_91 total_throughput all
-$ sapa show states all ;
+$ cd janus
+$ janus create solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
+$ janus env RAM:20G all,!elastic2 ;
+$ janus configconfig queryCache:9999 documentCache:9999 all,!elastic1,!elastic2 ;
+$ janus workload loop:open all ;
+$ janus workload load_start:1 load_finish:100 solr1,solr2;
+$ janus workload load_balancer:clients all,!elastic2;
+$ janus plug ratelimiter /path/to/ratelimiter/binary all,!elastic1 ;
+$ janus viz cdf_91 total_throughput all
+$ janus show states all ;
 
 | ****** elastic1 ****** | ******* elastic 2 ******  | 
     ENGINE: elastic         ENGINE: elastic
@@ -65,7 +65,7 @@ $ sapa show states all ;
     LOOP:   open            LOOP:   open
     ... 
 
-$ sapa run <experiment_name> all ;
+$ janus run <experiment_name> all ;
 
 ```
 
@@ -95,7 +95,7 @@ install packages:
 
 ##### REMOTE:  
 
-_SAPA provides benchmarking even if you don't have cloud resources but emulating them with Docker locally. So, if you choose this route, please_:
+_janus provides benchmarking even if you don't have cloud resources but emulating them with Docker locally. So, if you choose this route, please_:
 - add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
 - make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
 - run `$ bash container_rsa.yml` to load ssh keyss into your containers. 
@@ -132,7 +132,7 @@ this will generate >> `inventory_gen.txt` file. swap this file with `./inventory
 - you will simply specify version in yaml. 
 
 
-##### LOAD env helpers utils.sh and be sure to replace SAPA_HOME and CL_USER var with your path for this app.
+##### LOAD env helpers utils.sh and be sure to replace JANUS_HOME and CL_USER var with your path for this app.
 
 #### set up shell envs
 1. run `ansible-playbook cloud_configure.yml` .. this will also generate utils.sh locally @ /benchmarkscripts/utils/utils.sh

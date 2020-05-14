@@ -31,14 +31,14 @@ instances: "0"
 _engine: solr
 engine: 'solr'
 
-_output_dir: "/home/sapauser/traffic_gen"
-output_dir: "/home/sapauser/traffic_gen"
+_output_dir: "/home/janususer/traffic_gen"
+output_dir: "/home/janususer/traffic_gen"
 _deploy_name: solr_default
 deploy_name: "artemis"
 _local_data_dir: "/Users/dporter/projects/janus/data_dir"
 local_data_dir: "/Users/dporter/projects/janus/data_dir"
 result_filename: "rf1_s2__clustersize2::query=roundrobin::proc=16::threads=1::dur=10.csv"
-csv_location: "/home/sapauser/traffic_gen"
+csv_location: "/home/janususer/traffic_gen"
 _solr_pipe:
   - mkdir_data_local
   - read_results

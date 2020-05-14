@@ -10,14 +10,14 @@ zoo_version_download_dict:
 
 _zoo_version: 3.5.5
 zoo_version: '3.111'
-zoo_install_dir: '/home/sapauser'
-_zoo_root_dir: '/home/sapauser/zoo-3.111'
-zoo_root_dir: '/home/sapauser/zoo-3.111'
+zoo_install_dir: '/home/janususer'
+_zoo_root_dir: '/home/janususer/zoo-3.111'
+zoo_root_dir: '/home/janususer/zoo-3.111'
 zoo_download_link: '3.5.5'
-_zoo_conf_dir: '/home/sapauser/zoo-3.111/conf'
-zoo_conf_dir: '/home/sapauser/zoo-3.111/conf'
-_zoo_bin_dir: '/home/sapauser/zoo-3.111/bin'
-zoo_bin_dir: '/home/sapauser/zoo-3.111/bin'
+_zoo_conf_dir: '/home/janususer/zoo-3.111/conf'
+zoo_conf_dir: '/home/janususer/zoo-3.111/conf'
+_zoo_bin_dir: '/home/janususer/zoo-3.111/bin'
+zoo_bin_dir: '/home/janususer/zoo-3.111/bin'
 
 
 _zookeeper:

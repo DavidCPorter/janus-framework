@@ -10,7 +10,7 @@ Requirements
 ------------
 - ubuntu18 LTS running on every server. 
 
-- You will need to have a complete inventory with required groups and formatting per sapa specification. 
+- You will need to have a complete inventory with required groups and formatting per janus specification. 
 
 
 Module Variables
@@ -20,7 +20,7 @@ Please use UI for variable assignment, however, these are the vars in this modul
 vars:
     ramdisk_path: /dev/shm
     ptp_install_dir: '/users/{{ansible_user}}/linuxptp'
-    cred_dir: "{{SAPA_HOME}}/playbooks/roles/cloud-env/files/.aws"
+    cred_dir: "{{JANUS_HOME}}/playbooks/roles/cloud-env/files/.aws"
     rem_user: dporte7
     packages:
       - awscli

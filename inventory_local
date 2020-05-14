@@ -1,48 +1,48 @@
 [allNodes]
-sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
-sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
-sapa4   globalIP=172.21.0.6   ansible_subnet=172.21.0.6
-sapa5   globalIP=172.21.0.7   ansible_subnet=172.21.0.7
+janus0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+janus1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+janus2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+janus3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
+janus4   globalIP=172.21.0.6   ansible_subnet=172.21.0.6
+janus5   globalIP=172.21.0.7   ansible_subnet=172.21.0.7
 
 [zookeeperNodes]
-sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+janus0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+janus1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+janus2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 [masterNodes]
-sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+janus0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+janus1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
 
 [thirdMaster]
-sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+janus2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 
 [twoNode]
-sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+janus0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+janus1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
 
 [dataNodes]
-sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
-sapa1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
-sapa2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
+janus0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+janus1   globalIP=172.21.0.3   ansible_subnet=172.21.0.3  zoo_id=2
+janus2   globalIP=172.21.0.4   ansible_subnet=172.21.0.4  zoo_id=3
 
 
 
 [singleNode]
-sapa0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
+janus0   globalIP=172.21.0.2   ansible_subnet=172.21.0.2  zoo_id=1
 
 [singleGenerator]
-sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
+janus3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
 
 [generatorNode]
-sapa3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
-sapa4   globalIP=172.21.0.6   ansible_subnet=172.21.0.6
-sapa5   globalIP=172.21.0.7   ansible_subnet=172.21.0.7
+janus3   globalIP=172.21.0.5   ansible_subnet=172.21.0.5
+janus4   globalIP=172.21.0.6   ansible_subnet=172.21.0.6
+janus5   globalIP=172.21.0.7   ansible_subnet=172.21.0.7
 
 [all:vars]
-ansible_user=sapauser
+ansible_user=janususer
 
 ansible_sudo_pass=password
 ansible_connection=ssh
@@ -53,11 +53,11 @@ node2=172.21.0.4
 node3=172.21.0.5
 node4=172.21.0.6
 node5=172.21.0.7
-root_path=/Users/dporter/projects/sapa
+root_path=/Users/dporter/projects/janus
 main_class=com.dporte7.solrclientserver.DistributedWebServer
 git_branch_name=dporter_8_3
 s3_bucket_name=solr-8-3-dporter
 gather_facts=no
-home=/home/sapauser
-SAPA_HOME=/Users/dporter/projects/sapa
+home=/home/janususer
+JANUS_HOME=/Users/dporter/projects/janus
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'

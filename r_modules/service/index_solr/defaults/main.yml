@@ -1,6 +1,6 @@
 ---
 # defaults file for upload_data
-_data_upload_dir: '/home/sapauser'
+_data_upload_dir: '/home/janususer'
 data_upload_dir: '{{ui_data_upload_dir | default(_data_upload_dir)}}'
 # collection name is passed in now
 _aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{hosts_ui}}"
@@ -9,7 +9,7 @@ _solr_install_dir: /users/dporte7/solr-8_3
 solr_install_dir: '{{ui_solr_install_dir | default(_solr_install_dir)}}'
 _solr_home: "{{solr_install_dir}}/solr/server/solr"
 solr_home: '{{ui_solr_home | default(_solr_home)}}'
-_upload_data_file_path: "{{SAPA_HOME}}/playbooks/roles/upload_data/files"
+_upload_data_file_path: "{{JANUS_HOME}}/playbooks/roles/upload_data/files"
 upload_data_file_path: '{{ui_upload_data_file_path | default(_upload_data_file_path)}}'
 _nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
 nfs_root: '{{ui_nfs_root | default(_nfs_root)}}'

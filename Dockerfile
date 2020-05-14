@@ -4,7 +4,7 @@
 
 FROM ubuntu:latest
 
-LABEL Description="local ubuntu server for Sapa local experiments"
+LABEL Description="local ubuntu server for janus local experiments"
 
 
 RUN bash -c ' \
@@ -45,7 +45,7 @@ RUN bash -c ' \
                        zip && \
     apt-get update && \
     apt-get clean && \
-	useradd -m -p $(openssl passwd -1 "password") -s /bin/bash -G sudo sapauser'
+	useradd -m -p $(openssl passwd -1 "password") -s /bin/bash -G sudo janususer'
 
 EXPOSE 22 8983 9200
 

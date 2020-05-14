@@ -3,7 +3,7 @@
 
   # OYSTA main vars
   vars:
-    module_root: "{{SAPA_HOME}}/r_modules/{{stage}}/{{module}}"
+    module_root: "{{JANUS_HOME}}/r_modules/{{stage}}/{{module}}"
     user_root_dir: "{{home}}"
 
   gather_facts: no

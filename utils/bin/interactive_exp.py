@@ -5,7 +5,7 @@ import pip
 import sys
 import os
 import subprocess
-import oysterutils as OysterUtils
+import janusutils as janusUtils
 import _ssh_import as ssh_import
 from _branch_class import Experiment
 from typing import Set
@@ -195,8 +195,8 @@ def commandDispatcher(exp_dict):
                 start(start_args, target_branches)
                 return
 
-        # oyster cmd does project operations when in interactive mode
-        def oyster(vars,target_branches):
+        # janus cmd does project operations when in interactive mode
+        def janus(vars,target_branches):
             nonlocal experiment
             if vars[0] == 'add' and vars[1] == 'branch':
                 add(vars[1:], target_branches)
@@ -204,7 +204,7 @@ def commandDispatcher(exp_dict):
                 ls(vars[1:], target_branches)
 
             else:
-                print('oyster command did not match operation')
+                print('janus command did not match operation')
 
         # offers "module" order support.
         def order(vars,target_branches):
@@ -280,7 +280,7 @@ def commandDispatcher(exp_dict):
             return
 
 
-        decorated_command = dict(add=add, rm=rm, ls=ls, oyster=oyster, order=order, show=show, start=start)
+        decorated_command = dict(add=add, rm=rm, ls=ls, janus=janus, order=order, show=show, start=start)
 
         return_function = decorated_command.get(args[0])
 
