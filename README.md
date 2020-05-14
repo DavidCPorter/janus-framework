@@ -11,7 +11,7 @@ JANUS simplifies this approach with a generalized framework to orchestrate, mana
 
 ### Architecture Overview
 
-JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. The Management Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
+JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. The MGMT Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
 
 ![fig_1](./utils/img/janus_architecture.png) 
 

@@ -13,7 +13,7 @@ experiment_name: cloudlab_tests
 
 # defaults file for benchmark
 ui_pyscript: traffic_gen.py
-ui_pom_path: "{{home}}/solrclientserver"
+ui_pom_path: "{{home}}/solrcloud_loadbalancer"
 
 
 # defaults file for solr
