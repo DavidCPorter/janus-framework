@@ -1,16 +1,12 @@
 
-Host athena
+Host solr1shard
   hostname 0.0.0.0
   User dporter
 
-Host artemis
+Host solr2shard
   hostname 0.0.0.0
   User dporter
 
-Host ares
-  hostname 0.0.0.0
-  User dporter
-
-Host apollo
+Host solr4shard
   hostname 0.0.0.0
   User dporter

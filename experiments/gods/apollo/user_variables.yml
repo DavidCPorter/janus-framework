@@ -1,12 +1,14 @@
+ui_chroot: fruity
+ui_cred_dir: myfavcred
 ui_deploy_name: apollo
 ui_endpoint_host: 172.21.0.
 ui_endpoint_port: '8983'
 ui_l_replicas: '1'
 ui_l_shards: '2'
-ui_replicas: '1'
+ui_replicas: '3'
 ui_shards: '2'
 ui_shorter_data: 'true'
 ui_solr_heap: '1'
 ui_solr_repo: https://github.com/DavidCPorter/lucene-solr.git
 ui_solr_version: dporter_8_3
-ui_zoo_version: '3.4'
+ui_zoo_version: '3.33'

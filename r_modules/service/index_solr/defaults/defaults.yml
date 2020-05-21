@@ -1,0 +1,27 @@
+---
+# defaults file for upload_data
+data_upload_dir: '/home/janususer'
+# collection name is passed in now
+aws_dir_name: "{{ansible_subnet}}/reviews_rf{{replicas}}_s{{shards}}_clustersize{{hosts_ui}}"
+solr_install_dir: /users/dporte7/solr-8_3
+solr_home: "{{solr_install_dir}}/solr/server/solr"
+upload_data_file_path: "{{JANUS_HOME}}/playbooks/roles/upload_data/files"
+nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
+aws_dir: dporter
+# vars for indexing module
+shards: 2
+replicas: 1
+collection_name: "{{shards}}_{{replicas}}_index"
+solrconfig_xml_dest: "{{solr_home}}/configsets/_default/conf/solrconfig.xml"
+shorter_data: true
+
+index_solr:
+  - 0_pre_index_config
+  - 1_index
+  - 2_solr_aws
+  - 3_post_index_config
+
+
+#SHOULD WE USE A DICT FOR BOITH DEFAULTS THAT USERS CAN CHANGE AND VARS THAT RECIEVE FROM OTHERS
+
+#SO WE HAVE DEFAULTS(USER-DEFINABLE, f GLOBALS AND USERVARS

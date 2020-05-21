@@ -13,6 +13,7 @@ createModule(){
   if [ "$#" -ne 2 ]; then
     # shellcheck disable=SC1065
     printf "\n > janus create requires 2 parameters: stage, module_name \n"
+    exit
   fi
 
   MOD_LOC=$JANUS_HOME/r_modules/$1/$2
@@ -36,7 +37,7 @@ while (( "$#" )); do
       COMMAND='create'
       STAGE="$2"
       MODULE="$3"
-      shift 3
+      shift $#
       createModule $STAGE $MODULE
       ;;
     * )

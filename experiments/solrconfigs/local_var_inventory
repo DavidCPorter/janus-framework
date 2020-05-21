@@ -1,0 +1,9 @@
+
+[solr2rep]
+solr2rep ansible_connection=local path=/Users/dporter/projects/janus/experiments/solrconfigs/solr2rep ansible_user=dporter
+
+[solr3rep]
+solr3rep ansible_connection=local path=/Users/dporter/projects/janus/experiments/solrconfigs/solr3rep ansible_user=dporter
+
+[solr1rep]
+solr1rep ansible_connection=local path=/Users/dporter/projects/janus/experiments/solrconfigs/solr1rep ansible_user=dporter

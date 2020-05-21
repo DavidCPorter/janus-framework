@@ -3,6 +3,7 @@ import sys
 import os
 import subprocess
 from yaml import safe_load, safe_dump
+from shutil import copyfile
 
 def main(args):
     print(args)
@@ -16,6 +17,8 @@ def main(args):
 
     for i in branch_list:
         output = subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i], capture_output=True)
+        # open(home+'/experiments/'+exp_name+'/inventory', )
+        copyfile(home+'/utils/inventory', home+'/experiments/'+exp_name+'/inventory')
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/env'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/load'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/pipeline'])
@@ -23,8 +26,8 @@ def main(args):
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/viz'])
         with open(home+'/experiments/'+exp_name+'/'+i+'/mod_order.yml', 'w+') as f:
             safe_dump({'module_order': None}, f)
-        with open(home+'/experiments/'+exp_name+'/'+i+'/user_variables.yml', 'w+') as f:
-            pass
+        open(home+'/experiments/'+exp_name+'/'+i+'/user_variables.yml', 'a').close()
+        open(home + '/experiments/' + exp_name + '/' + i + '/branch_globals.yml', 'a').close()
 
 if __name__ == '__main__':
     # print (sys.argv)

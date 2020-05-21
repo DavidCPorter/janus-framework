@@ -1,0 +1,5 @@
+cred_dir: vivi
+rem_user: myremmer
+replicas: '99'
+shards: '6'
+zoo_version: '2'

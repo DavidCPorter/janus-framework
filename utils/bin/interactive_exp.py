@@ -145,6 +145,16 @@ def commandDispatcher(exp_dict):
             if vars[0] == 'branches':
                 print(experiment.branches)
 
+        def load(vars, target_branches):
+            filename = vars.pop()
+            cmd_list = [line.rstrip() for line in open(filename)]
+            return_list = []
+            for cmd in cmd_list:
+                return_list.append(cmd.split(' '))
+
+            return return_list
+
+
         def add(vars,target_branches):
             if len(vars) < 2:
                 print(f'vars {vars} incorrect')
@@ -168,7 +178,7 @@ def commandDispatcher(exp_dict):
 
             if vars[0] == 'hosts':
                 if len(vars) < 4:
-                    print('BASIC assumes you left out playname(s) argument, so default behavior applied changes to all plays')
+                    print(f'\n\nBASIC assumes you left out playname(s) argument, so default behavior applied changes to all plays')
                     vars.append('all')
                 hostgroup = vars[1]
                 modulename = vars[2]
@@ -180,7 +190,7 @@ def commandDispatcher(exp_dict):
             if vars[0] == 'branch' or vars[0] == 'branches':
                 experiment.rm_branches(target_branches)
                 valid_groupnames_dict = update_groupnames(set(experiment.branches.keys()))
-                print('success')
+                print(f'\n\nsuccess')
 
             if vars[0] == 'modules' or vars[0] == 'module':
                 experiment.update_modules('rm', vars[1].split(','), target_branches)
@@ -195,6 +205,12 @@ def commandDispatcher(exp_dict):
                 start(start_args, target_branches)
                 return
 
+            if vars[0] == 'vars':
+                start_args = ['flag', 'vars']
+                start(start_args, target_branches)
+                return
+
+
         # janus cmd does project operations when in interactive mode
         def janus(vars,target_branches):
             nonlocal experiment
@@ -204,7 +220,7 @@ def commandDispatcher(exp_dict):
                 ls(vars[1:], target_branches)
 
             else:
-                print('janus command did not match operation')
+                print(f'\n\njanus command did not match operation')
 
         # offers "module" order support.
         def order(vars,target_branches):
@@ -216,11 +232,15 @@ def commandDispatcher(exp_dict):
             nonlocal experiment
             params_dict = {vars[x]: vars[x + 1] for x in range(0, len(vars) - 1) if x % 2 == 0}
             # returns a list of lists of sets each set in a list represents a single branch, and each list in a list is a different point in the module order.
-            branch_order = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='filtered')
-            full_branch_flow = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='unfiltered')
-            # make a graph out of the branch order
+            raw_branching_order = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='unfiltered')
+            print('raw_branching_order')
+            print(raw_branching_order)
+            optimal_branching_order = experiment.get_branch_flow_order([b for b in experiment.branches.values()], list_flag='filtered')
+            print(f'\n\n optimal_branch_order')
+            print(optimal_branching_order)
             final_list = list()
 
+            # make a graph out of the optimal branch order
             def explore_next(node):
                 nonlocal final_list
                 if node.neighbors == None:
@@ -234,8 +254,8 @@ def commandDispatcher(exp_dict):
                 if len(node.value - union_set) > 0:
                     final_list.append(node.value-union_set)
 
-            # Creates Nodes representation of branchorder
-            graph = [[Noder(i,None) for i in j] for j in branch_order ]
+            # Creates Nodes representation of optimal branchorder
+            graph = [[Noder(set(i),None) for i in j] for j in optimal_branching_order ]
             rootNode = Noder({t for t in target_branches}, graph[0])
             next_level=0
             for i in graph:
@@ -248,39 +268,50 @@ def commandDispatcher(exp_dict):
 
 
             explore_next(rootNode)
-            # want to order modules within the set correctly
-            # list list(_branches_sharing_mod) set(variables) tuple(key,value)
-            # pdb.set_trace()
-            # TODO below todo stems from this function becuase it returns empty list for branches
-            llst_branches_variables = experiment.get_vars_to_branch_on(final_list, full_branch_flow)
-            # returns list of list tuples(branch_name, module, play_to_start_from)
-            ordered_set = experiment.get_ordered_set(llst_branches_variables, final_list)
-            pdb.set_trace()
-            # TODO need to append solo branchsets aka branches with no common stages/modules
-            final = experiment.get_final_mod_play_levels(ordered_set, full_branch_flow)
-            # pdb.set_trace()
+            print(f'\n\nfinal_list')
+            print(final_list)
+            # list of branches with each branch represented by set of unique var tuples
+            set_of_diff_vars_per_branch = experiment.get_vars_to_branch_on(final_list, raw_branching_order)
+            print(f'\n\n sets of diff vars per branch')
+            print(set_of_diff_vars_per_branch)
 
+            # returns list of list tuples(branch_name, module, play_to_start_from)
+            ordered_sets_of_branches = experiment.order_branches_by_var_precedence(set_of_diff_vars_per_branch, final_list)
+            print(f'\n\nordered_sets of branches')
+            print(ordered_sets_of_branches)
+
+            final_schedule = experiment.get_schedule(ordered_sets_of_branches, raw_branching_order)
+            # pdb.set_trace()
+            print(f'\n\nfinal schedule')
+            print(final_schedule)
             # this would be called by show modules
             if params_dict.get('show') == 'modules':
                 pref = 1
                 print(f'\n\nbranch_name  |  branch_on_module  |  branch_on_play\n ')
-                for b in final:
+                for b in final_schedule:
                     print(f' {pref}) {b[0]}  |  {b[1]}  |  {b[3]}')
                     pref+=1
+                return
+
+            if params_dict.get('show') == 'vars':
+                print(f'\n\n collecting runtime variables \n\n')
+                shotgun, first_branch, mod_start, play_start = experiment.prepare_experiment(final_schedule, 'vars')
+                print(first_branch, mod_start, play_start)
+                shotgun(first_branch, mod_start, play_start)
                 return
             # walk the branches connected
             ex_flag = None
             if params_dict.get('flag'):
                 ex_flag = params_dict.get('flag')
 
-            shotgun,first_branch,mod_start,play_start = experiment.prepare_experiment(final, ex_flag)
+            shotgun,first_branch,mod_start,play_start = experiment.prepare_experiment(final_schedule, ex_flag)
             print(first_branch,mod_start,play_start)
             shotgun(first_branch,mod_start,play_start)
 
             return
 
 
-        decorated_command = dict(add=add, rm=rm, ls=ls, janus=janus, order=order, show=show, start=start)
+        decorated_command = dict(add=add, rm=rm, ls=ls, janus=janus, order=order, show=show, start=start, load=load)
 
         return_function = decorated_command.get(args[0])
 
@@ -316,15 +347,20 @@ def main(interactive_dict):
         if user_command_list[-1] == '':
             user_command_list.pop()
         try:
-            cmd,args,target_branches = experiment_context(user_command_list)
-            if cmd:
-                cmd(args,target_branches)
-            else:
-                print('command not found')
+            load_commands = [list(user_command_list)]
+            while load_commands:
+                cmd,args,target_branches = experiment_context(load_commands.pop(0))
+                if cmd:
+                    load_response = cmd(args,target_branches)
+                    if load_response:
+                        load_commands = list(load_response)
+                else:
+                    print('command not found')
+                    break
 
-        except (RuntimeError, TypeError, NameError) as e:
-            print("error -> ", e)
+        except (RuntimeError, TypeError, NameError, IndexError) as e:
             traceback.print_exc()
+            print("error -> ", e)
 
 
 

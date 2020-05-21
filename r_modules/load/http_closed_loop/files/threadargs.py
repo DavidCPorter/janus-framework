@@ -45,7 +45,7 @@ def get_urls(test_param, terms, shards, replicas, clustersize, instances, query,
             term = terms[i%len(terms)].rstrip()
             field = indexed_fields[i%len(indexed_fields)]
             # q = '/solr/reviews_rf'+str(replicas)+'_s'+str(shards)+'_clustersize'+csize+'/select?q='+field+'%3A'+term+'&rows=10'
-            # oysta docker collection name is simply replicas_shards_index
+            # JANUS docker collection name is simply replicas_shards_index
             q = '/solr/'+str(shards)+'_'+str(replicas)+'_index/select?q='+field+'%3A'+term+'&rows=10'
             urls.append("%s%s" % (prefix_url, q))
 

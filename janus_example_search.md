@@ -2,79 +2,19 @@
 
 ### OVERVIEW
 
-janus provides an automation tool for deploying and benchmarking SolrCloud and Elastic search engines. The overarching purpose of this project is to provide a framework for quickly discovering optimal deployment strategies given organizational constraints. Search engine config state space is incredibly large (fig1). Consequentially, tuning these apps for performance requires a lot of guesswork since there is no silver bullet when it comes to the best configuration. janus takes the guesswork out of performance tuning by providing a tight feedback loop on your deployment strategies. If you have been diagnosed with "search engine configuration fatigue", or suspect there are performance bottlenecks and want to efficiently explore all your options?... janus is the tool for you.
+Sapa is a project to evaluate the performance of two cloud-native search engines, solrcloud and elastic. To help manage and orchestrate the benchmark experiment, Sapa used the cloud-native benchmarking framework, JANUS. The purpose of sapa is to quickly discover optimal deployment strategies given organizational constraints. Search engine config state space is incredibly large (fig1). Consequentially, tuning these apps for performance requires a lot of guesswork since there is no silver bullet when it comes to the best configuration. SAPA takes the guesswork out of performance tuning by providing a tight feedback loop on the performance of your deployment strategies.  
  
  fig 1 | notes 
  ---- | ----
- ![fig_1](./utils/state_explosion.png) | The single line traversing this state space represents a single deployment. This graph illustrates a simple example of a deployment state space definition; each color represents a config category, and each dot represents a configured value. Many production systems will choose to compare many more verticals.  
+ ![fig_1](./utils/img/state_explosion.png) | The single line traversing this state space represents a single deployment. This graph illustrates a simple example of a deployment state space definition; each color represents a config category, and each dot represents a configured value. Many production systems will choose to compare many more verticals.  
  
 
-
-
-Key Terminology:
-- `janus_bench` = janus_bench is the term to descibe a janus run from end to end. Put simply, it's the core use case for janus. It's defined as a experiment to benchmark N number of search engine deployments and compare the results.
-- `statespace` = the statespace is the particular settings for a single deployment. 
-- `deployment` = a particular instance of elastic or solrcloud with a defined statespace 
-
-Importantly, statespace is composed of three sub spaces, and each has an impact on search performance.
-
-- `config`: these are the knobs provided to users for tuning the instance of the search engine. _e.g. solrconfig.xml, elasticsearch.yml, replicas, shards, etc._
-- `workload`: these settings generally define the interactions with search engines during the experiment, most notably the workload settings. _e.g. search term dictionary, documents, load balancers, client apis, etc_
-- `env`: defines things such as JVM settings, clustersize scaling, local, remote configs.
-**e.g. clustersizes, cluster replications, JVM settings, docker,  network configs, etc**
-
-other janus_bench options: 
-- `viz`: declare visualizations to generate with the performance data. _e.g. cdfs, latecy->throughput, 
-- `plug`: experimental integrations to plug into the enviornment. The goal with this is to inject a binary into the experimental flow to enhance performance. e.g. rate limiters, service proxies, multitenenant, etc.  
-
-janus's CLI makes configuring the statespace for multiple deployments simple. The CLI sole purposes is to populate janus_.yml files for each deployment. The best practice is to generate the .yml files using for example `janus create e_1:elastic e_2:elastic s_1:solr s_2:solr`. This will generate the template files which you can manually reconfigure, or do so with the CLI commands. A savvy user may choose to use the cli in a bash script that can be saved and perhaps replayed or archived. 
-
-Importantly, the last paramater for each cli command is a comma separated list of deployment names given in the create step. Optionally, all and ! are tokens that represent *all* deployments, and *sans* deployment. So you can for instance use `all,!elastic1` which will apply those settings to all but the elastic1 deployment. 
-
-```
-$ janus create <key:name1> <key:name2> <key:name3> 
-$ janus config <key:value> <key:value> <deployments>
-$ janus workload <key:value> <deployments>
-$ janus env <key:value> <deployments>
-$ janus plug </path/to/binary> <other_options> <deployments> 
-$ janus viz <viz_type1> <viz_type2> <deployments>
-$ janus show states <deployments>
-$ janus run <deployments>
-```
- 
- 
-### SIMPLE EXAMPLE
-
-a simple use case:
-John wants to know what search application and configuration has the lowest P99 latency given a particular load. 
-```
-$ cd janus
-$ janus create solr:solr1 solr:solr2 elastic:elastic1 elastic:elasic2
-$ janus env RAM:20G all,!elastic2 ;
-$ janus configconfig queryCache:9999 documentCache:9999 all,!elastic1,!elastic2 ;
-$ janus workload loop:open all ;
-$ janus workload load_start:1 load_finish:100 solr1,solr2;
-$ janus workload load_balancer:clients all,!elastic2;
-$ janus plug ratelimiter /path/to/ratelimiter/binary all,!elastic1 ;
-$ janus viz cdf_91 total_throughput all
-$ janus show states all ;
-
-| ****** elastic1 ****** | ******* elastic 2 ******  | 
-    ENGINE: elastic         ENGINE: elastic
-    RAM:    60G             RAM:    1G #default
-    LOOP:   open            LOOP:   open
-    ... 
-
-$ janus run <experiment_name> all ;
-
-```
 
 __need to tell a story here, basically a placeholder for now__
 
  fig 2: CDF 91 connections | fig 3: Total Throughput
  ---- | ----
- ![fig_2](./utils/cdf_example_fig.png) |  ![fig_3](./utils/total_throughput.png)
-
+ ![fig_2](./utils/img/cdf_example_fig.png) |  ![fig_3](./utils/img/total_throughput.png)
 
 
 
@@ -92,14 +32,12 @@ install packages:
 
 
 
-
 ##### REMOTE:  
-
 _janus provides benchmarking even if you don't have cloud resources but emulating them with Docker locally. So, if you choose this route, please_:
-- add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
+- add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see examples/config-host.example)
 - make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
-- run `$ bash container_rsa.yml` to load ssh keyss into your containers. 
-
+- run docker-compose --compatibility up -d
+- run `$ bash container_rsa.yml` to load ssh keys into your containers. 
 
 ###### for standard cloud deployment:
 step1: 
@@ -131,73 +69,8 @@ this will generate >> `inventory_gen.txt` file. swap this file with `./inventory
 #### -> else: 
 - you will simply specify version in yaml. 
 
-
 ##### LOAD env helpers utils.sh and be sure to replace JANUS_HOME and CL_USER var with your path for this app.
 
 #### set up shell envs
 1. run `ansible-playbook cloud_configure.yml` .. this will also generate utils.sh locally @ /benchmarkscripts/utils/utils.sh
-2. then, run `ssh_files/produce_ssh_files.sh` to create files for pssh tasks dependencies in runtest.sh (this uses utils.sh)
-
-
-#### FOLLOWING IS README WIP :::
-
-#### run experiment
-*before you run any experiment you want to make sure solr is not running `checksolr` and that there is no indicies on the cores `listcores`*
-*make sure the utils are updated  loaded first*
-*make sure to edit params file*
-fulltest < list of solr clusters >
-e.g. if i wanted to run scaling experiment on 2 4 8 and 16 clusters and compare the performance, I would run this:
-`fulltest 2 4 8 16`
-
-**IF YOU EVER EXIT an experiment or it fails... make sure to remember run `stopSolr <clustersize>` and `wipecores` and `killallbyname dstat` `callingnodes rm *.csv` before you continue**
-*FURTHERMORE, if the exp posted_data (indexed) for the first time, you might want to consider deleting that collection via solr admin and redoing the experiemnt becuase the final step in the exp is to save to aws and that would not have happened in a failed exp... you can either run the ansible script to post to aws, or just redo it after deleting*
-
-**It's important to remember that the disk space on the cluster is small ~10GB so any more that 4 replicas will prolly fail due to disk size failure. This is why there is the posting the index to aws (if prev nott there ) and removing it after each exp so you dont hit the limit.**
-
-
-### NOTES
-#### Notes on Solr Config
-*This is completed automatically during the solr config step with the ansible playbooks.*
-
-I found the easiest way to connect with the remote JMX is to modify this line in the ~/solr-8_0/solr/bin/solr executable
-
-`REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$SOLR_HOST")`  
-to  
-`REMOTE_JMX_OPTS+=("-Djava.rmi.server.hostname=$GLOBALIP")`
-
-
-#### Notes on Ansible Roles:
-There are five roles in this repo `cloudenv, solr, zookeeper, upload_data, benchmark, elastic` located in the /playbooks/roles dir. You can take a look at the procedures for setting up the envs in ./roles/<role_name>/tasks/main.yml
-
-#### Notes on Ansible Variables
-when you run ansible playbooks, the process will generate sys variables, and to view these you can run `ansible -i inventory -m setup`
-`hostvars`
-`VARIABLE PRECEDENCE`
-If multiple variables of the same name are defined in different places, they win in a certain order, which is (least to greatest):
-
-The idea here to follow is that the more explicit you get in scope, the more precedence it takes with command line -e extra vars always winning. Host and/or inventory variables can win over role defaults, but not explicit includes like the vars directory or an include_vars task.
-
-- command line values (eg “-u user”)
-- role defaults
-- inventory file or script group vars
-- inventory group_vars/all
-- playbook group_vars/all 
-- inventory group_vars/* 
-- playbook group_vars/* 
-- inventory file or script host vars 
-- inventory host_vars/* 
-- playbook host_vars/* 
-- host facts / cached set_facts 
-- play vars
-- play vars_prompt
-- play vars_files
-- role vars (defined in role/vars/main.yml)
-- block vars (only for tasks in block)
-- task vars (only for the task)
-- include_vars
-- set_facts / registered vars
-- role (and include_role) params
-- include params
-- extra vars (always win precedence)
-
 

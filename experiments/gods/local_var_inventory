@@ -1,12 +1,12 @@
 
-[athena]
-athena ansible_connection=local path=/Users/dporter/projects/janus/experiments/gods/athena ansible_user=dporter
-
 [artemis]
 artemis ansible_connection=local path=/Users/dporter/projects/janus/experiments/gods/artemis ansible_user=dporter
 
-[ares]
-ares ansible_connection=local path=/Users/dporter/projects/janus/experiments/gods/ares ansible_user=dporter
+[athena]
+athena ansible_connection=local path=/Users/dporter/projects/janus/experiments/gods/athena ansible_user=dporter
 
 [apollo]
 apollo ansible_connection=local path=/Users/dporter/projects/janus/experiments/gods/apollo ansible_user=dporter
+
+[ares]
+ares ansible_connection=local path=/Users/dporter/projects/janus/experiments/gods/ares ansible_user=dporter

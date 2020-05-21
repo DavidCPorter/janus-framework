@@ -2,7 +2,6 @@ import pip
 import sys
 import os
 import subprocess
-import _ssh_import as ssh_import
 from typing import List, Set, Any
 from llist import dllist, dllistnode
 
@@ -10,6 +9,7 @@ import pdb
 import yaml
 from collections import OrderedDict
 from more_itertools import powerset
+
 
 
 
@@ -22,12 +22,29 @@ class Vars:
         self.inverted_modules = {}
         self.host_play_map = {}
         variable_defaults_yaml = self.root_path + '/' + inverted_stage_mapping.get(
-            self.module_name) + '/' + self.module_name + '/defaults/main.yml'
+            self.module_name) + '/' + self.module_name + '/defaults/defaults.yml'
+        inherited_yaml = self.root_path + '/' + inverted_stage_mapping.get(
+            self.module_name) + '/' + self.module_name + '/defaults/inherited.yml'
+        show_vars_file_yaml = self.root_path + '/' + inverted_stage_mapping.get(
+            self.module_name) + '/' + self.module_name + '/defaults/show_vars_file_tmp.yml'
 
         with open(variable_defaults_yaml) as f:
             default_variables = yaml.safe_load(f)
             self.default_variable_keys = default_variables.keys()
+            show_vars_file = {}
+            for k in self.default_variable_keys:
+                show_vars_file.update({k: '{{'+k+'}}'})
+            with open(show_vars_file_yaml, 'w+', encoding = "utf-8") as fn:
+                output = yaml.safe_dump(show_vars_file, allow_unicode=True, default_flow_style='', default_style='', encoding=None)
+                # the process for discovering this replace method may be the most annoying snafu of this entire project. Pyyaml is the worst library in the world bar none. all i was trying to accomplish was removing the '' from string values in data dumps, and there's a copius amount of mixed information about styling in pyyaml due to maintainers replacement and version incompatibilities.
+                fn.write(output.replace("'", ''))
 
+        self.inherited_variable_keys = []
+
+        if os.path.isfile(inherited_yaml):
+            with open(inherited_yaml) as f:
+                global_variables = yaml.safe_load(f)
+                self.inherited_variable_keys = global_variables.keys()
 
 
     def add_variables(self, variable_dict):
@@ -35,8 +52,6 @@ class Vars:
 
     # when you add a module to branch(es) vars object is created and attached to module with orderd default keys to assist in dfs flow at runtime.
     # def order_keys(self):
-
-
 
 
 class Module:
@@ -51,9 +66,11 @@ class Module:
             self.play_order = OrderedDict()
             self.variables = Vars(name, self._root_path, branch_name, self._inverted_stage_module)
             self.inverted_variable_module = {}
+            self.global_variable_keys = {}
             for var in self.variables.default_variable_keys:
                 self.inverted_variable_module.update({var: name})
-
+            for var in self.variables.inherited_variable_keys:
+                self.global_variable_keys.update({var: None})
             self.play_order.update(Experiment._module_play_order.get(name))
 
 
@@ -69,6 +86,9 @@ class Branch:
         self.modules = {}
         self.name = name
         self.inverted_var_to_mod_lookup = {}
+        self.global_variables = {}
+
+
     def ls(self, cmd, with_options=False):
 
         print(f'\n\nbranch_name = {self.name} \n')
@@ -82,7 +102,8 @@ class Branch:
                 if cmd == 'vars':
                     print(
                         f'user-entered variables: {module.variables.user_variables} \n\n\n default variable keys: {module.variables.default_variable_keys} \n\n\n')
-                    ansible_command = ['ansible-playbook', '-i', './local_var_inventory', '../variable_main.yml', '--extra-vars',
+                    ansible_command = ['ansible-playbook', '-i', './local_var_inventory', '../variable_main.yml',
+                                       '--extra-vars',
                                        'stage=' + stage + ' module=' + module_name + ' hosts_ui=' + self.name]
                     # print(ansible_command)
                     # output = subprocess.run( ansible_command, capture_output=True)
@@ -97,7 +118,7 @@ class Branch:
         subprocess.run(['mkdir', self.name + '/pipeline'])
         subprocess.run(['mkdir', self.name + '/service'])
         subprocess.run(['mkdir', self.name + '/viz'])
-        with open(self.name + '/mod_order.yml', 'w+') as f:
+        with open(self.name + '/mod_order.yml', 'a+') as f:
             yaml.safe_dump({'module_order': None}, f)
 
     def remove_branch_dir(self):
@@ -113,7 +134,15 @@ class Branch:
                 mod.play_order.update(plays_dict)
                 # when we add a module, we automatically add an inverted var-to-module mapping for all the module variables and add it to self.inverted_var_to_mod_lookup table so we can use it when applying variable updates without asking the user to specify the module or stage. THIS IMPLIES ALL VARIABLES ARE UNIQUE! when variable names start overlapping we can add a namespace by default, but I'm going to hold off on that for the time being.
                 var_to_mod_dict = mod.inverted_variable_module
+                glob_vars = mod.global_variable_keys
                 self.inverted_var_to_mod_lookup.update(var_to_mod_dict)
+                if len(glob_vars):
+
+                    for k,v in glob_vars.items():
+                        self.global_variables.update({k:v})
+                        # if v != None:
+                        #     self.update_branch_vars([k,v])
+
                 self.order_modules('include', [module_name])
 
             else:
@@ -128,21 +157,38 @@ class Branch:
                 print(f'{module_name} module not in branch')
 
     # updating branch vars through module instance
-    def update_branch_vars(self, vars):
-        var_dict = {vars[x]: vars[x + 1] for x in range(0, len(vars) - 1) if x % 2 == 0}
-
+    def update_branch_vars(self, vars, global_flag=False):
+        if type(vars) != dict:
+            var_dict = {vars[x]: vars[x + 1] for x in range(0, len(vars) - 1) if x % 2 == 0}
+        else:
+            var_dict = dict(vars)
         try:
             # for each variable user wishes to update on this branch, grab the module associated with it, update the
             # corresponding variable dictionary for that module with the singe variable update. Repeat
+            # but first, if it's a global variable(others inherit) then it should update the global file not the user-vars
+
             for key in var_dict.keys():
-                # to remove 'ui_' for lookup
-                # pdb.set_trace()
-                mod = self.inverted_var_to_mod_lookup.get(key[3:])
+                if global_flag == True and key in self.global_variables:
+                    with open(self.name + '/branch_globals.yml', 'r') as f:
+                        cur_file = yaml.safe_load(f)
+
+                        if cur_file is None:
+                            cur_file = dict()
+
+                        cur_file.update({key: var_dict.get(key)})
+
+                    if cur_file:
+                        with open(self.name + '/branch_globals.yml', 'w') as f:
+                            yaml.safe_dump(cur_file, f)
+
+                    continue
+
+                mod = self.inverted_var_to_mod_lookup.get(key)
                 mod_instance = self.modules.get(mod)
                 mod_instance.variables.add_variables({key: var_dict.get(key)})
                 # for task ordering key needs to be _mod_name: {play: host}
 
-                # there are other ways to update through modules, but this is the first that came to mind. just read
+                # there are other ways to update through modules, but this is the most visible way to keep track of them. just read
                 # from current yaml file every time first in lieu of reading from mod_sintance.varianble.user_variables
                 with open(self.name + '/user_variables.yml', 'r') as f:
                     cur_file = yaml.safe_load(f)
@@ -157,8 +203,8 @@ class Branch:
                         yaml.safe_dump(cur_file, f)
 
 
-        except (RuntimeError, TypeError, NameError) as e:
-            print("error -> ", e)
+        except:
+            raise
 
     def order_modules(self, action, mod_name_list_arg: List):
         mod_name_list = [dllistnode(x) for x in mod_name_list_arg]
@@ -204,7 +250,7 @@ class Branch:
             modorder_dict.update({m: dict(mod.play_order)})
 
         with open(self.name + '/mod_order.yml', 'w+') as f:
-           yaml.safe_dump({'module_order': modorder_dict}, default_flow_style=False, sort_keys=False, stream=f)
+            yaml.safe_dump({'module_order': modorder_dict}, default_flow_style=False, sort_keys=False, stream=f)
 
 
 class Experiment():
@@ -216,8 +262,6 @@ class Experiment():
     _var_play_order = None
     _mod_to_ordered_vars = None
 
-
-
     #         open plays sequentially and store the variables
 
     @classmethod
@@ -225,7 +269,6 @@ class Experiment():
         var_order_index = cls._mod_to_ordered_vars.get(module_name)
         position = var_order_index.get(variable_key)
         return position
-
 
     def __init__(self, name, available_stages_modules, modules_root, play_order_dict, var_order_dict, branch_names):
         exp_dir = subprocess.run(['pwd'], capture_output=True)
@@ -235,8 +278,6 @@ class Experiment():
         Experiment._parent_dir = exp_dir[:-len(name) - 1]
         self.name = name
         self.branches = {}
-        for b in branch_names:
-            self.add_branch(b, new_interactive=True)
 
         self.stages = available_stages_modules.keys()
         Module._available_module_names = [i for sublist in available_stages_modules.values() for i in sublist]
@@ -249,23 +290,11 @@ class Experiment():
 
         Module._inverted_stage_module = self.inverted_stage_module
         Experiment._module_play_order = play_order_dict.copy()
+        for b in branch_names:
+            self.add_branch(b, new_interactive=True)
 
-        for b in self.branches.values():
-            with open(b.name + '/mod_order.yml', 'r') as f:
-                mod_order_dict = yaml.safe_load(f)
-                _mods = mod_order_dict.get('module_order')
-                if _mods is not None:
-                    b.add_modules(_mods)
-
-            with open(b.name + '/user_variables.yml', 'r') as f:
-                user_var_dict = yaml.safe_load(f)
-                if user_var_dict is not None:
-                    for k, v in user_var_dict.items():
-                        b.update_branch_vars([k, v])
-        Experiment._max_mods = self.get_max_mod_size_of_branches([b for b in self.branches.values()])
         self.update_var_order(var_order_dict)
-
-
+        Experiment._max_mods = self.get_max_mod_size_of_branches([b for b in self.branches.values()])
 
     ## INSTANCE METHODS START HERE ##
 
@@ -275,11 +304,9 @@ class Experiment():
             max_mods = max(max_mods, b.ordered_mods.size)
         return max_mods
 
-
     def update_var_order(self, mod_var):
         # var order doesnt care about the order of the modules or whether the modules have been added to the experiemnt.Howver, it does care about the play order.
         self._mod_to_ordered_vars = mod_var.copy()
-
 
     def ls(self, cmd, option_dict, target_branch_names):
         for b in target_branch_names:
@@ -300,6 +327,28 @@ class Experiment():
         self.branches.update({name: b})
         if not new_interactive:
             b.create_branch_dir()
+
+        if new_interactive:
+
+            # with open(b.name + '/branch_globals.yml', 'r') as f:
+            #     global_var_dict = yaml.safe_load(f)
+            #     if global_var_dict is not None:
+            #         b.global_variables.update(global_var_dict)
+
+            with open(b.name + '/mod_order.yml', 'r') as f:
+                mod_order_dict = yaml.safe_load(f)
+                if mod_order_dict:
+                    _mods = mod_order_dict.get('module_order')
+                    if _mods is not None:
+                        b.add_modules(_mods)
+
+            with open(b.name + '/user_variables.yml', 'r') as f:
+                user_var_dict = yaml.safe_load(f)
+                if user_var_dict is not None:
+                    for k, v in user_var_dict.items():
+                        b.update_branch_vars([k, v])
+
+
         return b
 
     def update_modules(self, cmd, module_names, target_branch_names):
@@ -310,8 +359,14 @@ class Experiment():
             if cmd == 'add':
                 ordered_mod_name_dict = OrderedDict()
                 for m in module_names:
-                    play_dict = Experiment._module_play_order.get(m)
-                    ordered_mod_name_dict.update({m: OrderedDict(play_dict)})
+
+                    try:
+                        play_dict = Experiment._module_play_order.get(m)
+                        ordered_mod_name_dict.update({m: OrderedDict(play_dict)})
+                    except:
+                        print(f'\n\n\n*** PLEASE BE SURE MODULE NAME IS CORRECT ***\n\n\n')
+                        raise
+
                 branch.add_modules(ordered_mod_name_dict)
 
             elif cmd == 'rm':
@@ -324,8 +379,6 @@ class Experiment():
 
         self.get_max_mod_size_of_branches([b for b in self.branches.values()])
 
-
-
     def update_hostgroups(self, hostgroup, modulename, playname, target_branch_names):
         playnames = playname.split(',')
         for b in target_branch_names:
@@ -335,17 +388,15 @@ class Experiment():
                 k = mod.play_order.keys()
             else:
                 k = playnames
-            update_dict = {x:hostgroup for x in k}
+            update_dict = {x: hostgroup for x in k}
             mod.play_order.update(update_dict)
-    #         write these new hosts to mod_order file... for sake of time just run this:
+            #         write these new hosts to mod_order file... for sake of time just run this:
             branch.order_modules('include', list(branch.ordered_mods))
-
 
     def show_ordered_mods(self, target_branch_names):
         branch_instances = [self.branches.get(b) for b in target_branch_names]
         for branch in branch_instances:
             print(branch.ordered_mods)
-
 
     def update_variables(self, user_variables, target_branch_names):
         # need to get variables through branch.(modules.get_inverted
@@ -353,75 +404,74 @@ class Experiment():
             branch = self.branches.get(b)
             branch.update_branch_vars(user_variables)
 
-    # returns list of tuples(branch_name, module, play_to_start_from, sort_number)
     # varset_list maps to respective branches, so varset_list is reorderd and used to return a reordered respective branhces list
-    def order_branches_by_var_precedence(self, varset_list, respective_branches, mod_name):
+    # returns list of tuples(branch_name, module, play_to_start_from, sort_number)
+    def _order_branches_by_var_precedence(self, varset_list, respective_branches, mod_name):
         def find_earliest_diff(self, varset, mod_name):
             earliest_diff = (9999, None)
             for var in varset:
                 # remove 'ui_'
-                earliest_diff = min((earliest_diff, self._mod_to_ordered_vars[mod_name][var[0][3:]]), key=lambda t: t[0])
+                earliest_diff = min((earliest_diff, self._mod_to_ordered_vars[mod_name][var[0]]),
+                                    key=lambda t: t[0])
             return earliest_diff
 
         # greatest var value gets precedence because that means it shares the most
-        module_branch_variable_tuple = [vars_branch for vars_branch in zip(varset_list,respective_branches)]
+        module_branch_variable_tuple = [vars_branch for vars_branch in zip(varset_list, respective_branches)]
         module_branch_variable_tuple.sort(key=lambda tup: tup[1])  # sorts in place
         return_list = []
 
-
-
         for b in module_branch_variable_tuple:
             varset = b[0]
-            play,earliest_var_delta = find_earliest_diff(self, varset, mod_name)
-            return_list.append((b[1],mod_name, play,earliest_var_delta))
+            play, earliest_var_delta = find_earliest_diff(self, varset, mod_name)
+            return_list.append((b[1], mod_name, play, earliest_var_delta))
 
-        return_list.sort(key= lambda t: t[2], reverse=True)
+        return_list.sort(key=lambda t: t[2], reverse=True)
 
         return return_list
-
 
         # list of tuples... each tuple represe
         #     for i in varset_list:
 
-
-
-    def get_ordered_set(self, play_diffs, final_list):
+    def order_branches_by_var_precedence(self, play_diffs, final_list):
         # each list in play_diffs contains a set of variables representing a branch that branches at same module as others in list... we need to order them by variable precedence
         return_list = []
-        count= 0
+        count = 0
         for module_varset in play_diffs:
             if len(module_varset):
+                print(len(module_varset))
                 arb_bname_list = list(final_list[count])
                 mod = ''
                 # this is just to get the mod_name for this set
                 for b in module_varset:
                     b = list(b)
-                    bname = arb_bname_list[0]
-                    branch = self.branches.get(bname)
-                    var_tup = b[0]
-                    key = var_tup[0]
-                    # remove 'ui'
-                    mod = branch.inverted_var_to_mod_lookup.get(key[3:])
-                    # print(mod)
+                    if len(b):
+                        bname = arb_bname_list[0]
+                        branch = self.branches.get(bname)
+                        var_tup = b[0]
+                        key = var_tup[0]
+                        # remove 'ui'
+                        mod = branch.inverted_var_to_mod_lookup.get(key)
+                        # print(mod)
 
                 # return
-                return_val = self.order_branches_by_var_precedence(module_varset, arb_bname_list, mod)
+                return_val = self._order_branches_by_var_precedence(module_varset, arb_bname_list, mod)
                 return_list.append(return_val)
-            count+=1
+            else:
+                # returns list of tuples(branch_name, module, play_to_start_from, sort_number)
+                arb_bname_list = list(final_list[count])
+                return_list.append([(arb_bname_list[0],None,None,None)])
+            count += 1
 
         return return_list
 
-
-
-
-
+    # module_name_index is the position of the module in the ordered modules that differ. So if all the modules have same var values the module_name index == len(ordered_mods)
     def get_play_diffs(self, module_name_index, branch_names):
         branch_instances_list = [self.branches.get(b) for b in list(branch_names)]
-        tmp_dict= {}
+        tmp_dict = {}
         for b in branch_instances_list:
             if module_name_index >= len(b.ordered_mods):
-
-                print('some branches have the exact same variables. Please address this issue by removing the superfluous branch or changing the vars')
+                print(
+                    'some branches have the exact same variables. Please address this issue by removing the superfluous branch or changing the vars')
                 return 0
             mod = b.ordered_mods[module_name_index]
             mod = b.modules.get(mod)
@@ -437,19 +487,15 @@ class Experiment():
 
                 if i == j:
                     continue
-                k1,v1 = dict_list[i]
-                k2,v2 = dict_list[j]
+                k1, v1 = dict_list[i]
+                k2, v2 = dict_list[j]
 
                 k1s_diff_vars.append(set(v1.items()) - set(v2.items()))
 
             branch_diffs_variables_list = [var for varset in k1s_diff_vars for var in varset]
             diffs_per_branch.append(set(branch_diffs_variables_list))
 
-
         return diffs_per_branch
-
-
-
 
     # this algo will append the module level to the respective index in the branch_order list so we know which module
     # the set of branches diff on.
@@ -463,6 +509,8 @@ class Experiment():
             bl = [self.branches.get(b) for b in bs]
             # -1 in case calling from flag=True need correct module references
             tmp_branch = bl[-1]
+            # only used for flag=True cases
+            mod_diff_name = 'unknown'
 
             if len(bs) == 1:
                 max_mi = -9999
@@ -470,29 +518,32 @@ class Experiment():
                 for mi in range(0, len(tmp_branch.ordered_mods)):
                     check = False
                     for bnames in full_branch_flow[mi]:
+                        print(bs, bnames)
                         if bs.issubset(bnames):
                             max_mi = mi
-                            flag_return_module_name = tmp_branch.ordered_mods[mi+1]
+                            try:
+                                mod_diff_name = tmp_branch.ordered_mods[mi + 1]
+                            except:
+                                print("ERROR -> need to adjust variables since some branches are exactly the same")
+                                raise
                             check = True
                             break
                     if check != True:
-
                         break
 
-            bs_module_diff_level.append(max_mi+1)
-            flag_return_list.append(flag_return_module_name)
+
+            bs_module_diff_level.append(max_mi + 1)
+            flag_return_list.append(mod_diff_name)
         if flag:
             return flag_return_list
 
         return bs_module_diff_level
 
-
-
-
     def get_vars_to_branch_on(self, list_of_sets, full_branch_flow):
         branch_order = list_of_sets
         # the list is in correct order, however, these sets of branches are in arbitrary order
         bs_module_diff_level = self.get_mod_diff_level(branch_order, full_branch_flow)
+        print(bs_module_diff_level)
         index = 0
         pdiffs = []
         # diff level is the module the furthest shared var module in the DAG, so we wan tot find the play diffs at that moduleindex+1
@@ -506,93 +557,71 @@ class Experiment():
             else:
                 # append empty list if only one branch in that set
                 pdiffs.append(list())
-            index+=1
+            index += 1
 
         return pdiffs
+
     #     need to do this again for betwen sets
-
-
-
 
     #
     def get_branch_flow_order(self, branch_instances_list, list_flag):
 
-        max_mods = self._max_mods
-        basic_flow = [{b.name for b in branch_instances_list}]
         all_branches_flow = []
-        for ordered_module_index in range(0, max_mods):
+
+        # for each index of all active modules order
+        for ordered_module_index in range(0, self._max_mods):
+
+            # create a dict with {branch: {vars}, branch2: {vars},...}
             tmp_dict = dict()
-            # compare each module in each branch and return the branches that all match
             for b in branch_instances_list:
                 mod = b.ordered_mods[ordered_module_index]
                 mod = b.modules.get(mod)
                 tmp_dict.update({b.name: mod.variables.user_variables})
-            tmp = {}
-            for k, v in tmp_dict.items():
-                hv = hash(frozenset(v.items()))
-                if hv not in tmp:
-                    tmp[hv] = [k]
+
+            # create another dict mapping shared var_hash to the respective [branches].
+            # now we know which branches share the var values for this module
+            vars_sharedbranches = {}
+            for bname, bvars in tmp_dict.items():
+                hashed_vars = hash(frozenset(bvars.items()))
+                if hashed_vars not in vars_sharedbranches:
+                    vars_sharedbranches[hashed_vars] = [bname]
                 else:
-                    tmp[hv].append(k)
-            maxlen = 0
-            max_matching_branch_names = set()
-            all_branches_flow.append([set(bs) for bs in tmp.values()])
+                    vars_sharedbranches[hashed_vars].append(bname)
 
-            for i in tmp.values():
-                i = set(i)
-                if len(i) > maxlen:
-                    max_matching_branch_names = i
-                    maxlen = len(i)
+            all_branches_flow.append([set(bs) for bs in vars_sharedbranches.values()])
 
-            remaining_branches = basic_flow[-1]
-            intersect_the_two = remaining_branches & max_matching_branch_names
-            basic_flow.append(intersect_the_two)
-
-
-        basic_flow_return_list = []
-        previous = set()
-        basic_flow.reverse()
-
-        # this filters out the prior aggregate set of branches
-        for i in basic_flow:
-            branches_remaining = set(i - previous)
-
-            if len(branches_remaining) != 0:
-                basic_flow_return_list.append(branches_remaining)
-            previous = branches_remaining.union(previous)
-
+        # if "filtered" pass the common var branch list to get optimal version
         if list_flag == 'filtered':
-            return self.best_subset({b.name for b in branch_instances_list},all_branches_flow)
+            return self.best_subset({b.name for b in branch_instances_list}, all_branches_flow)
 
         return all_branches_flow
 
 
-
-
     def best_subset(self, matchingset, all_flows):
-        return_list = [[] for i in all_flows]
+        return_list = [set() for i in all_flows]
         all_length = len(all_flows)
-
-        # print(all_length)
-        # print(return_list)
 
         def _best_subset(matchingset, index):
             nonlocal return_list, all_length
             if len(matchingset) == 1 or index == all_length:
+                # return_list[index].add(frozenset(matchingset))
                 return len(matchingset)
 
             maxer = -999
             max_subset = None
             all_subsets = powerset(matchingset)
+            # pdb.set_trace()
             all_subsets = list(all_subsets)
             all_subsets.pop(0)
+
+            # find the best subset of the previous subset
             for s in all_subsets:
                 contains_set = False
                 for f in all_flows[index]:
                     if set(s).issubset(f):
                         contains_set = True
                         break
-
+                # if this powerset is not a subset of any of the shared_var_branhces, continue
                 if not contains_set:
                     continue
 
@@ -601,26 +630,25 @@ class Experiment():
                     maxer = best_sub_length
                     max_subset = set(s)
 
-            return_list[index].append(max_subset)
+            if len(max_subset) < 2:
+                return 1
+            return_list[index].add(frozenset(max_subset))
+            print('this is return list:')
+            [print(f'{r}\n\n') for r in return_list]
             return len(max_subset)
 
-        sub = _best_subset(matchingset, 0)
 
-        count = 0
-        for i in list(return_list):
-            tmp = list(set(frozenset(item) for item in i))
-            return_list[count] = [set(item) for item in set(frozenset(item) for item in tmp)]
-            count += 1
-        # print(return_list)
+        # return_list will contain the groups
+        _best_subset(matchingset, 0)
+        return_list = [[set(s) for s in j] for j in return_list]
 
+        # dissolve sets into supersets
         count = 0
         tmp_return_list = [[] for i in all_flows]
-
         for i in return_list:
             # print(i)
             if len(i) == 0:
                 break
-
             max_remaining = max(i, key=len)
             tmp_return_list[count].append(max_remaining)
             max_remaining_prevs_total = set(max_remaining)
@@ -631,40 +659,16 @@ class Experiment():
                 tmp_return_list[count].append(max_remaining)
                 max_remaining_prevs_total = max_remaining.union(max_remaining_prevs_total)
             count += 1
-
         return_list = list(tmp_return_list)
-        first_rm_sequence = []
-        rm_sequence = []
-        for i in range(0, len(list(tmp_return_list))):
-            if len(tmp_return_list[i]) ==0:
-                rm_sequence.append(tmp_return_list[i])
-            else:
-                rm_count = 0
-                for j in range(0, len(list(tmp_return_list[i]))):
-                    if len(tmp_return_list[i][j]) <= 1:
-                        if len(tmp_return_list[i])-rm_count == 1:
-                            rm_sequence.append(tmp_return_list[i])
-                        else:
-                            first_rm_sequence.append((i,tmp_return_list[i][j]))
-                            # need this to account for previous remove
-                            rm_count+=1
-
-        for i,j in first_rm_sequence:
-            return_list[i].remove(j)
-
-        for i in rm_sequence:
-            return_list.remove(i)
-
-
         return return_list
 
-
-
-    def get_final_mod_play_levels(self, ordered_set, full_branch_flow):
+    def get_schedule(self, ordered_set, full_branch_flow):
         tmp = []
-        # get reference to the positions need modification
+        # get reference to the branches need to update the play and mod (these are the first branhces in a common set)
         replacements = [ordered_set[0][0]]
+
         count = 0
+        # replace ends of each list of common module branches with correct module and play to branch at
         for bs in list(ordered_set):
             if len(bs) > 1:
                 tmp.append(bs[0])
@@ -678,17 +682,17 @@ class Experiment():
                 if count != 0:
                     replacements.append(ordered_set[count][0])
 
-            count+=1
+            count += 1
         #
         ammendment_list = []
         #  dont need these
         tmp.pop(0)
         tmp.pop(-1)
         param_list = []
-        branch_sets= []
+        branch_sets = []
         # returnrecurse resume play and module for each leader in the modset
-        for i in range(0, len(tmp)-1, 2):
-            param_list.append([tmp[i], tmp[i+1]])
+        for i in range(0, len(tmp) - 1, 2):
+            param_list.append([tmp[i], tmp[i + 1]])
         for i in param_list:
             branch_sets.append({i[0][0], i[1][0]})
 
@@ -696,49 +700,65 @@ class Experiment():
         variable_mods = self.get_vars_to_branch_on(branch_sets, full_branch_flow)
         variable_to_recurse_to = []
         for i in variable_mods:
-            variable_to_recurse_to.append(i.pop())
-
-
-        count=-1
+            print(variable_mods)
+            # if branch does not have any diff variables use the diff from other branch as recurse to value
+            if i[-1] == set():
+                print('empty set')
+                print(i)
+                variable_to_recurse_to.append(i.pop(0))
+            else:
+                print(i)
+                variable_to_recurse_to.append(i.pop())
+        count = -1
         replacements_adustments = []
         for i in replacements:
             if count == -1:
-                count+=1
+                count += 1
                 continue
+            if count == len(mod_diff):
+                print(
+                    'trouble with shared modules indexing, we should never reach this point since mod_diff function should throw an error')
+                return 1
+
             mod_name = mod_diff[count]
-            var = variable_to_recurse_to[0].pop()
-            play_name = self._mod_to_ordered_vars[mod_name][var[0][3:]][1]
+            # small bug fixed here
+            var = variable_to_recurse_to[count].pop()
+            play_name = self._mod_to_ordered_vars[mod_name][var[0]][1]
             irrelevant = 999
             replacements_adustments.append((i[0], mod_name, irrelevant, play_name))
-            count+=1
-
+            print(f'{replacements_adustments} =---------=--- ra')
+            count += 1
 
         return_final = []
         count = -1
         for i in ordered_set:
             if count == -1:
-                count+=1
+                count += 1
                 return_final.append(i)
                 continue
             i_prefix = [replacements_adustments[count]]
             return_final.append(i_prefix + i[1:])
+            count+=1
 
         return [y for x in return_final for y in x]
 
-
     def prepare_experiment(self, branch_order, experiment_flag=None):
-        ansible_prefix = ['ansible-playbook', '-i', self._exp_dir+'/inventory', self._parent_dir+'/main.yml']
+        ansible_prefix = ['ansible-playbook', '-i', self._exp_dir + '/inventory', self._parent_dir + '/main.yml']
         stage_lookup = Module._inverted_stage_module
         b_order = branch_order
         branch_index = 0
         branches_remaining = True
         experiment_name = self.name
+        # clear global file prior to runnning
+        for bname in self.branches.keys():
+            open(self._exp_dir + '/' + bname + '/branch_globals.yml', 'w').close()
+
 
         def tree_walker(branch, mod_llist, play_tuple_list):
 
             nonlocal branch_index, branches_remaining
-            branches_remaining = False if branch_index == len(b_order)-1 else True
-        #     pass first branch, then recurse until branch_order.next.play == current.play (after recursed)
+            branches_remaining = False if branch_index == len(b_order) - 1 else True
+            #     pass first branch, then recurse until branch_order.next.play == current.play (after recursed)
             mod_name = mod_llist.value
 
             mod_instance = branch.modules.get(mod_name)
@@ -747,25 +767,24 @@ class Experiment():
             play_name = play_tuple_list[0][0]
             play_hosts = play_tuple_list[0][1]
             stage = stage_lookup.get(mod_name)
-            show_vars_file =  self._exp_dir+'/'+branch.name+'/'+stage+'/'+mod_name+'.yml'
+            show_vars_file = self._exp_dir + '/' + branch.name + '/' + stage + '/' + mod_name + '.yml'
+            global_vars_file = self._exp_dir + '/' + branch.name + '/branch_globals.yml'
             # will need to do some more work here to help with variable dependencies on previous plays
-            variable_filename = self._exp_dir+'/'+branch.name+'/'+'user_variables.yml'
-            vars = 'branch_file_ui=' + variable_filename + ' hosts_ui=' + play_hosts + ' tasks_file_ui=' + play_name + ' module=' + mod_name + ' stage=' + stage + ' experiment_name=' + experiment_name + ' show_vars_file='+ show_vars_file
+            variable_filename = self._exp_dir + '/' + branch.name + '/' + 'user_variables.yml'
+            vars = 'branch_file_ui=' + variable_filename + ' hosts_ui=' + play_hosts + ' tasks_file_ui=' + play_name + ' module=' + mod_name + ' stage=' + stage + ' experiment_name=' + experiment_name + ' show_vars_file=' + show_vars_file + ' global_vars=' + global_vars_file + ' branch_name=' + branch.name
 
-            if experiment_flag == 'show_vars':
-                ansible_output_rc = subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'debug'])
-                # if ansible_output_rc:
-                #     print(ansible_output_rc)
+            if experiment_flag == 'vars':
+                ansible_output = subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'debug'])
 
-                print(f'getting output \n\n')
-
-                with open(show_vars_file, 'r') as f:
+                with open(show_vars_file, 'r+') as f:
                     var_dict = yaml.safe_load(f)
-                    print(f'branch = {branch.name} \n    stage = {stage} \n      module = {mod_name} \n\n VARS:')
-                    for k,v in var_dict.items():
-                        if k[0] != '_':
-                            print(f'{k} = {v}')
-                    print(f'***************\n\n')
+                    if var_dict:
+                        print(f'branch = {branch.name} \n    stage = {stage} \n      module = {mod_name} \n\n VARS:')
+                        for k, v in var_dict.items():
+                            # need to do this because global varibles not explicitly set by user, will otherwise not be inherited by other modules by default.
+                            if k in branch.global_variables:
+                                branch.global_variables.update({k : v})
+                                branch.update_branch_vars([k,v], global_flag=True)
 
                 if mod_llist.next is not None:
                     tree_walker(branch, mod_llist.next, 'start')
@@ -773,19 +792,18 @@ class Experiment():
 
             else:
                 subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
-            # get next mod order if mod has no plays left
+                # get next mod order if mod has no plays left
                 if len(play_tuple_list) > 1:
                     tree_walker(branch, mod_llist, play_tuple_list[1:])
                 else:
-                #     get next module
+                    #     get next module
                     if mod_llist.next is not None:
                         tree_walker(branch, mod_llist.next, 'start')
-
 
             # if there are no more plays or modules, then branch only if we've recursed to the correct mod_name and
             # play_name, else deactivate
             if branches_remaining:
-                next_branch_tuple = b_order[branch_index+1]
+                next_branch_tuple = b_order[branch_index + 1]
                 if mod_name == next_branch_tuple[1] and play_name == next_branch_tuple[3]:
                     next_branch_instance = self.branches.get(next_branch_tuple[0])
                     module_order_root = next_branch_instance.ordered_mods.first
@@ -795,17 +813,16 @@ class Experiment():
                             next_branch_module = next_branch_instance.modules.get(module_order_root.value)
                             play_order = list(next_branch_module.play_order.items())
                             count = 0
-                            for play,_hosts in play_order:
+                            for play, _hosts in play_order:
                                 if play == play_name:
                                     break
                                 count += 1
                             play_order = play_order[count:]
 
                             # decativate current play once more before passing to new branch
-                            if experiment_flag != 'show_vars':
-                                subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'deactivate'])
+                            subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'deactivate'])
 
-                            branch_index+=1
+                            branch_index += 1
                             print(f'------- BRANCH INITIATED -------\n\n')
                             print(next_branch_instance, module_order_root, play_order)
                             print(f'--------------------------------\n\n')
@@ -814,14 +831,17 @@ class Experiment():
                             module_order_root = module_order_root.next
 
             # if we are just showing variables, we do not need to do run anything when we recurse.
-            if experiment_flag == 'show_vars':
+            if experiment_flag == 'vars':
+                if branches_remaining:
+                    next_branch_tuple = b_order[branch_index + 1]
+                    next_branch_instance = self.branches.get(next_branch_tuple[0])
+                    module_order_root = next_branch_instance.ordered_mods.first
+                    branch_index+=1
+                    return tree_walker(next_branch_instance, module_order_root, 'start')
                 return
             # recurse if no more plays or modules or branches matching play and module
             return subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'deactivate'])
 
-
         first_branch = self.branches.get(branch_order[0][0])
         mod_start = first_branch.ordered_mods.first
         return tree_walker, first_branch, mod_start, 'start'
-
-

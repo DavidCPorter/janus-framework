@@ -17,7 +17,7 @@
         - always
 
     - name: including default variables
-      include_vars: '{{module_root}}/defaults/main.yml'
+      include_vars: '{{module_root}}/defaults/defaults.yml'
       tags:
         - always
 

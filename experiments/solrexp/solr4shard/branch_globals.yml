@@ -1,0 +1,8 @@
+collection_name: 6_99_index
+engine: solr
+loop: closed
+query: roundrobin
+replicas: 99
+shards: 6
+solrnum: 2
+threads: 1

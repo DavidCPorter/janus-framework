@@ -2,14 +2,14 @@ module_order:
   cloud-env:
     1_install_tasks.yml: all
     2_aws_tasks.yml: all
-  solr:
-    1_install_tasks.yml: twoNode
-    2_config_tasks.yml: twoNode
-    3_run_tasks.yml: twoNode
   zookeeper:
     1_download_tasks.yml: zookeeperNodes
     2_configure_tasks.yml: zookeeperNodes
     3_run_tasks.yml: zookeeperNodes
+  solr:
+    1_install_tasks.yml: twoNode
+    2_config_tasks.yml: twoNode
+    3_run_tasks.yml: twoNode
   index_solr:
     0_pre_index_config.yml: twoNode
     1_index.yml: singleNode

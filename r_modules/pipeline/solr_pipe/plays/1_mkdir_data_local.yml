@@ -1,5 +1,5 @@
 ---
-- name: mkdir for {{oysta_namme}} result data
+- name: mkdir for {{janus_name}} result data
   file:
     path: "{{local_data_dir}}/{{experiment_name}}"
     state: directory
