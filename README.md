@@ -31,7 +31,14 @@ An important design goal of JANUS was maintaining an abstract view of the module
  ---- | ----
 ![fig_2](./utils/img/module_interface.png) | Each module contains at least one yaml file describing the operations to "activate" and "deactivate" the module using Ansible syntax. JANUS will parse varibles in these files to learn dependencies and provide a default VARS file for users. 
 
-Users can dynamically set variables with JANUS cli, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG, and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+
+VARS:
+JANUS 
+
+JANUS makes extensive use of variable overriding and abstractions to support many parts of the system. Ansible provides the middleware in many places and JANUS development's goal was not to reinvent the wheel when possible. However, Ansible was slightly too opinionated in terms of variables and role management, so JANUS to some extent, uses Ansible in an unconventional way to simplify variable managment. 
+
+Users can dynamically set variables with JANUS cli, load them from a janusfile, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG, and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+
 
 ### Install
 

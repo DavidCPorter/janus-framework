@@ -1,12 +1,12 @@
 
-Host two
+Host shard2
   hostname 0.0.0.0
   User dporter
 
-Host one
+Host shard1
   hostname 0.0.0.0
   User dporter
 
-Host three
+Host shard4
   hostname 0.0.0.0
   User dporter

@@ -20,7 +20,7 @@ def main(args):
         # open(home+'/experiments/'+exp_name+'/inventory', )
         # could add multi-inventory mode here, for now it's a single inv for all branches.
         copyfile(home+'/utils/inventory', home+'/experiments/'+exp_name+'/inventory')
-        copyfile(home+'/utils/expflow', home+'/experiments/'+exp_name+'/expflow')
+        copyfile(home+'/utils/janusfile', home+'/experiments/'+exp_name+'/janusfile')
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/env'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/load'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/pipeline'])

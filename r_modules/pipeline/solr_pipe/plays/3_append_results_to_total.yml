@@ -1,9 +1,5 @@
 ---
 
-- name: include inherited vars that should not be modified
-  include_vars: '{{module_root}}/defaults/inherited.yml'
-  tags:
-    - activate
 
 - debug:
     msg: python3 generate_exp_csvs.py --exp_name {{experiment_name}} --JANUS_HOME {{JANUS_HOME}} --deploy_name {{deploy_name}} --shards {{shards}} --replicas {{replicas}} --query {{query}} --clustersize {{solrnum}} --engine {{engine}}

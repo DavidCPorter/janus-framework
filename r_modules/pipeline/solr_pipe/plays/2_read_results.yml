@@ -3,12 +3,9 @@
 - name: do read results and delete csvs if successful
 
   block:
-    - name: include inherited vars that should not be modified
-      include_vars: '{{module_root}}/defaults/inherited.yml'
-
     - name: run read results remotely and output to single remote file
       script:
-        cmd: "{{module_root}}/files/readresults.py --processes {{processes}} --threads {{threads}} --duration {{duration}} --replicas {{replicas}} --query {{query}} --loop {{loop}} --shards {{shards}} --solrnum {{solrnum}} --instances {{instances}} --engine {{engine}} --csv_location {{csv_location}} --result_filename {{result_filename}}"
+        cmd: "{{module_root}}/files/readresults.py --processes {{processes}} --threads {{threads}} --duration {{duration}} --replicas {{replicas}} --query {{query}} --loop {{loop_type}} --shards {{shards}} --solrnum {{solrnum}} --instances {{instances}} --engine {{engine}} --csv_location {{csv_location}} --result_filename {{result_filename}}"
         creates: "{{output_dir}}/readresults_dir/{{result_filename}}"
         executable: python3
 

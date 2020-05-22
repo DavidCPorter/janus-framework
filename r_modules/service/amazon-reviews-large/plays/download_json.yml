@@ -1,8 +1,4 @@
 # tasks file for upload_data
-- debug:
-    var: data_upload_dir
-  tags:
-    - activate
 
 
 - name: Check if data has been downloaded already.
@@ -17,7 +13,8 @@
   shell: wget http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Electronics_5.json.gz
   args:
     creates: "{{data_upload_dir}}/reviews_Electronics_5.json.gz"
-
+  when:
+    - data_download_path_status.stat.exists == False
   tags:
     - activate
 
@@ -32,9 +29,9 @@
     - activate
 
 
-- name: AMZN_DOWNLOAD ---> remove doc set
-  file:
-    path: '{{data_upload_dir}}/reviews_Electronics_5.json'
-    state: absent
-  tags:
-    - deactivate
+#- name: AMZN_DOWNLOAD ---> remove doc set
+#  file:
+#    path: '{{data_upload_dir}}/reviews_Electronics_5.json'
+#    state: absent
+#  tags:
+#    - deactivate

@@ -8,11 +8,6 @@
 
 #### ACTIVATE ####
 
-- debug:
-    var: example_var
-  tags:
-    - activate
-
 - name: CLOUD-ENV ---> raise file and proc limits on servers
   blockinfile:
     path: '/etc/security/limits.conf'

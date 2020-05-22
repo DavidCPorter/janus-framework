@@ -7,7 +7,7 @@ threads:
 load_duration:
 replicas:
 query:
-loop:
+loop_type:
 shards:
 solrnum:
 instances:

@@ -298,7 +298,7 @@ def commandDispatcher(exp_dict):
                 print(f'\n\n collecting runtime variables \n\n')
                 shotgun, first_branch, mod_start, play_start = experiment.prepare_experiment(final_schedule, 'vars')
                 print(first_branch, mod_start, play_start)
-                shotgun(first_branch, mod_start, play_start)
+                shotgun(first_branch, mod_start, play_start, global_update_flag=True)
                 return
             # walk the branches connected
             ex_flag = None

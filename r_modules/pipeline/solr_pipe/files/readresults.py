@@ -3,6 +3,7 @@ import sys
 from datetime import datetime
 import time
 import gzip
+import pdb
 
 
 # args = $THREADS $DURATION $CON $QUERY $LOOP $PROCESSES
@@ -140,7 +141,6 @@ if __name__ == "__main__":
 
 
     args = sys.argv[1:]
-
     arg_dict = {args[x]: args[x + 1] for x in range(0, len(args) - 1) if x % 2 == 0}
 
     inner = main(arg_dict)

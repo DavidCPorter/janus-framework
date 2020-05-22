@@ -543,7 +543,6 @@ class Experiment():
         branch_order = list_of_sets
         # the list is in correct order, however, these sets of branches are in arbitrary order
         bs_module_diff_level = self.get_mod_diff_level(branch_order, full_branch_flow)
-        print(bs_module_diff_level)
         index = 0
         pdiffs = []
         # diff level is the module the furthest shared var module in the DAG, so we wan tot find the play diffs at that moduleindex+1
@@ -634,8 +633,6 @@ class Experiment():
             if len(max_subset) < 2:
                 return 1
             return_list[index].add(frozenset(max_subset))
-            print('this is return list:')
-            [print(f'{r}\n\n') for r in return_list]
             return len(max_subset)
 
 
@@ -755,7 +752,7 @@ class Experiment():
             open(self._exp_dir + '/' + bname + '/branch_globals.yml', 'w').close()
 
 
-        def tree_walker(branch, mod_llist, play_tuple_list):
+        def tree_walker(branch, mod_llist, play_tuple_list, global_update_flag=False):
 
             nonlocal branch_index, branches_remaining
             branches_remaining = False if branch_index == len(b_order) - 1 else True
@@ -775,7 +772,7 @@ class Experiment():
             vars = 'branch_file_ui=' + variable_filename + ' hosts_ui=' + play_hosts + ' tasks_file_ui=' + play_name + ' module=' + mod_name + ' stage=' + stage + ' experiment_name=' + experiment_name + ' show_vars_file=' + show_vars_file + ' global_vars=' + global_vars_file + ' branch_name=' + branch.name
 
             if experiment_flag == 'vars':
-                ansible_output = subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'debug'])
+                ansible_output = subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'vars_flag'])
 
                 with open(show_vars_file, 'r+') as f:
                     var_dict = yaml.safe_load(f)
@@ -783,23 +780,46 @@ class Experiment():
                         print(f'branch = {branch.name} \n    stage = {stage} \n      module = {mod_name} \n\n VARS:')
                         for k, v in var_dict.items():
                             # need to do this because global varibles not explicitly set by user, will otherwise not be inherited by other modules by default.
+
                             if k in branch.global_variables:
                                 branch.global_variables.update({k : v})
                                 branch.update_branch_vars([k,v], global_flag=True)
+
+                            print(f'{k} = {v}')
 
                 if mod_llist.next is not None:
                     tree_walker(branch, mod_llist.next, 'start')
 
 
             else:
-                subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
+                # update dynamic global vars
+                # only needs to run once per module per branch so ad hoc global_update_flag implemented
+                if global_update_flag:
+                    subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate,vars_flag'])
+                    with open(show_vars_file, 'r+') as f:
+                        var_dict = yaml.safe_load(f)
+                        if var_dict:
+                            print(f'branch = {branch.name} \n    stage = {stage} \n      module = {mod_name} \n\n VARS:')
+                            for k, v in var_dict.items():
+                                # need to do this because global varibles not explicitly set by user, will otherwise not be inherited by other modules by default.
+
+                                if k in branch.global_variables:
+                                    branch.global_variables.update({k : v})
+                                    branch.update_branch_vars([k,v], global_flag=True)
+
+                                print(f'{k} = {v}')
+
+                # this branch should run on subsequent plays for a branch mod
+                else:
+                    subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
+
                 # get next mod order if mod has no plays left
                 if len(play_tuple_list) > 1:
                     tree_walker(branch, mod_llist, play_tuple_list[1:])
                 else:
                     #     get next module
                     if mod_llist.next is not None:
-                        tree_walker(branch, mod_llist.next, 'start')
+                        tree_walker(branch, mod_llist.next, 'start', global_update_flag=True)
 
             # if there are no more plays or modules, then branch only if we've recursed to the correct mod_name and
             # play_name, else deactivate

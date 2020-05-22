@@ -25,12 +25,6 @@
 
   tasks:
 
-#  - debug:
-#      msg: "{{shards}} {{collection_name}} {{replicas}}"
-#    tags:
-#      - always
-
-
   - name:
     template:
       src: '{{module_root}}/defaults/show_vars_file_tmp.yml'
@@ -38,7 +32,12 @@
     delegate_to: localhost
     tags:
       - never
-      - debug
+      - vars_flag
+
+  - debug:
+      msg: "shorter_data flag = {{shorter_data}}"
+    tags:
+      - active
 
   - name: evolve to active state,   hosts_ui -> tasks_file_ui
     include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'
