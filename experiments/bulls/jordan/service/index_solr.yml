@@ -1,0 +1,13 @@
+aws_dir: dporter
+aws_dir_name: 172.21.0.7/reviews_rf4_s1_clustersizeall
+collection_name: 1_4_index
+data_upload_dir: /home/janususer
+index_solr: ['0_pre_index_config', '1_index', '2_solr_aws', '3_post_index_config']
+nfs_root: /proj/uic-cs-edu-PG0/exp/solr8/datastore
+replicas: 4
+shards: 1
+shorter_data: true
+solr_home: /users/dporte7/solr-8_3/solr/server/solr
+solr_install_dir: /users/dporte7/solr-8_3
+solrconfig_xml_dest: /users/dporte7/solr-8_3/solr/server/solr/configsets/_default/conf/solrconfig.xml
+upload_data_file_path: /Users/dporter/projects/janus/playbooks/roles/upload_data/files

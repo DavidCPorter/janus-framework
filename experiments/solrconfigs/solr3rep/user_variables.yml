@@ -1,3 +1,0 @@
-ui_solr_heap: '1'
-ui_solr_repo: https://github.com/DavidCPorter/lucene-solr.git
-ui_solr_version: dporter_8_3

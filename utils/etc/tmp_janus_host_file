@@ -1,12 +1,12 @@
 
-Host solr1shard
+Host two
   hostname 0.0.0.0
   User dporter
 
-Host solr2shard
+Host one
   hostname 0.0.0.0
   User dporter
 
-Host solr4shard
+Host three
   hostname 0.0.0.0
   User dporter

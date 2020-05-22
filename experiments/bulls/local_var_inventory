@@ -1,15 +1,9 @@
 
-[rodman]
-rodman ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/rodman ansible_user=dporter
+[jordan]
+jordan ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/jordan ansible_user=dporter
 
 [pippen]
 pippen ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/pippen ansible_user=dporter
 
-[jordan]
-jordan ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/jordan ansible_user=dporter
-
-[grant]
-grant ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/grant ansible_user=dporter
-
-[kerr]
-kerr ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/kerr ansible_user=dporter
+[rodman]
+rodman ansible_connection=local path=/Users/dporter/projects/janus/experiments/bulls/rodman ansible_user=dporter

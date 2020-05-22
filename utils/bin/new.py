@@ -18,7 +18,9 @@ def main(args):
     for i in branch_list:
         output = subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i], capture_output=True)
         # open(home+'/experiments/'+exp_name+'/inventory', )
+        # could add multi-inventory mode here, for now it's a single inv for all branches.
         copyfile(home+'/utils/inventory', home+'/experiments/'+exp_name+'/inventory')
+        copyfile(home+'/utils/expflow', home+'/experiments/'+exp_name+'/expflow')
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/env'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/load'])
         subprocess.run(['mkdir', home+'/experiments/'+exp_name+'/'+i+'/pipeline'])

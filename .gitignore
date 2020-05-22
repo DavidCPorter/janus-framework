@@ -1,7 +1,7 @@
 cloudlabDNS
 .idea/*
 hostsIps
-inventory
+utils/inventory
 inventory_gen.txt
 *.retry
 exp_results/

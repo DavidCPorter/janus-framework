@@ -146,6 +146,7 @@ def commandDispatcher(exp_dict):
                 print(experiment.branches)
 
         def load(vars, target_branches):
+
             filename = vars.pop()
             cmd_list = [line.rstrip() for line in open(filename)]
             return_list = []
@@ -168,17 +169,17 @@ def commandDispatcher(exp_dict):
                 valid_groupnames_dict = update_groupnames(branch_names.union(target_branches))
                 print('success')
 
-            if vars[0] == 'modules' or vars[0] == 'module':
+            elif vars[0] == 'modules' or vars[0] == 'module':
                 experiment.update_modules('add', vars[1:], target_branches)
 
-            if vars[0] == 'vars':
+            elif vars[0] == 'vars':
                 user_variables = vars[1:]
                 experiment.update_variables(user_variables, target_branches)
 
 
-            if vars[0] == 'hosts':
+            elif vars[0] == 'hosts':
                 if len(vars) < 4:
-                    print(f'\n\nBASIC assumes you left out playname(s) argument, so default behavior applied changes to all plays')
+                    print(f'\nJANUS assumes you left out playname(s) argument, so default behavior applied changes to all plays')
                     vars.append('all')
                 hostgroup = vars[1]
                 modulename = vars[2]

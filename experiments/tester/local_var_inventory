@@ -1,0 +1,9 @@
+
+[two]
+two ansible_connection=local path=/Users/dporter/projects/janus/experiments/tester/two ansible_user=dporter
+
+[three]
+three ansible_connection=local path=/Users/dporter/projects/janus/experiments/tester/three ansible_user=dporter
+
+[one]
+one ansible_connection=local path=/Users/dporter/projects/janus/experiments/tester/one ansible_user=dporter

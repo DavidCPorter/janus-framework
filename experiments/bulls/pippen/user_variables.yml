@@ -1,3 +1,9 @@
-cred_dir: dpisser
-solr_version: '8.1'
-zoo_version: '3.15'
+endpoint_host: 172.21.0.
+endpoint_port: '8983'
+replicas: '2'
+shards: '4'
+shorter_data: 'true'
+solr_heap: '1'
+solr_repo: https://github.com/DavidCPorter/lucene-solr.git
+solr_version: dporter_8_3
+zoo_version: '3'

@@ -4,7 +4,7 @@
 
 processes:
 threads:
-duration:
+load_duration:
 replicas:
 query:
 loop:

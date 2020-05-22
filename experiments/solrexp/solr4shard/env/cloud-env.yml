@@ -1,5 +1,0 @@
-cred_dir: mista
-packages: ['awscli', 'python3-pip', 'python3-dev', 'htop', 'dstat', 'maven', 'ant', 'virtualenv']
-ptp_install_dir: /users/janususer/linuxptp
-ramdisk_path: /dev/shm
-rem_user: myremmer

@@ -1,4 +1,0 @@
-cred_dir: dpisser
-solr_heap: '1500'
-solr_version: '1'
-zoo_version: '3.14'

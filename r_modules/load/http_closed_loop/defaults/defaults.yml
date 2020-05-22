@@ -19,8 +19,8 @@ engine: solr
 # following unnecessary yet required 4.3.2020
 threads: 1
 procs: 16
+processes: "{{procs}}"
 l_docker: true
-
 #should inherit these two
 endpoint_host: '172.21.0.'
 endpoint_port: 80

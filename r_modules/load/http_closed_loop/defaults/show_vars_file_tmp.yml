@@ -6,6 +6,7 @@ l_docker: {{l_docker}}
 load_duration: {{load_duration}}
 load_files: {{load_files}}
 loop: {{loop}}
+processes: {{processes}}
 procs: {{procs}}
 query: {{query}}
 solrnum: {{solrnum}}

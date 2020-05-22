@@ -1,21 +1,26 @@
 module_order:
   cloud-env:
-    aws_tasks.yml: all
-    install_tasks.yml: all
+    1_install_tasks.yml: all
+    2_aws_tasks.yml: all
   zookeeper:
-    configure_tasks.yml: all
-    download_tasks.yml: all
-    run_tasks.yml: all
+    1_download_tasks.yml: all
+    2_configure_tasks.yml: all
+    3_run_tasks.yml: all
   solr:
-    config_tasks.yml: all
-    install_tasks.yml: all
-    run_tasks.yml: all
-  elastic:
-    install.yml: all
-    kibana.yml: all
-    metricbeat.yml: all
-    run.yml: all
+    1_install_tasks.yml: all
+    2_config_tasks.yml: all
+    3_run_tasks.yml: all
+  index_solr:
+    0_pre_index_config.yml: all
+    1_index.yml: all
+    2_solr_aws.yml: all
+    3_post_index_config.yml: all
+  http_closed_loop:
+    1_copy_scripts.yml: all
+    2_run.yml: all
   solr_pipe:
-    append_results_to_total.yml: all
-    mkdir_data_local.yml: all
-    read_results.yml: all
+    1_mkdir_data_local.yml: all
+    2_read_results.yml: all
+    3_append_results_to_total.yml: all
+  cdf:
+    1_generate_cdf.yml: all
