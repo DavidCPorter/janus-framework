@@ -129,7 +129,7 @@ class LineData():
             the_load = " load=" + str(self.load) + ' '
         if self.csize > 0:
             the_clustersize = ' clustersize=' + str(self.csize)
-        self.name = the_load +'engine='+ str(self.engine) + the_clustersize + ' shards=' + str(gn)[0] + " replicas=" + str(gn)[1]
+        self.name = str(gn)
 
     def setLine(self):
         # clustersize = df.filter(like)

@@ -38,7 +38,7 @@ def main(args_dict):
             pass
 
     # this is for total file
-        fm = open(total_scale_file, "w+")
+        fm = open(total_scale_file, "a+")
         fm.write('engine,parallel_requests,QPS,P50_latency(ms),P90_latency(ms),P95_latency(ms),P99_latency(ms),clustersize,query,rfshards,GROUP,fcts,\n')
 
         for d in dirs:

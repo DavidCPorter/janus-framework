@@ -2,14 +2,41 @@
 
 ## JANUS: cloud-native benchmarking framework 
 
-JANUS is a framework to orchestrate, manage, and execute cloud-native benchmarking experiments.
+JANUS is a framework to manage, orchestrate, and execute cloud-native benchmarking experiments.
+
+
+
+### Overview:
+In the simplest terms, JANUS provides an abstraction for benchmarking cloud-native architectures ("deployments"). The abstraction looks like this: 
+
+![fig_1](./utils/img/janus_overview.png) 
+
+- each color is best thought of as a Tuple(module, config_params) for cloud-native systems
+- each deployment vertical is a full architecture stack to be evaluated
+- stages are basically logical abstraction for the experiment
+- each stage contains these modules that perform tasks using Ansible Syntax. (ANSIBLE mediated)
+- config_params are variables configured with JANUS' simple cli or janusfile. 
+- experiment schedule determines the optimal flow for reducing redundancy in orchestrating and executing these deloyments. 
+
+
+#### design goals
+- Intuitive design, making reasoning about the system simple
+- Transparency: the state of experiments are checkpointed in the local filesystem. These data can be checked into VCS making. 
+- Leverage users skills in popular provisioning and orchestraton framework and syntax for module development. 
+
+#### nongoals
+- JANUS is a framework; module development is explicitly a user responsibility. If JANUS gains traction in the community, it's expected others would provide modules similar to ansible roles. Ansible has example modules that can be used while learning the ropes and has plans to provide defacto "Visuals" stage modules. 
+
+
+
+MOTIVATION:
 
 Open source cloud-native development has become a double edge sword. Cherry picking services for domain-specific architectures makes enterprise development swift and powerful. However, the vast number of services in the open source ecosystem can leave engineers paralyzed by choice. A prudent engineer would conduct a fair evaluation of these architectures before making an investment. One key type of evaluation is performance benchmarking. Benchmarking is often a fickle task, requiring each service to be configured and operated in any number of infinite states. This quickly becomes unrealistic as you expand the scope of systems to evaluate since the complexity of conducting a fair evaluation reduces to (x systems * y configurations * z evaluations). 
 
 JANUS simplifies this approach with a generalized framework to orchestrate, manage, and execute experiments across a variety of system configurations and deployments. 
 
 
-### Architecture Overview
+### Design Overview
 
 JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. The MGMT Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
 
@@ -29,15 +56,19 @@ An important design goal of JANUS was maintaining an abstract view of the module
 
  module interface | *  
  ---- | ----
-![fig_2](./utils/img/module_interface.png) | Each module contains at least one yaml file describing the operations to "activate" and "deactivate" the module using Ansible syntax. JANUS will parse varibles in these files to learn dependencies and provide a default VARS file for users. 
+![fig_2](./utils/img/module_interface.png) | Each module contains at least one yaml file describing the operations to "activate" and "deactivate" the module using Ansible syntax. JANUS will parse varibles in these files to learn dependencies and provide default VARS file for users. Users override these defaults with the janusfile and/or cli. 
 
 
-VARS:
-JANUS 
+#### CONFIG PARAMS
 
-JANUS makes extensive use of variable overriding and abstractions to support many parts of the system. Ansible provides the middleware in many places and JANUS development's goal was not to reinvent the wheel when possible. However, Ansible was slightly too opinionated in terms of variables and role management, so JANUS to some extent, uses Ansible in an unconventional way to simplify variable managment. 
+JANUS makes extensive use of variable overriding and abstractions to support many parts of the system. Ansible provides the middleware for JANUS, however, it's strong opinions on variables and role management made traditional Ansible use case not compatible. So, JANUS to some extent, uses Ansible in an unconventional way to simplify variable managment. 
 
-Users can dynamically set variables with JANUS cli, load them from a janusfile, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG, and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+Users can dynamically set variables with JANUS cli, load them from a janusfile, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG (execution schedule), and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+
+
+#### EXECUTION SCHEDULING
+Once the Management Plane does it's job of preparing the orchestration of each deployment, the control plane's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
+ ![fig_2](./utils/img/control_program.png)
 
 
 ### Install
@@ -95,7 +126,6 @@ $ janus experiment1
 Longer term goal is to implement a UI using REACT and reactdnd. 
 
 
-
 Once the Management Plane does it's job of preparing the orchestration of each deployment, the control plane's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
  ![fig_2](./utils/img/control_program.png)
 
@@ -132,3 +162,6 @@ JANUS provides benchmarking even if you don't have cloud resources but emulating
 - run `$ bash container_rsa.yml` to load ssh keys into your containers. 
 
 
+
+
+- 

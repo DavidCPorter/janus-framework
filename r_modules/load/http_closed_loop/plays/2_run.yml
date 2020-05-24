@@ -11,6 +11,8 @@
     src: "{{module_root}}/templates/remotescript.sh"
     dest: "{{home}}/traffic_gen/remotescript.sh"
     force: yes
+
+  loop
   tags:
     - activate
 
