@@ -23,7 +23,7 @@ In the simplest terms, JANUS provides an abstraction for benchmarking cloud-nati
 
 #### design goals
 - Intuitive design, making reasoning about the system simple
-- Transparency: the state of experiments are checkpointed in the local filesystem. These data can be checked into VCS making. 
+- Transparency: the state of experiments are checkpointed in the local filesystem. These data can be checked into VCS giving users support to share state of their experiments.  
 - Leverage users skills in popular provisioning and orchestraton framework and syntax for module development. 
 
 #### nongoals
