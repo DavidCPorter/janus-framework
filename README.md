@@ -72,12 +72,12 @@ Users can dynamically set variables with JANUS cli, load them from a janusfile, 
 
 
 #### EXECUTION SCHEDULING
-Once the Management Plane does it's job of preparing the orchestration of each deployment, the control plane's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
+Once the Management Plane does it's job of preparing the orchestration of each deployment, the Control Program's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
  ![fig_2](./utils/img/control_program.png)
 *include algorithm?*
 
 ### Install/Setup
-Later versions of JANUS will be released as a pip package.\
+Later versions of JANUS will be released as a pip package.  
 
 Current install requires:
 `git clone git@github.com:DavidCPorter/janus-framework.git`
