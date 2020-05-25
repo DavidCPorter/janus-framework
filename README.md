@@ -9,15 +9,17 @@ JANUS is a framework to manage, orchestrate, and execute cloud-native benchmarki
 ### Overview:
 In the simplest terms, JANUS provides an abstraction for benchmarking cloud-native architectures ("deployments"). The abstraction looks like this: 
 
-![fig_1](./utils/img/janus_overview.png) 
+![fig_1](./utils/img/j_overview.png) 
 
-- each color is best thought of as a Tuple(module, config_params) for cloud-native systems
-- each deployment vertical is a full architecture stack to be evaluated
-- stages are basically logical abstraction for the experiment
-- each stage contains these modules that perform tasks using Ansible Syntax. (ANSIBLE mediated)
+- each color maps to a Tuple(module, config_params) as an architectural cloud-native component
+- each `deployment` vertical is a full architecture stack to be evaluated
+- `stages` serve as an organizational construct for building the experiment
+- each stage contains JANUS `modules` (jmods) that perform tasks using Ansible Syntax. 
 - config_params are variables configured with JANUS' simple cli or janusfile. 
-- experiment schedule determines the optimal flow for reducing redundancy in orchestrating and executing these deloyments. 
+- `experiment schedule` determines the optimal flow for reducing redundancy in orchestrating and executing these deloyments. 
 
+#### visual examples:
+(see appendix at bottom of README)
 
 #### design goals
 - Intuitive design, making reasoning about the system simple
@@ -25,25 +27,27 @@ In the simplest terms, JANUS provides an abstraction for benchmarking cloud-nati
 - Leverage users skills in popular provisioning and orchestraton framework and syntax for module development. 
 
 #### nongoals
-- JANUS is a framework; module development is explicitly a user responsibility. If JANUS gains traction in the community, it's expected others would provide modules similar to ansible roles. Ansible has example modules that can be used while learning the ropes and has plans to provide defacto "Visuals" stage modules. 
+- JANUS is a framework; module development is explicitly a user responsibility. If JANUS gains traction in the community, it's expected others would provide modules similar to ansible roles. JANUS has example modules that can be used while learning the ropes and has plans to provide defacto "Visuals" stage modules. 
 
 
 
-MOTIVATION:
+#### MOTIVATION:
 
-Open source cloud-native development has become a double edge sword. Cherry picking services for domain-specific architectures makes enterprise development swift and powerful. However, the vast number of services in the open source ecosystem can leave engineers paralyzed by choice. A prudent engineer would conduct a fair evaluation of these architectures before making an investment. One key type of evaluation is performance benchmarking. Benchmarking is often a fickle task, requiring each service to be configured and operated in any number of infinite states. This quickly becomes unrealistic as you expand the scope of systems to evaluate since the complexity of conducting a fair evaluation reduces to (x systems * y configurations * z evaluations). 
+Orchestration, monitoring, and tracing tools do a great job with real-time insights on a live deployment, but they simply are not designed to facilitate evaluations across many deployments and configurations. 
+
+The accelerated trend in open source cloud-native development has become a double edge sword for system architects. Cherry picking services for domain-specific architectures makes enterprise development swift and powerful. However, the vast number of services in the open source ecosystem can leave engineers paralyzed by choice. A prudent engineer would conduct a fair evaluation of these architectures before making an investment. One key type of evaluation is performance benchmarking. Benchmarking is often a fickle task, requiring each service to be configured and operated in any number of infinite states. This quickly becomes unrealistic as you expand the scope of systems to evaluate since the complexity of conducting a fair evaluation reduces to (x systems * y configurations * z evaluations). 
 
 JANUS simplifies this approach with a generalized framework to orchestrate, manage, and execute experiments across a variety of system configurations and deployments. 
 
 
-### Design Overview
+## Design Overview
 
 JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. The MGMT Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
 
 ![fig_1](./utils/img/janus_architecture.png) 
 
 
-An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. Modules can be created and plugged into JANUS in one of 5 layers:
+An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. Modules can be created and plugged into JANUS in one of 5 stages:
 
 1) `ENV` environment running the software
 2) `SERVICES` core features of the cloud-native system
@@ -61,18 +65,47 @@ An important design goal of JANUS was maintaining an abstract view of the module
 
 #### CONFIG PARAMS
 
-JANUS makes extensive use of variable overriding and abstractions to support many parts of the system. Ansible provides the middleware for JANUS, however, it's strong opinions on variables and role management made traditional Ansible use case not compatible. So, JANUS to some extent, uses Ansible in an unconventional way to simplify variable managment. 
+JANUS makes extensive use of variable overriding and abstractions to support many parts of the framework. Ansible provides the middleware for JANUS, however, the IAC tool's strong opinions on variables and role management made traditional Ansible use case not compatible. Therefore, to some extent, JANUS utilizes Ansible in an unconventional way to simplify variable managment. 
 
 Users can dynamically set variables with JANUS cli, load them from a janusfile, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG (execution schedule), and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
+['download' play in zookeeper module](./jmods/service/zookeeper/plays/1_download_stasks)
 
 
 #### EXECUTION SCHEDULING
 Once the Management Plane does it's job of preparing the orchestration of each deployment, the control plane's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
  ![fig_2](./utils/img/control_program.png)
+*include algorithm?*
 
+### Install/Setup
+Later versions of JANUS will be released as a pip package.\
+Current install requires python3 env with these packages: (my example in the bash script uses "anisble" since it's my pyenv which uses ansible)
+`pip install ansible paramiko Jinja2 numpy more_itertools itertools pyyaml`
 
-### Install
+ defines some env variables
+`git clone`
 
+configure ENV vars:
+```
+#!/bin/bash
+pyenv activate ansible
+export JANUS_HOME=/PATH/TO/JANUS_HOME
+export ANSIBLE_CONFIG=$JANUS_HOME/experiments/ansible.cfg
+PATH=$PATH:$JANUS_HOME/utils/bin
+cd $JANUS_HOME
+```
+I personally set up an alias to load this file on my machine.
+
+##### CLOUD INFRASTRUCTURE SETUP: 
+create inventory file with hosts 
+Most notably, you will need globally addressible nodes and a subnet connecting them.
+Modify the inventory example with your own IPs. 
+`utils/default_inventory`
+
+##### LOCAL CLOUD INFRASTRUCTURE SETUP (DOCKER): 
+If you do not have cloud infrastructure, you may choose to emulate a small cluster locally using docker. JANUS provides docker setup files for launching a 5 node local ubuntu18 cluster. Be sure to set appropriate Docker engine resources to support docker-file resource allocation (see docker-compose). Steps to consider for Docker support:
+- add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
+- make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
+- run `$ bash container_rsa.yml` to load ssh keys into your containers. 
 
 
 
@@ -122,46 +155,17 @@ $ janus experiment1
  > add hosts fourNode elastic
  > 
  > start all
+ > or 
+ > start show vars
+
+* show vars will print runtime variable values
 ```
 Longer term goal is to implement a UI using REACT and reactdnd. 
 
+### APPENDIX
+- example of solrcloud vs elastic with various configs interactive visual outputs
 
-Once the Management Plane does it's job of preparing the orchestration of each deployment, the control plane's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
- ![fig_2](./utils/img/control_program.png)
-
-
-##### LOCAL ENV:
-Create a python3 virtual env:  
-`pyenv activate your_env`
-
-install packages:  
-`pip install ansible paramiko Jinja2 numpy`
-
-##### CLOUD INFRASTRUCTURE:  
-create inventory file with hosts
-
-###### cloudlab setup 
-(JANUS provides an optional cloudlab profile creation script JANUS/utils/cloudlab_profiles)
-If you are using cloudlab resources, the cloud infrastructure creation is supported by JANUS. 
-*first, place the domain names of your nodes in JANUS/utils/cloudlabDNS; then run:*
-```
-JANUS create inventory [max_component_nodes] [max_load_nodes]
-
-```
-this will create JANUS/inventory file
-
-###### other setup
-Most notably, you will need globally addressible nodes and a subnet connecting them.
-Please emulate the inventory example with your own IPs. 
-[add more]
-
-###### emulating cloud infrastructure with local docker env
-JANUS provides benchmarking even if you don't have cloud resources but emulating them with Docker locally. Steps to activate this env:
-- add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
-- make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
-- run `$ bash container_rsa.yml` to load ssh keys into your containers. 
-
-
-
-
-- 
+examples | *  
+ ---- | ----
+![fig_2](./utils/img/cdf_solr_vs_elastic.png) |![fig_2](./utils/img/90_tail.png)
+![fig_2](./utils/img/scaling.png) |![fig_2](./utils/img/throughput_over_conns.png)

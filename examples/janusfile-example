@@ -1,5 +1,15 @@
-oyster new --name gods --branches athena,artemis,ares,apollo
-oyster gods
+FIRST STEP CREATES EXP
+janus new --name gods --branches athena,artemis,ares,apollo
+
+THEN
+janus gods
+
+THEN
+
+load janusfile
+
+WHICH RUNS THESE STEPS:
+
 add modules cloud-env zookeeper solr index_solr http_closed_loop cdf all
 order modules cloud-env zookeeper solr index_solr http_closed_loop cdf all
 add vars ui_solr_version dporter_8_3 ui_solr_heap 1 all

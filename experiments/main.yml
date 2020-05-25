@@ -3,7 +3,7 @@
 
   # JANUS main vars
   vars:
-    module_root: "{{JANUS_HOME}}/r_modules/{{stage}}/{{module}}"
+    module_root: "{{JANUS_HOME}}/jmods/{{stage}}/{{module}}"
     user_root_dir: "{{home}}"
 
   pre_tasks:

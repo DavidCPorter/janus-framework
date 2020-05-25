@@ -43,7 +43,7 @@ def update_groupnames(branch_names: Set):
 def commandDispatcher(exp_dict):
     name = exp_dict.get('--name')
     home_dir = exp_dict.get('--home')
-    r_modules = home_dir + '/r_modules'
+    r_modules = home_dir + '/jmods'
     stages = {'env', 'load', 'pipeline', 'service', 'viz'}
     available_modules = {x : list() for x in stages}
 

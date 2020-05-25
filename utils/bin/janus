@@ -16,7 +16,7 @@ createModule(){
     exit
   fi
 
-  MOD_LOC=$JANUS_HOME/r_modules/$1/$2
+  MOD_LOC=$JANUS_HOME/jmods/$1/$2
   mkdir $MOD_LOC
   cd $MOD_LOC;mkdir plays defaults tests files templates
   touch defaults/main.yml tests/main.yml janus_example_search.md
