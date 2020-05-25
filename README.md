@@ -78,11 +78,13 @@ Once the Management Plane does it's job of preparing the orchestration of each d
 
 ### Install/Setup
 Later versions of JANUS will be released as a pip package.\
-Current install requires python3 env with these packages: (my example in the bash script uses "anisble" since it's my pyenv which uses ansible)
+
+Current install requires:
+`git clone git@github.com:DavidCPorter/janus-framework.git`
+
+python3 env with these packages: (my example in the bash script uses "anisble" since it's my pyenv which uses ansible)
 `pip install ansible paramiko Jinja2 numpy more_itertools itertools pyyaml`
 
- defines some env variables
-`git clone`
 
 configure ENV vars:
 ```
