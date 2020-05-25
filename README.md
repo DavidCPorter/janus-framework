@@ -107,7 +107,7 @@ Modify the inventory example with your own IPs.
 If you do not have cloud infrastructure, you may choose to emulate a small cluster locally using docker. JANUS provides docker setup files for launching a 5 node local ubuntu18 cluster. Be sure to set appropriate Docker engine resources to support docker-file resource allocation (see docker-compose). Steps to consider for Docker support:
 - add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
 - make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
-- run `$ bash container_rsa.yml` to load ssh keys into your containers. 
+- Load to load ssh keys into your containers.`$ container_rsa.yml` is an example of this. 
 
 
 
