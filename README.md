@@ -45,7 +45,7 @@ JANUS provides a management plane and control program for building, deploying, a
 ![fig_1](./utils/img/janus_architecture.png) 
 
 
-An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. Modules can be created and plugged into JANUS in one of 5 stages:
+An important design goal of JANUS was maintaining an abstract view of the modules that make up a system's architecture. Users can adapt their systems to JANUS easily with a familiar syntax and simple interface. Modules can be created and plugged into JANUS in any of the 5 stages:
 
 1) `ENV` environment running the software
 2) `SERVICES` core features of the cloud-native system
@@ -107,7 +107,7 @@ If you do not have cloud infrastructure, JANUS provides docker files to emulate 
 steps to consider for Docker cloud emulation support:
 - add 0.0.0.0 as hostname for config file in ~/.ssh/config for all servers used in docker-compose.yml (see config-host.example)
 - make sure docker desktop configuration allocates enough CPU cores and RAM (50% of your machine is good)
-- Load to load ssh keys into your containers.`container_rsa.yml` is an example of this. 
+- load ssh keys into your containers.`container_rsa.yml` is an example of this. 
 
 
 ### Usage
