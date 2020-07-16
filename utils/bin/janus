@@ -30,7 +30,6 @@ if [ "$#" -lt 1 ]; then
 fi
 
 MODULE='x'
-JANUS_HOME=/Users/dporter/projects/janus
 while (( "$#" )); do
   case "$1" in
     create|c)

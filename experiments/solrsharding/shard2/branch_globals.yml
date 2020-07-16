@@ -1,8 +1,0 @@
-engine: solr
-instances: 0
-load_duration: 10
-loop_type: closed
-processes: 4
-query: roundrobin
-solrnum: 2
-threads: 1

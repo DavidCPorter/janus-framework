@@ -1,13 +1,13 @@
-![fig_1](./utils/img/logos/blackgreen.png) 
+![fig_1](./utils/img/logos/newblackgreen.png) 
 
-## JANUS: cloud-native benchmarking framework 
+## JANUS: cloud-native evaluation framework 
 
-JANUS is a framework to manage, orchestrate, and execute cloud-native benchmarking experiments.
+JANUS is a framework to manage, orchestrate, and execute cloud-native architectural evaluations.
 
 
 
-### Overview:
-In the simplest terms, JANUS provides an abstraction for benchmarking cloud-native architectures ("deployments"). The abstraction looks like this: 
+### OVERVIEW:
+In the simplest terms, JANUS provides an abstraction for evaluating cloud-native architectures ("deployments"). The abstraction looks like this: 
 
 ![fig_1](./utils/img/j_overview.png) 
 
@@ -18,7 +18,8 @@ In the simplest terms, JANUS provides an abstraction for benchmarking cloud-nati
 - config_params are variables configured with JANUS' cli or janusfile. 
 - `execution schedule` is the optimal execution path for reducing redundancy in orchestrating and executing these deloyments. 
 
-*The end goal of JANUS is to produce interactive visuals comparing each "deployment"; see appendix for examples of these visuals*
+#### GOALS:
+*The end goal of JANUS is to produce interactive visuals comparing each "deployment"; [the SAPA project](https://github.com/DavidCPorter/sapa) is an example of a project that uses JANUS to conduct a benchmarking evaluation of 24 config states of SolrCloud. Also, see appendix for visuals of a simple SolrCloud vs Elastic performance eval*
 
 #### design goals
 - **Intuitive design:** reasoning about the system should be simple
@@ -40,7 +41,7 @@ JANUS simplifies this approach with a generalized framework to orchestrate, mana
 
 ## Design Overview
 
-JANUS provides a management plane and control program for building, deploying, and executing a benchmarking experiment. The MGMT Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
+JANUS provides a management plane and control program for building, deploying, and executing an evaluation experiment. The MGMT Plane prepares the orchestration of various deployments. Control program generates execution graphs and orchestrates the experiment. 
 
 ![fig_1](./utils/img/janus_architecture.png) 
 
@@ -66,21 +67,24 @@ An important design goal of JANUS was maintaining an abstract view of the module
 JANUS makes extensive use of variable overriding and abstractions to support many parts of the framework. Ansible provides the middleware for JANUS, however, the IAC tool's strong opinions on variables and role management made the traditional Ansible use case incompatible. Therefore, to some extent, JANUS utilizes Ansible in an unconventional way to simplify variable managment. 
 
 Users can dynamically set variables with JANUS cli, load them from a janusfile, or leave them to their default behavior. JANUS will use variable precedence to construct the Optimal Flow DAG (execution schedule), and will load these at runtime for dynamic configuring, building, and deploying plays. Example of a module with three files for downloading, configuring, and running zookeeper: 
-['download' play in zookeeper module](./jmods/service/zookeeper/plays/1_download_stasks)
+['download' play in zookeeper module](./jmods/service/zookeeper/plays/1_download_tasks)
 
 
 #### EXECUTION SCHEDULING
 Once the Management Plane does it's job of preparing the orchestration of each deployment, the Control Program's reponsibility is to compute a dependency tree and learn which branches of the experiment share the most modules and plays, then figure out which plays to branch on given the variables, and construct the optimal execution path to minimize redundancy. Broad strokes look like this: 
  ![fig_2](./utils/img/control_program.png)
 
-### Install/Setup
+### Install/Setup 
+beta install video link -> [![JANUS INSTALL (BETA)](https://i9.ytimg.com/vi/0tBRQOoqSac/mq1.jpg?sqp=CMCYwvgF&rs=AOn4CLDyUEHP_2HSopRjTDqMR1JmzZEuXg)](https://youtu.be/0tBRQOoqSac)
+
+
 Later versions of JANUS will be released as a pip package.  
 
 Current install requires:
 `git clone git@github.com:DavidCPorter/janus-framework.git`
 
 python3 environment with these packages: 
-`pip install ansible paramiko Jinja2 numpy more_itertools itertools pyyaml`
+`pip install ansible paramiko Jinja2 numpy more_itertools pyyaml llist dnspython`
 
 Recommended:
 I personally set up an alias to load this file on my machine to activate JANUS dev env. 
@@ -118,10 +122,10 @@ $ janus new --name <name> --branches <branchlist>
 ```
 $ janus new --name experiemnt --branches branch1,branch2,branch3
 $ janus <name> 
- > add [modules] [module_names] [branches]
- > add [vars] [key] [value] [branches]
- > add [hosts] [groupName] [module] and/or [play] [branches]
- > order [modules] [module1] [module2] ... [branches]
+ > add modules [module_names] [branches]
+ > add vars [key] [value] [branches]
+ > add hosts [groupName] [module] and/or [play] [branches]
+ > order modules [module1] [module2] ... [branches]
 
 * "ls" will display user-entered info 
  > ls [vars] 
