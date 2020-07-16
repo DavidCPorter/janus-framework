@@ -87,11 +87,11 @@ python3 environment with these packages:
 `pip install ansible paramiko Jinja2 numpy more_itertools pyyaml llist dnspython`
 
 Recommended:
-I personally set up an alias to load this file on my machine to activate JANUS dev env. 
+I personally set up an alias to load this file on my machine to activate JANUS dev env. But first, create a pyenv using python >=3.7.0. Below config script activates this env I named `janus_env`
 
 ```
 #!/bin/bash
-pyenv activate ansible
+pyenv activate janus_env
 export JANUS_HOME=/PATH/TO/JANUS_HOME
 export ANSIBLE_CONFIG=$JANUS_HOME/experiments/ansible.cfg
 PATH=$PATH:$JANUS_HOME/utils/bin
