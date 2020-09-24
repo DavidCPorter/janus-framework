@@ -1,6 +1,5 @@
 
 - hosts: "{{hosts_ui}}"
-
   # JANUS main vars
   vars:
     module_root: "{{JANUS_HOME}}/jmods/{{stage}}/{{module}}"
@@ -12,11 +11,11 @@
     include_vars: '{{branch_file_ui}}'
     tags:
       - always
+
   - name: include globals
     include_vars: '{{global_vars}}'
     tags:
       - always
-
 
 #  vars_files will not overwrite pretask vars if vars have been defined. but default vars which reference other default variables can accept pre_task variables (took a while to find 'pre_tasks' as a solution to this variable precedence problem.
   vars_files:
@@ -33,11 +32,6 @@
     tags:
       - never
       - vars_flag
-
-  - debug:
-      msg: "shorter_data flag = {{shorter_data}}"
-    tags:
-      - active
 
   - name: evolve to active state,   hosts_ui -> tasks_file_ui
     include_tasks: '{{module_root}}/plays/{{tasks_file_ui}}'

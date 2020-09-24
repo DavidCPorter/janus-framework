@@ -13,10 +13,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: 2
           memory: 2000M
         reservations:
-          cpus: '1'
+          cpus: 1
           memory: 2000M
 
     networks:
@@ -36,10 +36,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: 2
           memory: 2000M
         reservations:
-          cpus: '1'
+          cpus: 1
           memory: 2000M
     networks:
       janus_net:
@@ -60,10 +60,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: 1
           memory: 400M
         reservations:
-          cpus: '1'
+          cpus: 1
           memory: 400M
     networks:
       janus_net:
@@ -80,7 +80,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: 1
           memory: 200M
     networks:
       janus_net:
@@ -97,7 +97,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: 1
           memory: 200M
     networks:
       janus_net:
@@ -114,7 +114,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: 1
           memory: 200M
     networks:
       janus_net:

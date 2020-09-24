@@ -1,0 +1,15 @@
+endpoint_host: 172.21.0.
+endpoint_port: '8983'
+increment: '2'
+max_conn: '10'
+min_conn: '1'
+procs: '2'
+query: roundrobin
+replicas: '2'
+shards: '1'
+shorter_data: 'yes'
+solr_heap: '1'
+solr_repo: https://github.com/DavidCPorter/lucene-solr.git
+solr_version: dporter_8_3
+threads: '1'
+zoo_version: 3.5.5

@@ -56,7 +56,7 @@
 - name: create schema
   script: "{{module_root}}/files/schema_create.sh {{ansible_subnet}} {{collection_name}}"
 #  when: "'PRE' not in index_result.stdout"
-#  run_once: true # dont need
+  run_once: true
   tags:
     - activate
 

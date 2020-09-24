@@ -10,7 +10,6 @@ import _ssh_import as ssh_import
 from _branch_class import Experiment
 from typing import Set
 from itertools import permutations
-
 import yaml
 from collections import OrderedDict
 from jinja2 import Template

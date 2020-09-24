@@ -741,10 +741,12 @@ class Experiment():
         return [y for x in return_final for y in x]
 
     def prepare_experiment(self, branch_order, experiment_flag=None):
-        ansible_prefix = ['ansible-playbook', '-i', self._exp_dir + '/inventory', self._parent_dir + '/main.yml']
+        # added up to 100 parallel machines here
+        ansible_prefix = ['ansible-playbook', '-i', self._exp_dir + '/inventory', '-f', '100',  self._parent_dir + '/main.yml']
         stage_lookup = Module._inverted_stage_module
         b_order = branch_order
         branch_index = 0
+        retro_flag = False
         branches_remaining = True
         experiment_name = self.name
         # clear global file prior to runnning
@@ -754,7 +756,7 @@ class Experiment():
 
         def tree_walker(branch, mod_llist, play_tuple_list, global_update_flag=False):
 
-            nonlocal branch_index, branches_remaining
+            nonlocal branch_index, branches_remaining, retro_flag
             branches_remaining = False if branch_index == len(b_order) - 1 else True
             #     pass first branch, then recurse until branch_order.next.play == current.play (after recursed)
             mod_name = mod_llist.value
@@ -771,7 +773,7 @@ class Experiment():
             variable_filename = self._exp_dir + '/' + branch.name + '/' + 'user_variables.yml'
             vars = 'branch_file_ui=' + variable_filename + ' hosts_ui=' + play_hosts + ' tasks_file_ui=' + play_name + ' module=' + mod_name + ' stage=' + stage + ' experiment_name=' + experiment_name + ' show_vars_file=' + show_vars_file + ' global_vars=' + global_vars_file + ' branch_name=' + branch.name
 
-            if experiment_flag == 'vars':
+            if experiment_flag == 'vars' or retro_flag == True:
                 ansible_output = subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'vars_flag'])
 
                 with open(show_vars_file, 'r+') as f:
@@ -790,12 +792,16 @@ class Experiment():
                 if mod_llist.next is not None:
                     tree_walker(branch, mod_llist.next, 'start')
 
+                # no need to deactivate or branch in this case
+                if retro_flag == True:
+                    return
+
 
             else:
                 # update dynamic global vars
                 # only needs to run once per module per branch so ad hoc global_update_flag implemented
                 if global_update_flag:
-                    subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate,vars_flag'])
+                    subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'vars_flag'])
                     with open(show_vars_file, 'r+') as f:
                         var_dict = yaml.safe_load(f)
                         if var_dict:
@@ -810,8 +816,7 @@ class Experiment():
                                 print(f'{k} = {v}')
 
                 # this branch should run on subsequent plays for a branch mod
-                else:
-                    subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
+                subprocess.run(ansible_prefix + ['--extra-vars', vars, '--tags', 'activate'])
 
                 # get next mod order if mod has no plays left
                 if len(play_tuple_list) > 1:
@@ -847,7 +852,13 @@ class Experiment():
                             print(f'------- BRANCH INITIATED -------\n\n')
                             print(next_branch_instance, module_order_root, play_order)
                             print(f'--------------------------------\n\n')
-                            return tree_walker(next_branch_instance, module_order_root, play_order)
+
+                            # retro_flag is nonlocal and if true, tells the loop to just generate global vars through the ordered mods and print all vars to output.
+                            retro_flag = True
+                            retro_start_mod = next_branch_instance.ordered_mods.first
+                            tree_walker(next_branch_instance, retro_start_mod, 'start')
+                            retro_flag = False
+                            return tree_walker(next_branch_instance, module_order_root, play_order, True)
                         else:
                             module_order_root = module_order_root.next
 

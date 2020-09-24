@@ -1,8 +1,8 @@
 ![fig_1](./utils/img/logos/newblackgreen.png) 
 
-## JANUS: cloud-native evaluation framework 
+## JANUS: strike the right note with your architecture 
 
-JANUS is a framework to manage, orchestrate, and execute cloud-native architectural evaluations.
+JANUS is a framework to manage, orchestrate, and execute architectural evaluations for cloud-native enterprise systems.
 
 
 

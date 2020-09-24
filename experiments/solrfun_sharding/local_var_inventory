@@ -1,0 +1,9 @@
+
+[shard4]
+shard4 ansible_connection=local path=/Users/dporter/projects/janus/experiments/solrfun_sharding/shard4 ansible_user=dporter
+
+[shard1]
+shard1 ansible_connection=local path=/Users/dporter/projects/janus/experiments/solrfun_sharding/shard1 ansible_user=dporter
+
+[shard2]
+shard2 ansible_connection=local path=/Users/dporter/projects/janus/experiments/solrfun_sharding/shard2 ansible_user=dporter

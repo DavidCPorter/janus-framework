@@ -76,7 +76,7 @@ http.max_content_length: 2147483647b
 #
 discovery.seed_hosts:
 {% for noder in ansible_play_hosts %}
-{% if noder not in hostvars[noder]['groups']['thirdMaster']  %}
+  {% if noder not in hostvars[noder]['groups']['thirdMaster']  %}
   - {{hostvars[noder]['ansible_subnet']}}
 {% endif %}
 {% if not loop.last %}{% endif %}{% endfor %}
