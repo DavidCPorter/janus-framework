@@ -1,0 +1,17 @@
+endpoint_host: 172.21.0.
+endpoint_port: 8983
+engine: solr
+http_closed_scripts_dir: /Users/dporter/projects/janus/jmods/load/http_closed_loop/files
+increment: 2
+instances: 0
+l_docker: True
+load_duration: 10
+load_files: ['benchstats.py', 'clparsing.py', 'testmodes.py', 'threadargs.py', 'traffic_gen.py']
+loop_type: closed
+max_conn: 10
+min_conn: 1
+processes: 2
+procs: 2
+query: roundrobin
+solrnum: 2
+threads: 1
